@@ -1,0 +1,273 @@
+import type { Question } from "./types";
+
+// Each choice contributes deltas to traits (0..1 mapping after normalization).
+// Values are treated as "raw observations". The scoring engine averages them per trait.
+
+export const QUESTIONS: Question[] = [
+  // Emotional Resilience
+  {
+    id: "er_1",
+    category: "Emotional Resilience",
+    prompt: "After a high-stakes outcome that did not go well, what does the next 24 hours look like inside you?",
+    helper: "Choose what is most honest, not most admirable.",
+    choices: [
+      { label: "I deconstruct it analytically to prevent recurrence.", traits: { analytical: 0.9, emotional_resilience: 0.8, perfectionism: 0.7 } },
+      { label: "I need solitude to emotionally decompress.", traits: { introversion: 0.8, sensitivity: 0.8, emotional_resilience: 0.5 } },
+      { label: "I pivot to the next task to maintain momentum.", traits: { emotional_resilience: 0.9, focus_style: 0.8, stamina: 0.8 } },
+      { label: "I ruminate, sometimes for days.", traits: { sensitivity: 0.9, burnout_vulnerability: 0.85, emotional_resilience: 0.2 } },
+      { label: "I talk it through with someone I trust.", traits: { communication: 0.7, empathy: 0.7, emotional_resilience: 0.6 } },
+    ],
+  },
+  {
+    id: "er_2",
+    category: "Trauma & Stress Tolerance",
+    prompt: "Witnessing prolonged suffering at work most likely makes you…",
+    choices: [
+      { label: "Steady and useful; I lock in.", traits: { emotional_resilience: 0.95, death_comfort: 0.9, ethical_burden_tolerance: 0.9 } },
+      { label: "Functional, but it builds up under the surface.", traits: { sensitivity: 0.7, burnout_vulnerability: 0.7, emotional_resilience: 0.5 } },
+      { label: "I cope better through structured action than reflection.", traits: { procedural: 0.7, focus_style: 0.7, emotional_resilience: 0.7 } },
+      { label: "Eventually depleted; I need recovery rituals.", traits: { burnout_vulnerability: 0.85, sensitivity: 0.7, emotional_resilience: 0.4 } },
+    ],
+  },
+
+  // Cognitive Style
+  {
+    id: "cs_1",
+    category: "Cognitive Style",
+    prompt: "Which mental texture feels most like home?",
+    choices: [
+      { label: "Slow, layered reasoning over a single complex case.", traits: { analytical: 0.9, patience: 0.9, focus_style: 0.2, specialized_vs_broad: 0.7 } },
+      { label: "Rapid pattern recognition across many short encounters.", traits: { focus_style: 0.95, visual_spatial: 0.6, specialized_vs_broad: 0.2 } },
+      { label: "Hands-on procedural problem solving.", traits: { procedural: 0.95, visual_spatial: 0.8, stamina: 0.7 } },
+      { label: "Conversational, narrative reasoning with people.", traits: { communication: 0.9, empathy: 0.85, patience: 0.8 } },
+      { label: "Image-driven, visual diagnostic flow.", traits: { visual_spatial: 0.95, analytical: 0.8, introversion: 0.7 } },
+    ],
+  },
+  {
+    id: "cs_2",
+    category: "Chaos vs Predictability",
+    prompt: "A perfect Tuesday at work would feel…",
+    choices: [
+      { label: "Highly predictable, repetition I can master.", traits: { routine_preference: 0.95, lifestyle_balance: 0.7, focus_style: 0.2 } },
+      { label: "Mostly structured with a couple of curveballs.", traits: { routine_preference: 0.55, focus_style: 0.5 } },
+      { label: "Unpredictable but bounded by a shift.", traits: { risk_tolerance: 0.8, focus_style: 0.85, chronic_vs_acute: 0.9 } },
+      { label: "Fully chaotic — I thrive in unknowns.", traits: { risk_tolerance: 0.95, chronic_vs_acute: 0.95, routine_preference: 0.1, focus_style: 0.95 } },
+    ],
+  },
+
+  // Procedural vs Analytical
+  {
+    id: "pa_1",
+    category: "Procedural vs Analytical",
+    prompt: "Which felt more satisfying in training so far?",
+    choices: [
+      { label: "Nailing a procedure with my hands.", traits: { procedural: 0.95, visual_spatial: 0.8 } },
+      { label: "Cracking a difficult diagnosis with reasoning.", traits: { analytical: 0.95, patience: 0.7 } },
+      { label: "Building a patient's trust over months.", traits: { empathy: 0.9, communication: 0.85, patience: 0.8 } },
+      { label: "Leading a team through an acute event.", traits: { leadership: 0.9, focus_style: 0.8, emotional_resilience: 0.8 } },
+    ],
+  },
+
+  // Communication & Social
+  {
+    id: "cm_1",
+    category: "Communication Style",
+    prompt: "After a full clinical day with people, you feel…",
+    choices: [
+      { label: "Energized — people are my fuel.", traits: { social_battery: 0.95, empathy: 0.8, communication: 0.85, introversion: 0.1 } },
+      { label: "Satisfied but drained, need quiet to recover.", traits: { social_battery: 0.5, introversion: 0.7, sensitivity: 0.6 } },
+      { label: "Depleted — I'd rather work with images or data.", traits: { introversion: 0.95, social_battery: 0.1, analytical: 0.7, visual_spatial: 0.7 } },
+    ],
+  },
+  {
+    id: "cm_2",
+    category: "Comfort With Death & Suffering",
+    prompt: "How comfortable are you sitting with a dying patient and their family?",
+    choices: [
+      { label: "Very — it feels like sacred work.", traits: { death_comfort: 0.95, empathy: 0.9, ethical_burden_tolerance: 0.95 } },
+      { label: "Manageable, but I'd rather not make it my daily life.", traits: { death_comfort: 0.55, empathy: 0.7 } },
+      { label: "Difficult — I'd prefer to avoid frequent exposure.", traits: { death_comfort: 0.2, sensitivity: 0.8 } },
+    ],
+  },
+
+  // Identity & Ego
+  {
+    id: "id_1",
+    category: "Identity & Ego",
+    prompt: "How attached is your sense of self to your medical career?",
+    choices: [
+      { label: "Medicine IS who I am.", traits: { identity_career: 0.95, ambition: 0.9, prestige_motivation: 0.7 } },
+      { label: "Important, but one part of me.", traits: { identity_career: 0.6, lifestyle_balance: 0.7 } },
+      { label: "It's a meaningful job; my identity lives elsewhere.", traits: { identity_career: 0.2, lifestyle_balance: 0.95, family_priority: 0.85 } },
+    ],
+  },
+  {
+    id: "id_2",
+    category: "Need For Recognition",
+    prompt: "Recognition and prestige in your specialty matters to you…",
+    choices: [
+      { label: "A lot — being respected fuels me.", traits: { prestige_motivation: 0.95, ambition: 0.85, recognition_need: 0.95 } },
+      { label: "Somewhat.", traits: { prestige_motivation: 0.55, recognition_need: 0.5 } },
+      { label: "Barely — I'd take quiet impact over status.", traits: { prestige_motivation: 0.1, recognition_need: 0.15 } },
+    ],
+  },
+
+  // Lifestyle Priorities
+  {
+    id: "ls_1",
+    category: "Lifestyle Priorities",
+    prompt: "How important is a predictable, balanced lifestyle to you?",
+    choices: [
+      { label: "Non-negotiable. I will not compromise it.", traits: { lifestyle_balance: 1.0, family_priority: 0.9, burnout_vulnerability: 0.6, identity_career: 0.2 } },
+      { label: "Very important, with some flexibility.", traits: { lifestyle_balance: 0.75, family_priority: 0.7 } },
+      { label: "Important, but I'd trade for meaningful work.", traits: { lifestyle_balance: 0.45, ambition: 0.7 } },
+      { label: "Lifestyle is secondary to mastery and impact.", traits: { lifestyle_balance: 0.1, identity_career: 0.9, ambition: 0.95, stamina: 0.85 } },
+    ],
+  },
+  {
+    id: "ls_2",
+    category: "Relationship & Family Goals",
+    prompt: "What role do partnership and family play in your future life?",
+    choices: [
+      { label: "Central — I'm building my career around them.", traits: { family_priority: 1.0, lifestyle_balance: 0.85, identity_career: 0.3 } },
+      { label: "Important, but I'll integrate them with career.", traits: { family_priority: 0.7, lifestyle_balance: 0.6 } },
+      { label: "Open to them, not building life around them.", traits: { family_priority: 0.4, ambition: 0.7 } },
+      { label: "Not a current priority.", traits: { family_priority: 0.1, identity_career: 0.85, ambition: 0.85 } },
+    ],
+  },
+  {
+    id: "ls_3",
+    category: "Sleep & Schedule Tolerance",
+    prompt: "Your tolerance for sustained sleep disruption and overnight call is…",
+    choices: [
+      { label: "High — I recover quickly and don't mind.", traits: { stamina: 0.95, emotional_resilience: 0.85 } },
+      { label: "Moderate — I can do it in bursts.", traits: { stamina: 0.6 } },
+      { label: "Low — it wrecks me physically and mentally.", traits: { stamina: 0.2, burnout_vulnerability: 0.85, lifestyle_balance: 0.9 } },
+    ],
+  },
+
+  // Risk & Ambition
+  {
+    id: "ra_1",
+    category: "Risk & Ambition",
+    prompt: "Which feels most like you when stakes are highest?",
+    choices: [
+      { label: "I get sharper and more decisive under pressure.", traits: { risk_tolerance: 0.95, focus_style: 0.9, emotional_resilience: 0.9, leadership: 0.8 } },
+      { label: "I slow down and become methodical.", traits: { perfectionism: 0.85, analytical: 0.85, patience: 0.7 } },
+      { label: "I lean on team consensus.", traits: { communication: 0.8, leadership: 0.5, empathy: 0.7 } },
+      { label: "I feel it — I can still perform but it costs me.", traits: { sensitivity: 0.8, burnout_vulnerability: 0.7, emotional_resilience: 0.5 } },
+    ],
+  },
+  {
+    id: "ra_2",
+    category: "Delayed Gratification",
+    prompt: "Spending 7–10 years in training before reaching your final career feels…",
+    choices: [
+      { label: "Worth it — I think long-term.", traits: { delayed_gratification: 0.95, ambition: 0.9, identity_career: 0.85 } },
+      { label: "Acceptable if the destination is exceptional.", traits: { delayed_gratification: 0.7, ambition: 0.7 } },
+      { label: "Difficult — I want to start living sooner.", traits: { delayed_gratification: 0.2, lifestyle_balance: 0.85, family_priority: 0.7 } },
+    ],
+  },
+  {
+    id: "ra_3",
+    category: "Financial Priorities",
+    prompt: "How central is high income to your career choice?",
+    choices: [
+      { label: "Very — I want financial freedom and security.", traits: { income_priority: 0.95, ambition: 0.8 } },
+      { label: "Important but not the deciding factor.", traits: { income_priority: 0.6 } },
+      { label: "I'd take meaning over money.", traits: { income_priority: 0.2, empathy: 0.7 } },
+    ],
+  },
+
+  // Uncertainty & Perfectionism
+  {
+    id: "un_1",
+    category: "Tolerance For Uncertainty",
+    prompt: "A patient case may not have a definitive answer for weeks. Your inner experience is…",
+    choices: [
+      { label: "I find the gray area intellectually invigorating.", traits: { uncertainty_tolerance: 0.95, analytical: 0.85, patience: 0.85 } },
+      { label: "I can hold it, but I want to keep working the problem.", traits: { uncertainty_tolerance: 0.7, analytical: 0.8 } },
+      { label: "Uncertainty drains me — I crave closure.", traits: { uncertainty_tolerance: 0.15, perfectionism: 0.8, procedural: 0.7 } },
+      { label: "I shift focus to what I can act on right now.", traits: { procedural: 0.8, focus_style: 0.85, uncertainty_tolerance: 0.5 } },
+    ],
+  },
+  {
+    id: "un_2",
+    category: "Perfectionism",
+    prompt: "When you make a small clinical error, you typically…",
+    choices: [
+      { label: "Replay it for days.", traits: { perfectionism: 0.95, sensitivity: 0.85, burnout_vulnerability: 0.7 } },
+      { label: "Log the lesson and move on within hours.", traits: { emotional_resilience: 0.9, focus_style: 0.7, perfectionism: 0.5 } },
+      { label: "Discuss it openly to learn from peers.", traits: { communication: 0.85, empathy: 0.7, leadership: 0.5 } },
+    ],
+  },
+
+  // Work environment
+  {
+    id: "we_1",
+    category: "Work Environment Preference",
+    prompt: "Where do you feel most yourself working?",
+    choices: [
+      { label: "A bright clinic with steady patient flow.", traits: { lifestyle_balance: 0.8, communication: 0.8, chronic_vs_acute: 0.2 } },
+      { label: "An operating room.", traits: { procedural: 0.95, visual_spatial: 0.85, stamina: 0.8 } },
+      { label: "An ICU or emergency department.", traits: { chronic_vs_acute: 0.95, risk_tolerance: 0.85, focus_style: 0.9, stamina: 0.85 } },
+      { label: "A quiet reading room or lab.", traits: { introversion: 0.95, analytical: 0.85, visual_spatial: 0.7, social_battery: 0.2 } },
+      { label: "A therapy room or long-conversation space.", traits: { empathy: 0.95, communication: 0.9, patience: 0.9 } },
+    ],
+  },
+  {
+    id: "we_2",
+    category: "Leadership & Team",
+    prompt: "Your preferred role in a team is…",
+    choices: [
+      { label: "The decisive lead — I make the call.", traits: { leadership: 0.95, autonomy: 0.85, competitiveness: 0.7 } },
+      { label: "The thoughtful collaborator.", traits: { communication: 0.85, empathy: 0.7, patience: 0.7 } },
+      { label: "The independent specialist.", traits: { autonomy: 0.95, introversion: 0.7, analytical: 0.7 } },
+      { label: "The supportive teammate.", traits: { empathy: 0.85, sensitivity: 0.6 } },
+    ],
+  },
+
+  // Chronic vs Acute
+  {
+    id: "ca_1",
+    category: "Chronic vs Acute",
+    prompt: "Which feels more meaningful to you?",
+    choices: [
+      { label: "Walking with one patient across years of their life.", traits: { chronic_vs_acute: 0.05, empathy: 0.9, patience: 0.9, communication: 0.85 } },
+      { label: "Resolving an acute problem in a single visit or shift.", traits: { chronic_vs_acute: 0.95, focus_style: 0.85, procedural: 0.7 } },
+    ],
+  },
+  {
+    id: "ca_2",
+    category: "Specialized vs Broad",
+    prompt: "Would you rather be…",
+    choices: [
+      { label: "A deep expert in a narrow domain.", traits: { specialized_vs_broad: 0.95, perfectionism: 0.7, analytical: 0.8 } },
+      { label: "A broad generalist who sees everything.", traits: { specialized_vs_broad: 0.05, empathy: 0.7, communication: 0.8 } },
+      { label: "Something in between.", traits: { specialized_vs_broad: 0.5 } },
+    ],
+  },
+
+  // Burnout & long-term
+  {
+    id: "bn_1",
+    category: "Burnout Vulnerability",
+    prompt: "Looking back at hard semesters, you'd say…",
+    choices: [
+      { label: "I bounce back fast and stay clear-headed.", traits: { burnout_vulnerability: 0.1, emotional_resilience: 0.95, stamina: 0.9 } },
+      { label: "I push through, but I notice the cost later.", traits: { burnout_vulnerability: 0.6, stamina: 0.7 } },
+      { label: "Sustained pressure quietly erodes me.", traits: { burnout_vulnerability: 0.95, sensitivity: 0.85, lifestyle_balance: 0.85 } },
+    ],
+  },
+  {
+    id: "bn_2",
+    category: "Long-Term Stamina",
+    prompt: "Imagine your work life at 50. What protects your wellbeing?",
+    choices: [
+      { label: "Predictable hours and family time.", traits: { lifestyle_balance: 0.95, family_priority: 0.9 } },
+      { label: "Continued mastery and meaningful complexity.", traits: { identity_career: 0.85, ambition: 0.7, analytical: 0.7 } },
+      { label: "Variety and flexibility in how I work.", traits: { autonomy: 0.85, lifestyle_balance: 0.7 } },
+      { label: "A team I love working with.", traits: { communication: 0.8, empathy: 0.7 } },
+    ],
+  },
+];
