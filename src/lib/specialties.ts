@@ -207,7 +207,7 @@ export const SPECIALTIES: Specialty[] = [
     incomeBand: 4, competitiveness: 2, lifestyle: 5, burnoutRisk: 2,
     emotionalBurden: 2, procedural: 2, patientInteraction: 1, callBurden: 2,
     emergencyFrequency: 1, physicalDemand: 1, familyFriendly: 5, autonomy: 4, prestige: 3,
-    ideal: { introversion: 0.85, analytical: 0.95, visual_spatial: 0.85, focus_style: 0.2, social_battery: 0.2, communication: 0.3, lifestyle_balance: 0.9, patient_interaction: 0.1 as any, perfectionism: 0.85 },
+    ideal: { introversion: 0.85, analytical: 0.95, visual_spatial: 0.85, focus_style: 0.2, social_battery: 0.2, communication: 0.3, lifestyle_balance: 0.9, perfectionism: 0.85 },
     thrives: ["Deep solo focus", "Pattern recognition"],
     struggles: ["Need for patient contact", "Extroverts"],
     downsides: ["Isolation", "Image of being 'invisible'"],
