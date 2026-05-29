@@ -1,18 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X } from "lucide-react";
+import { ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X, Compass, Heart, Globe2, TrendingUp } from "lucide-react";
 import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
 } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { loadSession, resetSession } from "@/lib/session";
-import type { SpecialtyMatch } from "@/lib/types";
+import { MEANING_LABEL, GEO_INTENT_LABEL, CAREER_ARCHETYPE_LABEL } from "@/lib/types";
+import type { SpecialtyMatch, MeaningSource, CareerArchetype } from "@/lib/types";
 
 export const Route = createFileRoute("/results")({
   head: () => ({
@@ -29,9 +26,7 @@ function ResultsPage() {
   const [session, setSession] = useState(() => loadSession());
 
   useEffect(() => {
-    if (!session.result) {
-      navigate({ to: "/" });
-    }
+    if (!session.result) navigate({ to: "/" });
   }, [session.result, navigate]);
 
   if (!session.result) return null;
@@ -44,8 +39,9 @@ function ResultsPage() {
       { axis: "Cognitive", value: top.cognitiveFit },
       { axis: "Emotional", value: top.emotionalFit },
       { axis: "Lifestyle", value: top.lifestyleFit },
+      { axis: "Meaning", value: top.meaningFit },
+      { axis: "Opportunity", value: top.opportunityFit },
       { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
-      { axis: "Overall fit", value: top.compatibility },
     ],
     [top],
   );
@@ -74,7 +70,6 @@ function ResultsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
 
-      {/* Cinematic header */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -99,6 +94,11 @@ function ResultsPage() {
           <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-soft text-brand text-sm font-medium">
             <Sparkles className="size-4" /> Confidence {result.confidence}%
           </span>
+          {result.onboarding.geographicIntent && result.onboarding.geographicIntent !== "undecided" && (
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-calm-soft text-calm text-sm font-medium">
+              <Globe2 className="size-4" /> {GEO_INTENT_LABEL[result.onboarding.geographicIntent]}
+            </span>
+          )}
         </div>
       </motion.section>
 
@@ -131,28 +131,21 @@ function ResultsPage() {
 
             <div className="relative grid grid-cols-2 gap-3 mt-8">
               <Stat label="Lifestyle" value={top.lifestyleFit} />
-              <Stat label="Emotional fit" value={top.emotionalFit} />
+              <Stat label="Meaning" value={top.meaningFit} />
               <Stat label="Cognitive fit" value={top.cognitiveFit} />
               <Stat label="Burnout risk" value={top.burnoutWarning} inverse />
             </div>
           </div>
 
           <div className="lg:col-span-5 rounded-3xl border border-border bg-card p-8 min-h-[420px] flex flex-col">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">Trait alignment</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">Six-axis alignment</div>
             <div className="flex-1 min-h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
                   <PolarGrid stroke="oklch(0.92 0.008 265)" />
                   <PolarAngleAxis dataKey="axis" tick={{ fill: "oklch(0.45 0.02 265)", fontSize: 11 }} />
                   <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar
-                    name="You"
-                    dataKey="value"
-                    stroke="oklch(0.48 0.16 274)"
-                    fill="oklch(0.48 0.16 274)"
-                    fillOpacity={0.25}
-                    strokeWidth={2}
-                  />
+                  <Radar name="You" dataKey="value" stroke="oklch(0.48 0.16 274)" fill="oklch(0.48 0.16 274)" fillOpacity={0.25} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -160,21 +153,169 @@ function ResultsPage() {
         </motion.div>
       </section>
 
+      {/* Tensions + Regret Risk */}
+      {(result.tensions.length > 0 || result.regretRisk.score > 25) && (
+        <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10 grid lg:grid-cols-2 gap-6">
+          {result.tensions.length > 0 && (
+            <div className="rounded-3xl border border-orange-200/40 dark:border-orange-900/30 bg-orange-50/50 dark:bg-orange-950/15 p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="size-5 text-warning" />
+                <h3 className="font-serif text-xl">Tensions in your profile</h3>
+              </div>
+              <ul className="space-y-3 text-sm leading-relaxed text-foreground/80">
+                {result.tensions.map((t) => (
+                  <li key={t} className="flex gap-3"><span className="text-warning mt-1">—</span><span>{t}</span></li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="rounded-3xl border border-border bg-card p-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Compass className="size-5 text-brand" />
+                <h3 className="font-serif text-xl">Regret risk</h3>
+              </div>
+              <span className={`text-3xl font-serif ${result.regretRisk.score > 60 ? "text-warning" : result.regretRisk.score > 35 ? "text-foreground" : "text-calm"}`}>
+                {result.regretRisk.score}%
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-foreground/80 mb-4">{result.regretRisk.verdict}</p>
+            {result.regretRisk.signals.length > 0 && (
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                {result.regretRisk.signals.map((s) => (
+                  <li key={s.flag} className="flex gap-2"><span>•</span><span>{s.note}</span></li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Meaning breakdown */}
+      {result.meaningBreakdown.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+          <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
+            <div className="flex items-center gap-3 mb-2">
+              <Heart className="size-5 text-brand" />
+              <h3 className="font-serif text-xl">Your meaning source</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+              Where you derive meaning quietly shapes which specialty you'll still love at 50.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {result.meaningBreakdown.map((m, i) => (
+                <div key={m.source} className="flex items-center gap-3 rounded-2xl bg-brand-soft/40 px-4 py-3">
+                  <span className="text-2xl font-serif text-brand w-7">{i + 1}</span>
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{MEANING_LABEL[m.source as MeaningSource]}</div>
+                    <div className="h-1 mt-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-brand rounded-full" style={{ width: `${m.weight}%` }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Thrives / struggles */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10 grid md:grid-cols-2 gap-6">
-        <Panel
-          tone="positive"
-          title="You thrive in…"
-          items={top.specialty.thrives}
-        />
-        <Panel
-          tone="warn"
-          title="You may struggle with…"
-          items={top.specialty.struggles}
-        />
+        <Panel tone="positive" title="You thrive in…" items={top.specialty.thrives} />
+        <Panel tone="warn" title="You may struggle with…" items={top.specialty.struggles} />
       </section>
 
-      {/* Specialty deep dive */}
+      {/* Career paths for top match */}
+      {top.specialty.careerPaths.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+          <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
+            <div className="flex items-center gap-3 mb-2">
+              <Compass className="size-5 text-brand" />
+              <h3 className="font-serif text-xl">Possible career paths within {top.specialty.name}</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+              Your specialty is only half the answer. Here are realistic trajectories given your archetype choices.
+            </p>
+            <div className="grid md:grid-cols-2 gap-3">
+              {top.specialty.careerPaths.map((p) => {
+                const matchesArch = (result.onboarding.careerArchetypes ?? []).some((a) => p.archetypes.includes(a));
+                return (
+                  <div key={p.label} className={`rounded-2xl border p-5 ${matchesArch ? "border-brand bg-brand-soft/30" : "border-border bg-background"}`}>
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h4 className="font-medium">{p.label}</h4>
+                      {matchesArch && <span className="text-[10px] uppercase tracking-wider text-brand font-semibold shrink-0">Matches you</span>}
+                    </div>
+                    {p.note && <p className="text-xs text-muted-foreground mb-2 leading-relaxed">{p.note}</p>}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {p.archetypes.slice(0, 3).map((a) => (
+                        <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                          {CAREER_ARCHETYPE_LABEL[a as CareerArchetype]}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Opportunity outlook */}
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+        <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
+          <div className="flex items-center gap-3 mb-2">
+            <Globe2 className="size-5 text-brand" />
+            <h3 className="font-serif text-xl">Opportunity outlook</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+            Specialty economics differ wildly by region. These are realistic indicators, not promises.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <OutlookBar label="Egypt private" value={top.specialty.egyptPrivatePotential * 10} />
+            <OutlookBar label="GCC demand" value={top.specialty.gccDemand * 10} />
+            <OutlookBar label="UK pathway" value={top.specialty.ukMigrationFriendliness * 10} />
+            <OutlookBar label="Remote potential" value={top.specialty.remoteWorkPotential * 10} />
+            <OutlookBar label="AI disruption" value={top.specialty.aiDisruptionRisk * 10} tone="warn" />
+          </div>
+        </div>
+      </section>
+
+      {/* Lifecycle */}
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+        <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
+          <div className="flex items-center gap-3 mb-2">
+            <TrendingUp className="size-5 text-brand" />
+            <h3 className="font-serif text-xl">How this specialty feels over time</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+            Many specialties look excellent at year 5 and brutal at 45. Others are the opposite. Plan for both.
+          </p>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={top.specialty.lifecycle}>
+                <XAxis dataKey="year" tickFormatter={(y) => `Yr ${y}`} stroke="oklch(0.55 0.02 265)" fontSize={12} />
+                <YAxis domain={[0, 100]} stroke="oklch(0.55 0.02 265)" fontSize={12} />
+                <Tooltip
+                  contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
+                  formatter={(v: number) => `${v}%`}
+                  labelFormatter={(y) => `Year ${y}`}
+                />
+                <Line type="monotone" dataKey="lifestyle" stroke="oklch(0.62 0.09 195)" strokeWidth={2.5} dot={{ r: 4 }} name="Lifestyle" />
+                <Line type="monotone" dataKey="fulfillment" stroke="oklch(0.48 0.16 274)" strokeWidth={2.5} dot={{ r: 4 }} name="Fulfillment" />
+                <Line type="monotone" dataKey="financial" stroke="oklch(0.72 0.15 55)" strokeWidth={2.5} dot={{ r: 4 }} name="Financial" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap gap-4 mt-4 text-xs text-muted-foreground">
+            <Legend color="oklch(0.62 0.09 195)" label="Lifestyle" />
+            <Legend color="oklch(0.48 0.16 274)" label="Fulfillment" />
+            <Legend color="oklch(0.72 0.15 55)" label="Financial" />
+          </div>
+        </div>
+      </section>
+
+      {/* Day in life / trade-offs / realities */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
         <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
           <div className="grid lg:grid-cols-3 gap-8">
@@ -185,9 +326,7 @@ function ResultsPage() {
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-brand mb-2">Hidden trade-offs</div>
               <ul className="text-sm space-y-1.5 text-muted-foreground">
-                {top.specialty.downsides.map((d) => (
-                  <li key={d}>— {d}</li>
-                ))}
+                {top.specialty.downsides.map((d) => <li key={d}>— {d}</li>)}
               </ul>
             </div>
             <div>
@@ -210,9 +349,7 @@ function ResultsPage() {
           <span className="text-xs text-muted-foreground">Top 5 of 40 specialties</span>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
-          {result.matches.slice(1).map((m) => (
-            <MatchCard key={m.specialty.id} match={m} />
-          ))}
+          {result.matches.slice(1).map((m) => <MatchCard key={m.specialty.id} match={m} />)}
         </div>
       </section>
 
@@ -242,22 +379,9 @@ function ResultsPage() {
 
       {/* Long-term predictions */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-16 grid md:grid-cols-3 gap-6">
-        <PredictionCard
-          title="Burnout risk"
-          value={`${top.burnoutWarning}%`}
-          body="Likelihood of emotional exhaustion in this field over 10 years, given your resilience profile."
-          warn={top.burnoutWarning > 60}
-        />
-        <PredictionCard
-          title="Decision confidence"
-          value={`${result.confidence}%`}
-          body="How consistent your answers were across categories. Higher = clearer fit."
-        />
-        <PredictionCard
-          title="Long-term fulfillment"
-          value={top.compatibility > 80 ? "High" : top.compatibility > 65 ? "Moderate" : "Mixed"}
-          body="Projected match between this specialty's daily realities and the life you said you want."
-        />
+        <PredictionCard title="Burnout risk" value={`${top.burnoutWarning}%`} body="Likelihood of emotional exhaustion in this field over 10 years, given your resilience profile." warn={top.burnoutWarning > 60} />
+        <PredictionCard title="Decision confidence" value={`${result.confidence}%`} body="How consistent your answers were across categories. Higher = clearer fit." />
+        <PredictionCard title="Long-term fulfillment" value={top.compatibility > 80 ? "High" : top.compatibility > 65 ? "Moderate" : "Mixed"} body="Projected match between this specialty's daily realities and the life you said you want." />
       </section>
 
       <div className="max-w-6xl mx-auto px-6 sm:px-10 mt-16 flex flex-wrap justify-center gap-3">
@@ -275,7 +399,6 @@ function ResultsPage() {
 }
 
 function Stat({ label, value, inverse }: { label: string; value: number; inverse?: boolean }) {
-  const display = inverse ? value : value;
   const tone = inverse
     ? value > 70 ? "bg-warning" : value > 45 ? "bg-warning/70" : "bg-white/60"
     : "bg-white/80";
@@ -283,19 +406,17 @@ function Stat({ label, value, inverse }: { label: string; value: number; inverse
     <div className="rounded-2xl bg-white/10 border border-white/15 p-4 backdrop-blur-sm">
       <div className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-2">{label}</div>
       <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-2xl font-serif">{display}<span className="text-sm opacity-70">%</span></span>
+        <span className="text-2xl font-serif">{value}<span className="text-sm opacity-70">%</span></span>
       </div>
       <div className="h-1 rounded-full bg-white/15 overflow-hidden">
-        <div className={`h-full ${tone} rounded-full`} style={{ width: `${display}%` }} />
+        <div className={`h-full ${tone} rounded-full`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );
 }
 
 function Panel({ tone, title, items }: { tone: "positive" | "warn"; title: string; items: string[] }) {
-  const cls = tone === "positive"
-    ? "bg-calm-soft/60 border-calm/20"
-    : "bg-orange-50/60 dark:bg-orange-950/20 border-orange-200/40 dark:border-orange-900/20";
+  const cls = tone === "positive" ? "bg-calm-soft/60 border-calm/20" : "bg-orange-50/60 dark:bg-orange-950/20 border-orange-200/40 dark:border-orange-900/20";
   const iconCls = tone === "positive" ? "text-calm" : "text-warning";
   const Icon = tone === "positive" ? Check : X;
   return (
@@ -322,14 +443,13 @@ function MatchCard({ match }: { match: SpecialtyMatch }) {
           <div className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">{m.compatibility}% match</div>
           <h4 className="text-xl font-serif mt-1">{m.specialty.name}</h4>
         </div>
-        <div className="text-xs text-muted-foreground text-right">
-          {m.specialty.trainingYears}
-        </div>
+        <div className="text-xs text-muted-foreground text-right">{m.specialty.trainingYears}</div>
       </div>
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{m.specialty.blurb}</p>
       <div className="space-y-2">
         <Bar label="Lifestyle" value={m.lifestyleFit} />
-        <Bar label="Emotional" value={m.emotionalFit} />
+        <Bar label="Meaning" value={m.meaningFit} />
+        <Bar label="Opportunity" value={m.opportunityFit} />
         <Bar label="Burnout risk" value={m.burnoutWarning} tone="warn" />
       </div>
     </div>
@@ -344,10 +464,22 @@ function Bar({ label, value, tone }: { label: string; value: number; tone?: "war
         <span className="font-medium text-foreground">{value}%</span>
       </div>
       <div className="h-1 rounded-full bg-muted overflow-hidden">
-        <div
-          className={`h-full rounded-full ${tone === "warn" ? "bg-warning" : "bg-brand"}`}
-          style={{ width: `${value}%` }}
-        />
+        <div className={`h-full rounded-full ${tone === "warn" ? "bg-warning" : "bg-brand"}`} style={{ width: `${value}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function OutlookBar({ label, value, tone }: { label: string; value: number; tone?: "warn" }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background p-4">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{label}</div>
+      <div className="flex items-baseline gap-1 mb-2">
+        <span className="text-2xl font-serif">{Math.round(value / 10)}</span>
+        <span className="text-xs text-muted-foreground">/ 10</span>
+      </div>
+      <div className="h-1 rounded-full bg-muted overflow-hidden">
+        <div className={`h-full rounded-full ${tone === "warn" ? "bg-warning" : "bg-brand"}`} style={{ width: `${value}%` }} />
       </div>
     </div>
   );
@@ -360,6 +492,15 @@ function PredictionCard({ title, value, body, warn }: { title: string; value: st
       <div className={`text-3xl font-serif mb-3 ${warn ? "text-warning" : ""}`}>{value}</div>
       <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
     </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="w-3 h-3 rounded-full" style={{ background: color }} />
+      {label}
+    </span>
   );
 }
 

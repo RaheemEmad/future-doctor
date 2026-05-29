@@ -1,26 +1,24 @@
 import type { AssessmentResult, Choice, OnboardingData } from "./types";
 
-const STORAGE_KEY = "aequitas:session:v1";
+const STORAGE_KEY = "aequitas:session:v2";
+const LEGACY_KEYS = ["aequitas:session:v1"];
 
 export type SessionState = {
   onboarding?: OnboardingData;
-  answers: Record<string, number>; // questionId -> choice index
+  answers: Record<string, number>;
   result?: AssessmentResult;
 };
 
 function safeStorage(): Storage | null {
   if (typeof window === "undefined") return null;
-  try {
-    return window.localStorage;
-  } catch {
-    return null;
-  }
+  try { return window.localStorage; } catch { return null; }
 }
 
 export function loadSession(): SessionState {
   const s = safeStorage();
   if (!s) return { answers: {} };
   try {
+    for (const k of LEGACY_KEYS) s.removeItem(k);
     const raw = s.getItem(STORAGE_KEY);
     if (!raw) return { answers: {} };
     return JSON.parse(raw) as SessionState;
@@ -32,11 +30,7 @@ export function loadSession(): SessionState {
 export function saveSession(state: SessionState) {
   const s = safeStorage();
   if (!s) return;
-  try {
-    s.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    /* noop */
-  }
+  try { s.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* noop */ }
 }
 
 export function resetSession() {

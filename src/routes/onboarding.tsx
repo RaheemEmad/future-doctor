@@ -1,10 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
 import { loadSession, saveSession } from "@/lib/session";
-import type { OnboardingData } from "@/lib/types";
+import {
+  CAREER_ARCHETYPE_LABEL,
+  GEO_INTENT_LABEL,
+  MEANING_LABEL,
+  type CareerArchetype,
+  type GeographicIntent,
+  type MeaningSource,
+  type OnboardingData,
+} from "@/lib/types";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -30,23 +38,42 @@ const DEFAULTS: OnboardingData = {
   ambition: 3,
   relocationOpenness: 3,
   workEnvironment: "",
+  careerArchetypes: [],
+  geographicIntent: "",
+  meaningTop: [],
 };
 
 type Step = {
   id: keyof OnboardingData;
   title: string;
   subtitle?: string;
-  kind: "choice" | "scale";
+  kind: "choice" | "scale" | "multi" | "rank";
   options?: { value: string; label: string }[];
   minLabel?: string;
   maxLabel?: string;
+  maxPicks?: number;
 };
+
+const ARCHETYPES: CareerArchetype[] = [
+  "master_clinician", "academic", "surgeon_operator", "researcher",
+  "healthcare_executive", "medical_educator", "startup_founder",
+  "public_health", "telemedicine", "lifestyle_physician", "global_health",
+];
+
+const GEO_OPTIONS: GeographicIntent[] = [
+  "egypt_gov", "egypt_private", "gulf", "uk", "us", "canada_aus", "undecided",
+];
+
+const MEANING_OPTIONS: MeaningSource[] = [
+  "saving_lives", "relationships", "technical_mastery", "scientific_curiosity",
+  "leadership", "innovation", "teaching",
+];
 
 const STEPS: Step[] = [
   { id: "ageRange", title: "What's your age range?", kind: "choice", options: ["Under 22", "22–25", "26–29", "30–34", "35+"].map((v) => ({ value: v, label: v })) },
   { id: "gender", title: "How do you identify?", kind: "choice", options: ["Woman", "Man", "Non-binary", "Prefer not to say"].map((v) => ({ value: v, label: v })) },
   { id: "stage", title: "Where are you in your training?", kind: "choice", options: ["Pre-med", "Medical student M1–M2", "Medical student M3–M4", "Intern / PGY-1", "Resident PGY-2+", "Reconsidering specialty"].map((v) => ({ value: v, label: v })) },
-  { id: "country", title: "Which country are you training in?", kind: "choice", options: ["United States", "Canada", "United Kingdom", "EU", "Middle East", "Asia", "Other"].map((v) => ({ value: v, label: v })) },
+  { id: "country", title: "Which country are you training in?", kind: "choice", options: ["Egypt", "Other Middle East", "United States", "Canada", "United Kingdom", "EU", "Asia", "Other"].map((v) => ({ value: v, label: v })) },
   { id: "relationship", title: "Your relationship situation today?", kind: "choice", options: ["Single", "Dating", "Long-term partner", "Married", "Prefer not to say"].map((v) => ({ value: v, label: v })) },
   { id: "wantsChildren", title: "Do you want children in your future?", kind: "choice", options: [{ value: "yes", label: "Yes" }, { value: "maybe", label: "Maybe / open" }, { value: "no", label: "No" }] },
   { id: "workLifeBalance", title: "How important is work–life balance to you?", subtitle: "Not what you should feel — what you actually feel.", kind: "scale", minLabel: "Career first", maxLabel: "Life first" },
@@ -68,11 +95,34 @@ const STEPS: Step[] = [
     { value: "reading_room", label: "Quiet reading room or lab" },
     { value: "conversation", label: "Conversation room for long talks" },
   ] },
+  {
+    id: "careerArchetypes",
+    title: "What kind of physician do you want to become?",
+    subtitle: "Pick up to 3. This is about the shape of your life, not your specialty.",
+    kind: "multi",
+    maxPicks: 3,
+    options: ARCHETYPES.map((a) => ({ value: a, label: CAREER_ARCHETYPE_LABEL[a] })),
+  },
+  {
+    id: "geographicIntent",
+    title: "Where do you see yourself practicing long-term?",
+    subtitle: "Different specialties open different doors in different markets.",
+    kind: "choice",
+    options: GEO_OPTIONS.map((g) => ({ value: g, label: GEO_INTENT_LABEL[g] })),
+  },
+  {
+    id: "meaningTop",
+    title: "Where do you derive meaning from your work?",
+    subtitle: "Pick your top 3, in order of importance. This single answer changes everything.",
+    kind: "rank",
+    maxPicks: 3,
+    options: MEANING_OPTIONS.map((m) => ({ value: m, label: MEANING_LABEL[m] })),
+  },
 ];
 
 function OnboardingPage() {
   const navigate = useNavigate();
-  const session = loadSession();
+  const [session] = useState(() => loadSession());
   const [data, setData] = useState<OnboardingData>(session.onboarding ?? DEFAULTS);
   const [step, setStep] = useState(0);
   const current = STEPS[step];
@@ -83,11 +133,25 @@ function OnboardingPage() {
     setData((prev) => ({ ...prev, [key]: val }));
   }
 
+  function toggleMulti(key: keyof OnboardingData, v: string, max: number) {
+    const arr = (data[key] as string[]) ?? [];
+    const has = arr.includes(v);
+    const next = has ? arr.filter((x) => x !== v) : arr.length >= max ? arr : [...arr, v];
+    setField(key, next as never);
+  }
+
+  function toggleRank(key: keyof OnboardingData, v: string, max: number) {
+    const arr = (data[key] as string[]) ?? [];
+    const idx = arr.indexOf(v);
+    let next: string[];
+    if (idx >= 0) next = arr.filter((x) => x !== v);
+    else if (arr.length >= max) next = arr;
+    else next = [...arr, v];
+    setField(key, next as never);
+  }
+
   function next() {
-    if (step < totalSteps - 1) {
-      setStep(step + 1);
-      return;
-    }
+    if (step < totalSteps - 1) { setStep(step + 1); return; }
     saveSession({ ...session, onboarding: data });
     navigate({ to: "/assessment" });
   }
@@ -97,17 +161,18 @@ function OnboardingPage() {
     else setStep(step - 1);
   }
 
-  const canProceed =
-    current.kind === "choice"
-      ? typeof value === "string" && value !== ""
-      : typeof value === "number";
+  const canProceed = (() => {
+    if (current.kind === "choice") return typeof value === "string" && value !== "";
+    if (current.kind === "scale") return typeof value === "number";
+    if (current.kind === "multi" || current.kind === "rank") return Array.isArray(value) && value.length > 0;
+    return false;
+  })();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteNav />
       <main className="flex-1 flex flex-col items-center px-6 py-10 lg:py-16">
         <div className="w-full max-w-2xl">
-          {/* Progress */}
           <div className="flex items-center justify-between mb-12">
             <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
               About you · {step + 1} / {totalSteps}
@@ -132,7 +197,8 @@ function OnboardingPage() {
             {current.subtitle && (
               <p className="text-muted-foreground italic font-serif mb-8">{current.subtitle}</p>
             )}
-            {current.kind === "choice" ? (
+
+            {current.kind === "choice" && (
               <div className="grid gap-3 mt-6">
                 {current.options!.map((opt) => {
                   const selected = value === opt.value;
@@ -141,16 +207,10 @@ function OnboardingPage() {
                       key={opt.value}
                       onClick={() => setField(current.id, opt.value as never)}
                       className={`text-left p-5 rounded-2xl border transition-all flex items-center gap-4 ${
-                        selected
-                          ? "border-brand bg-brand-soft/60"
-                          : "border-border bg-card hover:border-brand/50 hover:bg-brand-soft/30"
+                        selected ? "border-brand bg-brand-soft/60" : "border-border bg-card hover:border-brand/50 hover:bg-brand-soft/30"
                       }`}
                     >
-                      <div
-                        className={`size-5 rounded-full border grid place-items-center shrink-0 transition-colors ${
-                          selected ? "border-brand" : "border-border"
-                        }`}
-                      >
+                      <div className={`size-5 rounded-full border grid place-items-center shrink-0 ${selected ? "border-brand" : "border-border"}`}>
                         {selected && <div className="size-2 rounded-full bg-brand" />}
                       </div>
                       <span className="font-medium">{opt.label}</span>
@@ -158,7 +218,9 @@ function OnboardingPage() {
                   );
                 })}
               </div>
-            ) : (
+            )}
+
+            {current.kind === "scale" && (
               <div className="mt-8 space-y-6">
                 <div className="grid grid-cols-5 gap-3">
                   {[1, 2, 3, 4, 5].map((n) => {
@@ -168,9 +230,7 @@ function OnboardingPage() {
                         key={n}
                         onClick={() => setField(current.id, n as never)}
                         className={`aspect-square rounded-2xl border text-lg font-medium transition-all ${
-                          selected
-                            ? "border-brand bg-brand text-brand-foreground"
-                            : "border-border bg-card hover:border-brand/50"
+                          selected ? "border-brand bg-brand text-brand-foreground" : "border-border bg-card hover:border-brand/50"
                         }`}
                       >
                         {n}
@@ -182,6 +242,59 @@ function OnboardingPage() {
                   <span>{current.minLabel}</span>
                   <span>{current.maxLabel}</span>
                 </div>
+              </div>
+            )}
+
+            {current.kind === "multi" && (
+              <div className="grid gap-3 mt-6">
+                {current.options!.map((opt) => {
+                  const arr = (value as string[]) ?? [];
+                  const selected = arr.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => toggleMulti(current.id, opt.value, current.maxPicks ?? 3)}
+                      className={`text-left p-4 rounded-2xl border transition-all flex items-center gap-4 ${
+                        selected ? "border-brand bg-brand-soft/60" : "border-border bg-card hover:border-brand/50 hover:bg-brand-soft/30"
+                      }`}
+                    >
+                      <div className={`size-5 rounded-md border grid place-items-center shrink-0 ${selected ? "border-brand bg-brand text-brand-foreground" : "border-border"}`}>
+                        {selected && <Check className="size-3" />}
+                      </div>
+                      <span className="font-medium">{opt.label}</span>
+                    </button>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Picked {((value as string[]) ?? []).length} of {current.maxPicks}
+                </p>
+              </div>
+            )}
+
+            {current.kind === "rank" && (
+              <div className="grid gap-3 mt-6">
+                {current.options!.map((opt) => {
+                  const arr = (value as string[]) ?? [];
+                  const rank = arr.indexOf(opt.value);
+                  const selected = rank >= 0;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => toggleRank(current.id, opt.value, current.maxPicks ?? 3)}
+                      className={`text-left p-4 rounded-2xl border transition-all flex items-center gap-4 ${
+                        selected ? "border-brand bg-brand-soft/60" : "border-border bg-card hover:border-brand/50 hover:bg-brand-soft/30"
+                      }`}
+                    >
+                      <div className={`size-7 rounded-full border grid place-items-center shrink-0 text-sm font-semibold ${selected ? "border-brand bg-brand text-brand-foreground" : "border-border text-muted-foreground"}`}>
+                        {selected ? rank + 1 : "·"}
+                      </div>
+                      <span className="font-medium">{opt.label}</span>
+                    </button>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tap in order of importance. Picked {((value as string[]) ?? []).length} of {current.maxPicks}.
+                </p>
               </div>
             )}
           </motion.div>

@@ -106,9 +106,21 @@ export const QUESTIONS: Question[] = [
     category: "Need For Recognition",
     prompt: "Recognition and prestige in your specialty matters to you…",
     choices: [
-      { label: "A lot — being respected fuels me.", traits: { prestige_motivation: 0.95, ambition: 0.85, recognition_need: 0.95 } },
+      { label: "A lot — being respected fuels me.", traits: { prestige_motivation: 0.95, ambition: 0.85, recognition_need: 0.95 }, regretFlags: ["prestige_driven", "peer_comparison"] },
       { label: "Somewhat.", traits: { prestige_motivation: 0.55, recognition_need: 0.5 } },
       { label: "Barely — I'd take quiet impact over status.", traits: { prestige_motivation: 0.1, recognition_need: 0.15 } },
+    ],
+  },
+  {
+    id: "id_3",
+    category: "Why This Path",
+    prompt: "When you imagine your future specialty, whose voice is loudest in your head?",
+    helper: "Notice who you are choosing for.",
+    choices: [
+      { label: "Mine — I've thought about this on my own terms.", traits: { identity_career: 0.7, autonomy: 0.8 } },
+      { label: "My parents' / family's expectations.", traits: { family_priority: 0.6 }, regretFlags: ["family_pressure"] },
+      { label: "My peers and what looks impressive to them.", traits: { recognition_need: 0.7 }, regretFlags: ["peer_comparison", "prestige_driven"] },
+      { label: "What feels safe — exam score, match odds, financial security.", traits: { income_priority: 0.7 }, regretFlags: ["fear_driven", "money_driven"] },
     ],
   },
 
@@ -173,7 +185,7 @@ export const QUESTIONS: Question[] = [
     category: "Financial Priorities",
     prompt: "How central is high income to your career choice?",
     choices: [
-      { label: "Very — I want financial freedom and security.", traits: { income_priority: 0.95, ambition: 0.8 } },
+      { label: "Very — I want financial freedom and security.", traits: { income_priority: 0.95, ambition: 0.8 }, regretFlags: ["money_driven"] },
       { label: "Important but not the deciding factor.", traits: { income_priority: 0.6 } },
       { label: "I'd take meaning over money.", traits: { income_priority: 0.2, empathy: 0.7 } },
     ],
@@ -268,6 +280,35 @@ export const QUESTIONS: Question[] = [
       { label: "Continued mastery and meaningful complexity.", traits: { identity_career: 0.85, ambition: 0.7, analytical: 0.7 } },
       { label: "Variety and flexibility in how I work.", traits: { autonomy: 0.85, lifestyle_balance: 0.7 } },
       { label: "A team I love working with.", traits: { communication: 0.8, empathy: 0.7 } },
+    ],
+  },
+
+  // Meaning Source — the "why"
+  {
+    id: "ms_1",
+    category: "Source Of Meaning",
+    prompt: "When you imagine a deeply satisfying day at work in 15 years, what made it satisfying?",
+    helper: "Trust the first answer your gut offers.",
+    choices: [
+      { label: "I helped pull someone back from the edge.", traits: { death_comfort: 0.7, emotional_resilience: 0.7 } },
+      { label: "A patient I've known for years trusted me with something hard.", traits: { empathy: 0.8, patience: 0.8 } },
+      { label: "I executed a difficult procedure beautifully.", traits: { procedural: 0.85, perfectionism: 0.8 } },
+      { label: "I cracked a diagnosis no one else saw.", traits: { analytical: 0.9, uncertainty_tolerance: 0.7 } },
+      { label: "I led a team through something hard.", traits: { leadership: 0.85, communication: 0.7 } },
+      { label: "I built or shipped something new.", traits: { ambition: 0.7, autonomy: 0.8 } },
+      { label: "I taught someone who'll go on to help thousands.", traits: { communication: 0.8, patience: 0.7 } },
+    ],
+  },
+  {
+    id: "ms_2",
+    category: "Source Of Meaning",
+    prompt: "Which of these feelings do you most want medicine to give you?",
+    choices: [
+      { label: "Awe at the human body and biology.", traits: { analytical: 0.7 } },
+      { label: "The closeness of being trusted by another person.", traits: { empathy: 0.8 } },
+      { label: "The quiet pride of craft done well.", traits: { perfectionism: 0.8, procedural: 0.7 } },
+      { label: "The thrill of acting decisively when it matters.", traits: { risk_tolerance: 0.8, emotional_resilience: 0.7 } },
+      { label: "The reach of leading change beyond one room.", traits: { leadership: 0.8, ambition: 0.8 } },
     ],
   },
 ];

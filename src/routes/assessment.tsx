@@ -57,7 +57,7 @@ function AssessmentPage() {
     // finalize
     const choices = QUESTIONS.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
     const traits = aggregateTraits(choices);
-    const result = score(traits, session.onboarding!);
+    const result = score(traits, session.onboarding!, choices);
     const finalSession = { ...session, result };
     saveSession(finalSession);
     navigate({ to: "/results" });
