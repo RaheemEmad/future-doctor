@@ -1,5 +1,19 @@
-import type { AssessmentResult, Choice, OnboardingData, Specialty, SpecialtyMatch, Trait, TraitScores } from "./types";
-import { SPECIALTIES } from "./specialties";
+import type {
+  AssessmentResult,
+  CareerArchetype,
+  Choice,
+  EnrichedSpecialty,
+  GeographicIntent,
+  MeaningSource,
+  OnboardingData,
+  RegretFlag,
+  RegretSignal,
+  Specialty,
+  SpecialtyMatch,
+  Trait,
+  TraitScores,
+} from "./types";
+import { ENRICHED_SPECIALTIES } from "./enrichment";
 import { QUESTIONS } from "./questions";
 
 const ALL_TRAITS: Trait[] = [
@@ -12,6 +26,13 @@ const ALL_TRAITS: Trait[] = [
   "ethical_burden_tolerance", "focus_style", "social_battery",
 ];
 
+const ALL_MEANING: MeaningSource[] = [
+  "saving_lives", "relationships", "technical_mastery", "scientific_curiosity",
+  "leadership", "innovation", "teaching",
+];
+
+function clamp01(x: number) { return Math.max(0, Math.min(1, x)); }
+
 export function aggregateTraits(answers: Choice[]): TraitScores {
   const sums: Record<string, number> = {};
   const counts: Record<string, number> = {};
@@ -23,17 +44,9 @@ export function aggregateTraits(answers: Choice[]): TraitScores {
   }
   const result: TraitScores = {};
   for (const trait of ALL_TRAITS) {
-    if (counts[trait]) {
-      result[trait] = clamp01(sums[trait] / counts[trait]);
-    } else {
-      result[trait] = 0.5;
-    }
+    result[trait] = counts[trait] ? clamp01(sums[trait] / counts[trait]) : 0.5;
   }
   return result;
-}
-
-function clamp01(x: number) {
-  return Math.max(0, Math.min(1, x));
 }
 
 export function applyOnboarding(traits: TraitScores, onboarding: OnboardingData): TraitScores {
@@ -46,24 +59,20 @@ export function applyOnboarding(traits: TraitScores, onboarding: OnboardingData)
   blend("family_priority", onboarding.wantsChildren === "yes" ? 0.9 : onboarding.wantsChildren === "maybe" ? 0.55 : 0.2, 0.5);
   blend("income_priority", onboarding.financialPriority / 5, 0.55);
   blend("ambition", onboarding.ambition / 5, 0.55);
-  blend("identity_career", 1 - onboarding.workLifeBalance / 5 * 0.5, 0.25);
-  // willingness to sacrifice raises stamina + identity_career, lowers family_priority slightly
+  blend("identity_career", 1 - (onboarding.workLifeBalance / 5) * 0.5, 0.25);
   blend("stamina", onboarding.willingnessToSacrifice / 5, 0.35);
   blend("identity_career", onboarding.willingnessToSacrifice / 5, 0.3);
   return t;
 }
 
 function cosineLike(user: TraitScores, ideal: TraitScores): number {
-  // Weighted distance: only use traits the specialty cares about
   let weightSum = 0;
   let agree = 0;
   for (const [trait, target] of Object.entries(ideal)) {
     const u = user[trait as Trait] ?? 0.5;
     const tgt = target as number;
-    // weight = how strongly the specialty cares (distance from 0.5)
-    const weight = 0.4 + Math.abs(tgt - 0.5) * 1.5; // 0.4..1.15
-    const diff = Math.abs(u - tgt);
-    const sim = 1 - diff; // 0..1
+    const weight = 0.4 + Math.abs(tgt - 0.5) * 1.5;
+    const sim = 1 - Math.abs(u - tgt);
     agree += sim * weight;
     weightSum += weight;
   }
@@ -71,8 +80,62 @@ function cosineLike(user: TraitScores, ideal: TraitScores): number {
 }
 
 function bandFit(userScore: number, specialtyScore1to5: number): number {
-  const target = (specialtyScore1to5 - 1) / 4; // 0..1
+  const target = (specialtyScore1to5 - 1) / 4;
   return 1 - Math.abs(userScore - target);
+}
+
+function meaningWeights(top: MeaningSource[]): Record<MeaningSource, number> {
+  const w: Record<MeaningSource, number> = {
+    saving_lives: 0, relationships: 0, technical_mastery: 0,
+    scientific_curiosity: 0, leadership: 0, innovation: 0, teaching: 0,
+  };
+  if (top.length === 0) {
+    for (const m of ALL_MEANING) w[m] = 1 / ALL_MEANING.length;
+    return w;
+  }
+  const decay = [1.0, 0.7, 0.45];
+  let total = 0;
+  top.slice(0, 3).forEach((m, i) => { w[m] = decay[i] ?? 0.3; total += w[m]; });
+  for (const m of ALL_MEANING) w[m] = w[m] / (total || 1);
+  return w;
+}
+
+function meaningFit(spProfile: Record<MeaningSource, number>, weights: Record<MeaningSource, number>): number {
+  let s = 0;
+  for (const m of ALL_MEANING) s += spProfile[m] * weights[m];
+  return clamp01(s);
+}
+
+function opportunityFit(sp: EnrichedSpecialty, intent: GeographicIntent | ""): { score: number; weight: number } {
+  const norm = (x: number) => (x - 1) / 9;
+  const ai = 1 - norm(sp.aiDisruptionRisk); // resilience to AI
+  switch (intent) {
+    case "egypt_private":
+      return { score: 0.7 * norm(sp.egyptPrivatePotential) + 0.2 * ai + 0.1 * norm(sp.remoteWorkPotential), weight: 0.16 };
+    case "egypt_gov":
+      return { score: 0.55 * norm(sp.fellowshipPipeline) + 0.3 * norm(sp.egyptPrivatePotential) + 0.15 * ai, weight: 0.12 };
+    case "gulf":
+      return { score: 0.75 * norm(sp.gccDemand) + 0.25 * ai, weight: 0.18 };
+    case "uk":
+      return { score: 0.75 * norm(sp.ukMigrationFriendliness) + 0.25 * ai, weight: 0.15 };
+    case "us":
+      return { score: 0.6 * (1 - norm(sp.usMatchDifficulty)) + 0.4 * norm(sp.fellowshipPipeline), weight: 0.15 };
+    case "canada_aus":
+      return { score: 0.5 * norm(sp.ukMigrationFriendliness) + 0.3 * norm(sp.gccDemand) + 0.2 * ai, weight: 0.12 };
+    default:
+      return { score: 0.5, weight: 0.06 };
+  }
+}
+
+function archetypeFit(sp: EnrichedSpecialty, picks: CareerArchetype[]): { score: number; matched: typeof sp.careerPaths } {
+  if (!picks.length) return { score: 0.5, matched: sp.careerPaths.slice(0, 3) };
+  const set = new Set(picks);
+  let matched = 0;
+  const highlighted = sp.careerPaths.filter((p) => p.archetypes.some((a) => set.has(a)));
+  matched = highlighted.length;
+  const cap = Math.min(picks.length, sp.careerPaths.length);
+  const score = clamp01(matched / Math.max(1, cap));
+  return { score, matched: highlighted.length ? highlighted : sp.careerPaths.slice(0, 2) };
 }
 
 function buildReasons(user: TraitScores, sp: Specialty): { fors: string[]; against: string[] } {
@@ -93,47 +156,104 @@ function buildReasons(user: TraitScores, sp: Specialty): { fors: string[]; again
 
 function humanTrait(t: Trait): string {
   const map: Record<Trait, string> = {
-    emotional_resilience: "Emotional resilience",
-    empathy: "Empathy",
-    introversion: "Introversion",
-    perfectionism: "Perfectionism",
-    uncertainty_tolerance: "Tolerance for uncertainty",
-    recognition_need: "Need for recognition",
-    patience: "Patience",
-    risk_tolerance: "Risk tolerance",
-    sensitivity: "Emotional sensitivity",
-    routine_preference: "Preference for routine",
-    leadership: "Leadership drive",
-    competitiveness: "Competitiveness",
-    identity_career: "Career-identity fusion",
-    delayed_gratification: "Delayed gratification",
-    procedural: "Procedural orientation",
-    analytical: "Analytical thinking",
-    visual_spatial: "Visual-spatial strength",
-    communication: "Communication style",
-    autonomy: "Need for autonomy",
-    prestige_motivation: "Prestige motivation",
-    burnout_vulnerability: "Burnout vulnerability",
-    stamina: "Physical & schedule stamina",
-    death_comfort: "Comfort with death & suffering",
-    family_priority: "Family priority",
-    lifestyle_balance: "Lifestyle balance need",
-    income_priority: "Income priority",
-    ambition: "Ambition level",
-    chronic_vs_acute: "Acute-care orientation",
+    emotional_resilience: "Emotional resilience", empathy: "Empathy", introversion: "Introversion",
+    perfectionism: "Perfectionism", uncertainty_tolerance: "Tolerance for uncertainty",
+    recognition_need: "Need for recognition", patience: "Patience", risk_tolerance: "Risk tolerance",
+    sensitivity: "Emotional sensitivity", routine_preference: "Preference for routine",
+    leadership: "Leadership drive", competitiveness: "Competitiveness",
+    identity_career: "Career-identity fusion", delayed_gratification: "Delayed gratification",
+    procedural: "Procedural orientation", analytical: "Analytical thinking",
+    visual_spatial: "Visual-spatial strength", communication: "Communication style",
+    autonomy: "Need for autonomy", prestige_motivation: "Prestige motivation",
+    burnout_vulnerability: "Burnout vulnerability", stamina: "Physical & schedule stamina",
+    death_comfort: "Comfort with death & suffering", family_priority: "Family priority",
+    lifestyle_balance: "Lifestyle balance need", income_priority: "Income priority",
+    ambition: "Ambition level", chronic_vs_acute: "Acute-care orientation",
     specialized_vs_broad: "Specialization preference",
     ethical_burden_tolerance: "Ethical burden tolerance",
-    focus_style: "Focus style (sustained vs switching)",
-    social_battery: "Social battery",
+    focus_style: "Focus style (sustained vs switching)", social_battery: "Social battery",
   };
   return map[t];
 }
 
-export function score(traits: TraitScores, onboarding: OnboardingData): AssessmentResult {
-  const adjusted = applyOnboarding(traits, onboarding);
-  const matches: SpecialtyMatch[] = SPECIALTIES.map((sp) => {
-    const traitFit = cosineLike(adjusted, sp.ideal);
+function regretRisk(answers: Choice[], traits: TraitScores, top: SpecialtyMatch | undefined): {
+  score: number; signals: RegretSignal[]; verdict: string;
+} {
+  const counts: Record<RegretFlag, number> = {
+    prestige_driven: 0, family_pressure: 0, fear_driven: 0, money_driven: 0, peer_comparison: 0,
+  };
+  for (const c of answers) {
+    for (const f of c.regretFlags ?? []) counts[f]++;
+  }
+  // Trait-level boosts
+  if ((traits.prestige_motivation ?? 0.5) > 0.8) counts.prestige_driven += 1;
+  if ((traits.income_priority ?? 0.5) > 0.85 && (traits.identity_career ?? 0.5) < 0.4) counts.money_driven += 1;
+  if ((traits.recognition_need ?? 0.5) > 0.85) counts.peer_comparison += 1;
 
+  // Meaning misalignment with top match (if top picked for prestige/money but profile screams relationships, etc.)
+  let meaningGap = 0;
+  if (top) {
+    const tm = top.specialty.meaningProfile;
+    if ((traits.empathy ?? 0.5) > 0.75 && tm.relationships < 0.5) meaningGap += 1;
+    if ((traits.analytical ?? 0.5) > 0.8 && tm.scientific_curiosity < 0.5) meaningGap += 0.5;
+  }
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0) + meaningGap;
+  const score = clamp01(total / 8) * 100;
+
+  const signals: RegretSignal[] = [];
+  const notes: Record<RegretFlag, string> = {
+    prestige_driven: "Several answers leaned on status and prestige.",
+    family_pressure: "Some choices read as parent/family-driven, not self-driven.",
+    fear_driven: "A pattern of choosing what feels 'safe' over what feels true.",
+    money_driven: "Income weight is high relative to identity attachment to medicine.",
+    peer_comparison: "Strong sensitivity to how peers perceive your choice.",
+  };
+  for (const f of Object.keys(counts) as RegretFlag[]) {
+    if (counts[f] > 0) signals.push({ flag: f, weight: counts[f], note: notes[f] });
+  }
+  signals.sort((a, b) => b.weight - a.weight);
+
+  let verdict = "Your answers suggest a self-driven, identity-aligned choice.";
+  if (score > 60) verdict = "Elevated risk of choosing a specialty that impresses others more than it fulfills you.";
+  else if (score > 35) verdict = "Some external pressures are influencing your reasoning — worth examining honestly.";
+
+  return { score: Math.round(score), signals: signals.slice(0, 3), verdict };
+}
+
+function detectTensions(traits: TraitScores, ob: OnboardingData, top: EnrichedSpecialty | undefined): string[] {
+  const out: string[] = [];
+  if ((traits.lifestyle_balance ?? 0.5) > 0.75 && (traits.identity_career ?? 0.5) > 0.8) {
+    out.push("You want strong work–life balance and a career that defines you. Pick the side you can defend at 3am.");
+  }
+  if ((traits.family_priority ?? 0.5) > 0.75 && (traits.ambition ?? 0.5) > 0.85 && (traits.lifestyle_balance ?? 0.5) < 0.4) {
+    out.push("Your family priority is high but lifestyle tolerance is low — that's a collision course in surgical paths.");
+  }
+  if ((traits.death_comfort ?? 0.5) < 0.35 && ob.lifestyleVision === "hospital_intensity") {
+    out.push("You said you want hospital intensity, but you carry low tolerance for sustained mortality exposure.");
+  }
+  if (top && top.lifestyle <= 2 && (traits.lifestyle_balance ?? 0.5) > 0.75) {
+    out.push(`Your top match (${top.name}) has a punishing lifestyle while you rank balance as non-negotiable.`);
+  }
+  if ((traits.prestige_motivation ?? 0.5) > 0.85 && (traits.identity_career ?? 0.5) < 0.4) {
+    out.push("Prestige matters to you, but medicine isn't core to your identity — risk of seeking validation that won't satisfy.");
+  }
+  return out.slice(0, 4);
+}
+
+function meaningBreakdown(top: MeaningSource[]): { source: MeaningSource; weight: number }[] {
+  const w = meaningWeights(top);
+  return ALL_MEANING.map((s) => ({ source: s, weight: Math.round(w[s] * 100) }))
+    .sort((a, b) => b.weight - a.weight)
+    .filter((x) => x.weight > 0);
+}
+
+export function score(traits: TraitScores, onboarding: OnboardingData, answers: Choice[] = []): AssessmentResult {
+  const adjusted = applyOnboarding(traits, onboarding);
+  const mWeights = meaningWeights(onboarding.meaningTop ?? []);
+
+  const matches: SpecialtyMatch[] = ENRICHED_SPECIALTIES.map((sp) => {
+    const traitFit = cosineLike(adjusted, sp.ideal);
     const lifestyleFit = bandFit(adjusted.lifestyle_balance ?? 0.5, sp.lifestyle);
     const familyFit = bandFit(adjusted.family_priority ?? 0.5, sp.familyFriendly);
     const incomeFit = bandFit(adjusted.income_priority ?? 0.5, sp.incomeBand);
@@ -152,21 +272,27 @@ export function score(traits: TraitScores, onboarding: OnboardingData): Assessme
 
     const lifestyleScore = 0.5 * lifestyleFit + 0.25 * familyFit + 0.25 * stamFit;
 
-    // burnout warning: high specialty burnout + low resilience + high vulnerability
+    const mFit = meaningFit(sp.meaningProfile, mWeights);
+    const opp = opportunityFit(sp, onboarding.geographicIntent || "undecided");
+    const arche = archetypeFit(sp, onboarding.careerArchetypes ?? []);
+
     const burnoutWarning =
       0.5 * ((sp.burnoutRisk - 1) / 4) * 100 +
       0.3 * (1 - (adjusted.emotional_resilience ?? 0.5)) * 100 +
       0.2 * (adjusted.burnout_vulnerability ?? 0.5) * 100;
 
     const compatibility =
-      100 *
-      (0.45 * traitFit +
-        0.2 * lifestyleScore +
-        0.15 * emotionalFit +
-        0.1 * incomeFit +
-        0.1 * cognitiveFit);
+      100 * (
+        0.32 * traitFit +
+        0.15 * lifestyleScore +
+        0.12 * emotionalFit +
+        0.07 * incomeFit +
+        0.08 * cognitiveFit +
+        0.12 * mFit +
+        opp.weight * opp.score +
+        0.08 * arche.score
+      ) / (0.32 + 0.15 + 0.12 + 0.07 + 0.08 + 0.12 + opp.weight + 0.08);
 
-    // Penalize severe lifestyle mismatch
     let final = compatibility;
     if ((adjusted.lifestyle_balance ?? 0.5) > 0.8 && sp.lifestyle <= 2) final -= 12;
     if ((adjusted.family_priority ?? 0.5) > 0.8 && sp.familyFriendly <= 2) final -= 10;
@@ -182,18 +308,24 @@ export function score(traits: TraitScores, onboarding: OnboardingData): Assessme
       lifestyleFit: Math.round(lifestyleScore * 100),
       emotionalFit: Math.round(emotionalFit * 100),
       cognitiveFit: Math.round(cognitiveFit * 100),
+      meaningFit: Math.round(mFit * 100),
+      opportunityFit: Math.round(opp.score * 100),
+      archetypeFit: Math.round(arche.score * 100),
       burnoutWarning: Math.round(Math.min(95, Math.max(5, burnoutWarning))),
       reasonsFor: fors,
       reasonsAgainst: against,
+      highlightedPaths: arche.matched.slice(0, 4),
     };
   }).sort((a, b) => b.compatibility - a.compatibility);
 
   const avoid = [...matches].sort((a, b) => a.compatibility - b.compatibility).slice(0, 3);
-
-  // confidence: spread of top 5 + answer completeness
   const top5 = matches.slice(0, 5);
   const spread = top5[0].compatibility - top5[4].compatibility;
   const confidence = Math.round(Math.min(95, 55 + spread * 1.2));
+
+  const regret = regretRisk(answers, adjusted, top5[0]);
+  const tensions = detectTensions(adjusted, onboarding, top5[0]?.specialty);
+  const mBreakdown = meaningBreakdown(onboarding.meaningTop ?? []);
 
   return {
     traits: adjusted,
@@ -201,9 +333,10 @@ export function score(traits: TraitScores, onboarding: OnboardingData): Assessme
     matches: top5,
     avoid,
     confidence,
+    regretRisk: regret,
+    tensions,
+    meaningBreakdown: mBreakdown,
   };
 }
 
-export function getQuestions() {
-  return QUESTIONS;
-}
+export function getQuestions() { return QUESTIONS; }
