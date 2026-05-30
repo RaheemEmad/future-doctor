@@ -311,4 +311,115 @@ export const QUESTIONS: Question[] = [
       { label: "The reach of leading change beyond one room.", traits: { leadership: 0.8, ambition: 0.8 } },
     ],
   },
+
+  // ===== Deeper clinical-life realities (added from physician feedback) =====
+  {
+    id: "cl_1",
+    category: "On-Call Reality",
+    prompt: "It's 3:47am and your phone rings about a deteriorating patient. Most honestly, you feel…",
+    helper: "Imagine this happening 6 nights a month for 30 years.",
+    choices: [
+      { label: "Sharp and useful within 60 seconds.", traits: { stamina: 0.95, emotional_resilience: 0.9, focus_style: 0.85 } },
+      { label: "Functional but rattled; I'll process it tomorrow.", traits: { stamina: 0.6, sensitivity: 0.6, burnout_vulnerability: 0.55 } },
+      { label: "Resentful — this is exactly why I want low-call fields.", traits: { stamina: 0.2, lifestyle_balance: 0.95, family_priority: 0.8 } },
+      { label: "Energized — I prefer the night-shift brain.", traits: { chronic_vs_acute: 0.95, risk_tolerance: 0.85, autonomy: 0.7 } },
+    ],
+  },
+  {
+    id: "cl_2",
+    category: "Litigation & Liability",
+    prompt: "A patient files a complaint or lawsuit against you despite competent care. Your inner response…",
+    choices: [
+      { label: "Devastating — I'd replay it for years.", traits: { perfectionism: 0.9, sensitivity: 0.9, burnout_vulnerability: 0.85, ethical_burden_tolerance: 0.3 } },
+      { label: "Stressful but I'd compartmentalize and learn.", traits: { emotional_resilience: 0.85, ethical_burden_tolerance: 0.75 } },
+      { label: "Part of the job — I'd protect myself with documentation and move on.", traits: { emotional_resilience: 0.9, ethical_burden_tolerance: 0.9, procedural: 0.7 } },
+    ],
+  },
+  {
+    id: "cl_3",
+    category: "Patient Volume vs Depth",
+    prompt: "Which clinic feels more like home?",
+    choices: [
+      { label: "60 patients/day, 8 minutes each, brisk and efficient.", traits: { stamina: 0.85, focus_style: 0.9, chronic_vs_acute: 0.7, procedural: 0.6, empathy: 0.4 } },
+      { label: "20 patients/day, 20 minutes each, room for the full story.", traits: { empathy: 0.85, patience: 0.85, communication: 0.85, chronic_vs_acute: 0.3 } },
+      { label: "6 patients/day, hour-long visits, deep relational work.", traits: { empathy: 0.95, patience: 0.95, lifestyle_balance: 0.7, social_battery: 0.8 } },
+    ],
+  },
+  {
+    id: "cl_4",
+    category: "Hierarchy & Power Dynamics",
+    prompt: "Medicine has steep hierarchies. Your honest position is…",
+    choices: [
+      { label: "I'll play the long game — pay dues, then earn authority.", traits: { delayed_gratification: 0.9, ambition: 0.85, identity_career: 0.85 } },
+      { label: "I tolerate it because it's temporary, but it grates.", traits: { autonomy: 0.85, leadership: 0.7 } },
+      { label: "I'd rather avoid pyramid politics — flatter fields appeal to me.", traits: { autonomy: 0.95, lifestyle_balance: 0.7, ambition: 0.4 } },
+      { label: "I navigate it well; I'm comfortable managing up.", traits: { communication: 0.9, leadership: 0.7, empathy: 0.7 } },
+    ],
+  },
+  {
+    id: "cl_5",
+    category: "Pediatric Exposure",
+    prompt: "How do you experience working with critically ill children?",
+    helper: "Not what you should feel — what you actually feel.",
+    choices: [
+      { label: "It's where I feel most called.", traits: { empathy: 0.95, ethical_burden_tolerance: 0.9, death_comfort: 0.75 } },
+      { label: "I can do it but it costs me more than adult work.", traits: { sensitivity: 0.85, burnout_vulnerability: 0.8, empathy: 0.85 } },
+      { label: "I'd avoid it — I know my limits.", traits: { sensitivity: 0.9, death_comfort: 0.2, family_priority: 0.8 } },
+    ],
+  },
+  {
+    id: "cl_6",
+    category: "Solo vs Group Practice",
+    prompt: "Ten years in, where do you picture yourself working?",
+    choices: [
+      { label: "Solo or small private practice — my rules, my patients.", traits: { autonomy: 0.95, ambition: 0.8, leadership: 0.7, income_priority: 0.75 } },
+      { label: "Mid-size group — shared call, shared risk, real income.", traits: { autonomy: 0.6, lifestyle_balance: 0.7, income_priority: 0.7 } },
+      { label: "Academic medical center — research, teaching, prestige.", traits: { identity_career: 0.85, analytical: 0.8, prestige_motivation: 0.7 }, regretFlags: ["prestige_driven"] },
+      { label: "Salaried hospital employee — predictable, low admin.", traits: { lifestyle_balance: 0.85, autonomy: 0.3, routine_preference: 0.8 } },
+    ],
+  },
+  {
+    id: "cl_7",
+    category: "Administrative Burden",
+    prompt: "Modern medicine = real clinical care + 2–3 hours of charting and paperwork daily. How do you feel about that ratio?",
+    choices: [
+      { label: "Fine — documentation IS care. I can systematize it.", traits: { procedural: 0.85, perfectionism: 0.75, routine_preference: 0.8 } },
+      { label: "Tolerable but it's the part that burns me out.", traits: { burnout_vulnerability: 0.8, lifestyle_balance: 0.8, autonomy: 0.7 } },
+      { label: "It's a deal-breaker — I'll choose fields that minimize it.", traits: { lifestyle_balance: 0.9, autonomy: 0.95, burnout_vulnerability: 0.85 } },
+    ],
+  },
+  {
+    id: "cl_8",
+    category: "Technology & AI Adoption",
+    prompt: "AI is reshaping diagnostics, imaging, and documentation. Your stance…",
+    choices: [
+      { label: "I want to be on the bleeding edge — even building tools.", traits: { ambition: 0.85, autonomy: 0.85, analytical: 0.9 } },
+      { label: "I'll use what's proven, skeptically.", traits: { analytical: 0.8, perfectionism: 0.75 } },
+      { label: "I'd rather pick fields where the human relationship is the product.", traits: { empathy: 0.9, communication: 0.85, chronic_vs_acute: 0.3 } },
+      { label: "It worries me — I want a future-proof specialty.", traits: { uncertainty_tolerance: 0.3, income_priority: 0.7 }, regretFlags: ["fear_driven"] },
+    ],
+  },
+  {
+    id: "cl_9",
+    category: "Geographic & Career Mobility",
+    prompt: "If your top match required you to leave your home country for 5–10 years (training abroad, fellowship, migration), you'd…",
+    choices: [
+      { label: "Go without hesitation — the career comes first.", traits: { identity_career: 0.9, ambition: 0.9, family_priority: 0.3 } },
+      { label: "Go, but with a clear plan to return.", traits: { ambition: 0.75, family_priority: 0.65 } },
+      { label: "Reluctantly consider it — depends heavily on partner and family.", traits: { family_priority: 0.85, lifestyle_balance: 0.7 } },
+      { label: "No — I'd choose a different specialty before uprooting my life.", traits: { family_priority: 0.95, lifestyle_balance: 0.9, identity_career: 0.3 } },
+    ],
+  },
+  {
+    id: "cl_10",
+    category: "Existential Stamina",
+    prompt: "Twenty years from now, what scares you more?",
+    choices: [
+      { label: "Looking back at a brilliant career that cost me my relationships.", traits: { family_priority: 0.95, lifestyle_balance: 0.9, identity_career: 0.3 } },
+      { label: "Looking back at a comfortable life I find quietly unremarkable.", traits: { ambition: 0.95, identity_career: 0.9, prestige_motivation: 0.7 }, regretFlags: ["prestige_driven"] },
+      { label: "Looking back and realizing I chose what others wanted for me.", traits: { autonomy: 0.95, identity_career: 0.7 }, regretFlags: ["family_pressure", "peer_comparison"] },
+      { label: "Looking back at burnout that hollowed me out by 45.", traits: { burnout_vulnerability: 0.9, lifestyle_balance: 0.85, emotional_resilience: 0.4 } },
+    ],
+  },
 ];
+
