@@ -9,11 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SpecialtiesRouteImport } from './routes/specialties'
+import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MethodologyRouteImport } from './routes/methodology'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as AssessmentRouteImport } from './routes/assessment'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SpecialtiesRoute = SpecialtiesRouteImport.update({
+  id: '/specialties',
+  path: '/specialties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
@@ -22,6 +36,16 @@ const ResultsRoute = ResultsRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodologyRoute = MethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssessmentRoute = AssessmentRouteImport.update({
@@ -38,39 +62,94 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/compare': typeof CompareRoute
+  '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
+  '/saved': typeof SavedRoute
+  '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/compare': typeof CompareRoute
+  '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
+  '/saved': typeof SavedRoute
+  '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/compare': typeof CompareRoute
+  '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
+  '/saved': typeof SavedRoute
+  '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assessment' | '/onboarding' | '/results'
+  fullPaths:
+    | '/'
+    | '/assessment'
+    | '/compare'
+    | '/methodology'
+    | '/onboarding'
+    | '/results'
+    | '/saved'
+    | '/specialties'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assessment' | '/onboarding' | '/results'
-  id: '__root__' | '/' | '/assessment' | '/onboarding' | '/results'
+  to:
+    | '/'
+    | '/assessment'
+    | '/compare'
+    | '/methodology'
+    | '/onboarding'
+    | '/results'
+    | '/saved'
+    | '/specialties'
+  id:
+    | '__root__'
+    | '/'
+    | '/assessment'
+    | '/compare'
+    | '/methodology'
+    | '/onboarding'
+    | '/results'
+    | '/saved'
+    | '/specialties'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssessmentRoute: typeof AssessmentRoute
+  CompareRoute: typeof CompareRoute
+  MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
   ResultsRoute: typeof ResultsRoute
+  SavedRoute: typeof SavedRoute
+  SpecialtiesRoute: typeof SpecialtiesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/specialties': {
+      id: '/specialties'
+      path: '/specialties'
+      fullPath: '/specialties'
+      preLoaderRoute: typeof SpecialtiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
@@ -83,6 +162,20 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/methodology': {
+      id: '/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof MethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assessment': {
@@ -105,8 +198,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssessmentRoute: AssessmentRoute,
+  CompareRoute: CompareRoute,
+  MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
   ResultsRoute: ResultsRoute,
+  SavedRoute: SavedRoute,
+  SpecialtiesRoute: SpecialtiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
