@@ -17,6 +17,7 @@ import { MEANING_LABEL, GEO_INTENT_LABEL, CAREER_ARCHETYPE_LABEL } from "@/lib/t
 import type { Choice, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, TraitScores } from "@/lib/types";
 import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
+import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 
 type Search = { s?: string };
 
@@ -481,7 +482,7 @@ function ResultsPage() {
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-16">
         <div className="flex items-end justify-between mb-6">
           <h3 className="text-2xl lg:text-3xl font-serif">Your other strong matches</h3>
-          <span className="text-xs text-muted-foreground">Top 5 of {ENRICHED_LEN()} specialties</span>
+          <span className="text-xs text-muted-foreground">Top 5 of {ENRICHED_SPECIALTIES.length} specialties</span>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {result.matches.slice(1).map((m) => <MatchCard key={m.specialty.id} match={m} />)}
@@ -565,10 +566,6 @@ function ResultsPage() {
   );
 }
 
-function ENRICHED_LEN() {
-  // Avoid pulling enrichment for one number — close enough.
-  return 40;
-}
 
 function Stat({ label, value, inverse }: { label: string; value: number; inverse?: boolean }) {
   const tone = inverse
