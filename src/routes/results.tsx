@@ -1,17 +1,28 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X, Compass, Heart, Globe2, TrendingUp } from "lucide-react";
+import {
+  ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X,
+  Compass, Heart, Globe2, TrendingUp, Bookmark, SlidersHorizontal, Link2,
+} from "lucide-react";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
 } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
-import { loadSession, resetSession } from "@/lib/session";
+import { loadSession, resetSession, saveSession } from "@/lib/session";
+import { score, aggregateTraits } from "@/lib/scoring";
+import { QUESTIONS } from "@/lib/questions";
 import { MEANING_LABEL, GEO_INTENT_LABEL, CAREER_ARCHETYPE_LABEL } from "@/lib/types";
-import type { SpecialtyMatch, MeaningSource, CareerArchetype } from "@/lib/types";
+import type { Choice, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, TraitScores } from "@/lib/types";
+import { decodeShare, encodeShare } from "@/lib/share";
+import { saveRun } from "@/lib/saved";
+import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
+
+type Search = { s?: string };
 
 export const Route = createFileRoute("/results")({
+  validateSearch: (s: Record<string, unknown>): Search => ({ s: typeof s.s === "string" ? s.s : undefined }),
   head: () => ({
     meta: [
       { title: "Your results — Aequitas" },
@@ -21,32 +32,85 @@ export const Route = createFileRoute("/results")({
   component: ResultsPage,
 });
 
+const REFINEABLE: { trait: Trait; label: string }[] = [
+  { trait: "lifestyle_balance", label: "Lifestyle balance need" },
+  { trait: "family_priority", label: "Family priority" },
+  { trait: "income_priority", label: "Income priority" },
+  { trait: "stamina", label: "Stamina / schedule tolerance" },
+  { trait: "death_comfort", label: "Comfort with mortality" },
+  { trait: "ambition", label: "Ambition" },
+  { trait: "identity_career", label: "Career as identity" },
+  { trait: "procedural", label: "Procedural drive" },
+];
+
 function ResultsPage() {
   const navigate = useNavigate();
+  const { s: shareToken } = Route.useSearch();
   const [session, setSession] = useState(() => loadSession());
+  const [tweaks, setTweaks] = useState<Partial<Record<Trait, number>>>({});
+  const [showRefine, setShowRefine] = useState(false);
+  const [showSave, setShowSave] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Decode share token if present
+  useEffect(() => {
+    if (!shareToken) return;
+    const payload = decodeShare(shareToken);
+    if (!payload) return;
+    const choices = Object.entries(payload.a).map(([qid, idx]) => {
+      const q = QUESTIONS.find((x) => x.id === qid);
+      return q?.choices[idx];
+    }).filter(Boolean) as Choice[];
+    const traits = aggregateTraits(choices);
+    const result = score(traits, payload.o, choices);
+    const next = { onboarding: payload.o, answers: payload.a, result };
+    saveSession(next);
+    setSession(next);
+    // strip token from URL for cleanliness
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("s");
+      window.history.replaceState(null, "", url.toString());
+    }
+  }, [shareToken]);
 
   useEffect(() => {
-    if (!session.result) navigate({ to: "/" });
-  }, [session.result, navigate]);
+    if (!shareToken && !session.result) navigate({ to: "/" });
+  }, [session.result, navigate, shareToken]);
 
-  if (!session.result) return null;
+  // Recompute on tweak
+  const originalChoices: Choice[] = useMemo(() => {
+    if (!session.onboarding) return [];
+    return Object.entries(session.answers).map(([qid, idx]) => {
+      const q = QUESTIONS.find((x) => x.id === qid);
+      return q?.choices[idx];
+    }).filter(Boolean) as Choice[];
+  }, [session.answers, session.onboarding]);
 
-  const { result } = session;
+  const liveResult = useMemo(() => {
+    if (!session.result || !session.onboarding) return null;
+    if (Object.keys(tweaks).length === 0) return session.result;
+    const baseTraits = aggregateTraits(originalChoices);
+    const merged: TraitScores = { ...baseTraits, ...tweaks };
+    return score(merged, session.onboarding, originalChoices);
+  }, [tweaks, session.result, session.onboarding, originalChoices]);
+
+  if (!liveResult || !session.onboarding) return null;
+
+  const result = liveResult;
   const top = result.matches[0];
 
-  const radarData = useMemo(
-    () => [
-      { axis: "Cognitive", value: top.cognitiveFit },
-      { axis: "Emotional", value: top.emotionalFit },
-      { axis: "Lifestyle", value: top.lifestyleFit },
-      { axis: "Meaning", value: top.meaningFit },
-      { axis: "Opportunity", value: top.opportunityFit },
-      { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
-    ],
-    [top],
-  );
+  const radarData = [
+    { axis: "Cognitive", value: top.cognitiveFit },
+    { axis: "Emotional", value: top.emotionalFit },
+    { axis: "Lifestyle", value: top.lifestyleFit },
+    { axis: "Meaning", value: top.meaningFit },
+    { axis: "Opportunity", value: top.opportunityFit },
+    { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
+  ];
 
-  const profileSummary = useMemo(() => synthesizeNarrative(result.traits), [result.traits]);
+  const profileSummary = synthesizeNarrative(result.traits);
 
   function startOver() {
     resetSession();
@@ -54,16 +118,38 @@ function ResultsPage() {
     navigate({ to: "/" });
   }
 
-  function share() {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      navigator.share({
-        title: "My Aequitas result",
-        text: `My top specialty match is ${top.specialty.name} (${top.compatibility}%)`,
-        url: typeof window !== "undefined" ? window.location.href : undefined,
-      }).catch(() => {});
-    } else if (typeof navigator !== "undefined") {
-      navigator.clipboard?.writeText(typeof window !== "undefined" ? window.location.href : "");
+  function flash(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2400);
+  }
+
+  async function share() {
+    if (!session.onboarding) return;
+    const token = encodeShare({ v: 2, o: session.onboarding, a: session.answers });
+    const url = typeof window !== "undefined"
+      ? `${window.location.origin}/results?s=${token}`
+      : `/results?s=${token}`;
+    const text = `My top Aequitas match is ${top.specialty.name} (${top.compatibility}%).`;
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: "My Aequitas result", text, url });
+        return;
+      } catch { /* fallthrough to copy */ }
     }
+    try {
+      await navigator.clipboard.writeText(url);
+      flash("Share link copied to clipboard.");
+    } catch {
+      flash(url);
+    }
+  }
+
+  function doSave() {
+    if (!session.onboarding) return;
+    const run = saveRun(saveName, session.onboarding, session.answers, result);
+    setShowSave(false);
+    setSaveName("");
+    flash(`Saved as “${run.name}”.`);
   }
 
   return (
@@ -91,16 +177,66 @@ function ResultsPage() {
           <button onClick={share} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Share2 className="size-4" /> Share
           </button>
+          <button onClick={() => setShowSave(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
+            <Bookmark className="size-4" /> Save run
+          </button>
+          <button onClick={() => setShowRefine((v) => !v)} className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${showRefine ? "bg-brand text-brand-foreground" : "bg-card border border-border hover:bg-muted"}`}>
+            <SlidersHorizontal className="size-4" /> Refine
+          </button>
           <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-soft text-brand text-sm font-medium">
             <Sparkles className="size-4" /> Confidence {result.confidence}%
           </span>
-          {result.onboarding.geographicIntent && result.onboarding.geographicIntent !== "undecided" && (
+          {session.onboarding.geographicIntent && session.onboarding.geographicIntent !== "undecided" && (
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-calm-soft text-calm text-sm font-medium">
-              <Globe2 className="size-4" /> {GEO_INTENT_LABEL[result.onboarding.geographicIntent]}
+              <Globe2 className="size-4" /> {GEO_INTENT_LABEL[session.onboarding.geographicIntent]}
             </span>
           )}
         </div>
       </motion.section>
+
+      {/* Refine panel */}
+      {showRefine && (
+        <motion.section
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="max-w-6xl mx-auto px-6 sm:px-10 mb-10"
+        >
+          <div className="rounded-3xl border border-brand/30 bg-brand-soft/30 p-8">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div>
+                <h3 className="font-serif text-xl flex items-center gap-2"><SlidersHorizontal className="size-5 text-brand" /> Refine your priorities</h3>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Nudge these dimensions to stress-test the model. The matches re-score live — useful for "what if I weight family less / income more".
+                </p>
+              </div>
+              {Object.keys(tweaks).length > 0 && (
+                <button onClick={() => setTweaks({})} className="text-xs px-3 py-1.5 rounded-full bg-card border border-border hover:bg-muted shrink-0">Reset</button>
+              )}
+            </div>
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4 mt-5">
+              {REFINEABLE.map(({ trait, label }) => {
+                const v = tweaks[trait] ?? result.traits[trait] ?? 0.5;
+                return (
+                  <div key={trait}>
+                    <div className="flex items-center justify-between text-sm mb-1.5">
+                      <span className="text-foreground/80">{label}</span>
+                      <span className="tabular-nums text-xs text-muted-foreground">{Math.round(v * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0} max={100}
+                      value={Math.round(v * 100)}
+                      onChange={(e) => setTweaks((t) => ({ ...t, [trait]: Number(e.target.value) / 100 }))}
+                      className="w-full accent-brand"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.section>
+      )}
 
       {/* Top match hero */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10">
@@ -238,7 +374,7 @@ function ResultsPage() {
             </p>
             <div className="grid md:grid-cols-2 gap-3">
               {top.specialty.careerPaths.map((p) => {
-                const matchesArch = (result.onboarding.careerArchetypes ?? []).some((a) => p.archetypes.includes(a));
+                const matchesArch = (session.onboarding!.careerArchetypes ?? []).some((a) => p.archetypes.includes(a));
                 return (
                   <div key={p.label} className={`rounded-2xl border p-5 ${matchesArch ? "border-brand bg-brand-soft/30" : "border-border bg-background"}`}>
                     <div className="flex items-start justify-between gap-3 mb-2">
@@ -346,7 +482,7 @@ function ResultsPage() {
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-16">
         <div className="flex items-end justify-between mb-6">
           <h3 className="text-2xl lg:text-3xl font-serif">Your other strong matches</h3>
-          <span className="text-xs text-muted-foreground">Top 5 of 40 specialties</span>
+          <span className="text-xs text-muted-foreground">Top 5 of {ENRICHED_SPECIALTIES.length} specialties</span>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {result.matches.slice(1).map((m) => <MatchCard key={m.specialty.id} match={m} />)}
@@ -388,15 +524,48 @@ function ResultsPage() {
         <button onClick={startOver} className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand text-brand-foreground font-medium hover:opacity-90 transition-opacity">
           Retake the assessment <ArrowRight className="size-4" />
         </button>
+        <Link to="/saved" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-card border border-border hover:bg-muted font-medium transition-colors">
+          <Bookmark className="size-4" /> Saved runs
+        </Link>
         <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-card border border-border hover:bg-muted font-medium transition-colors">
           Back to home
         </Link>
       </div>
 
+      {/* Save dialog */}
+      {showSave && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6" onClick={() => setShowSave(false)}>
+          <div className="bg-card rounded-3xl border border-border p-7 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-serif text-2xl mb-1">Save this run</h3>
+            <p className="text-sm text-muted-foreground mb-5">Give it a name so you can find it later or compare it against future runs.</p>
+            <input
+              autoFocus
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              placeholder={`e.g. "Before PGY-1 — ${new Date().toLocaleDateString()}"`}
+              className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+              onKeyDown={(e) => e.key === "Enter" && doSave()}
+            />
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={() => setShowSave(false)} className="px-4 py-2 rounded-full text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+              <button onClick={doSave} className="px-5 py-2 rounded-full bg-brand text-brand-foreground text-sm font-medium">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-foreground text-background px-5 py-2.5 rounded-full text-sm flex items-center gap-2 shadow-lg">
+          <Link2 className="size-4" /> {toast}
+        </div>
+      )}
+
       <SiteFooter />
     </div>
   );
 }
+
 
 function Stat({ label, value, inverse }: { label: string; value: number; inverse?: boolean }) {
   const tone = inverse

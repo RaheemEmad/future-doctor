@@ -9,9 +9,10 @@ export function SiteNav() {
         </div>
         <span className="font-serif text-xl tracking-tight">Aequitas</span>
       </Link>
-      <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground font-medium">
-        <Link to="/" className="hover:text-foreground transition-colors">Methodology</Link>
-        <Link to="/" className="hover:text-foreground transition-colors">Specialties</Link>
+      <div className="hidden md:flex items-center gap-7 text-sm text-muted-foreground font-medium">
+        <Link to="/methodology" className="hover:text-foreground transition-colors">Methodology</Link>
+        <Link to="/specialties" className="hover:text-foreground transition-colors">Specialties</Link>
+        <Link to="/saved" className="hover:text-foreground transition-colors">Saved</Link>
         <Link
           to="/onboarding"
           className="px-5 py-2.5 bg-brand text-brand-foreground rounded-full hover:opacity-90 transition-opacity"
@@ -35,7 +36,12 @@ export function SiteFooter() {
       <p className="text-sm text-muted-foreground font-serif italic max-w-xl mx-auto px-6">
         "Your career is not just what you do; it is the environment in which your life happens."
       </p>
-      <div className="mt-6 text-xs text-muted-foreground/70 uppercase tracking-[0.2em]">
+      <div className="mt-6 flex items-center justify-center gap-5 text-xs text-muted-foreground/80">
+        <Link to="/methodology" className="hover:text-foreground">Methodology</Link>
+        <Link to="/specialties" className="hover:text-foreground">Specialties</Link>
+        <Link to="/saved" className="hover:text-foreground">Saved runs</Link>
+      </div>
+      <div className="mt-4 text-xs text-muted-foreground/70 uppercase tracking-[0.2em]">
         © {new Date().getFullYear()} Aequitas Medical Assessment
       </div>
     </footer>
