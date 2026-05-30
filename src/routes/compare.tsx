@@ -26,7 +26,7 @@ function ComparePage() {
   const idList = (ids ?? "").split(",").filter(Boolean).slice(0, 3);
 
   const runs = useMemo(() => {
-    return idList.map((id) => {
+    return idList.map((id: string) => {
       const r = getSaved(id);
       if (!r) return null;
       const choices = Object.entries(r.answers).map(([qid, idx]) => {
