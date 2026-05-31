@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { getSaved } from "@/lib/saved";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
 import { GEO_INTENT_LABEL } from "@/lib/types";
-import type { AssessmentResult } from "@/lib/types";
 
 type Search = { ids?: string };
 
