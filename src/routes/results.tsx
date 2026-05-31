@@ -766,3 +766,37 @@ function synthesizeNarrative(traits: Record<string, number | undefined>): string
     : "Your profile shows a balanced cognitive and emotional baseline across categories.";
   return `${lead} Below is what that means for the medical life you can sustainably build.`;
 }
+
+function highlightTraits(traits: TraitScores): string[] {
+  const out: string[] = [];
+  const push = (label: string, cond: boolean) => { if (cond) out.push(label); };
+  push("high empathy", (traits.empathy ?? 0.5) > 0.75);
+  push("analytical", (traits.analytical ?? 0.5) > 0.75);
+  push("procedural drive", (traits.procedural ?? 0.5) > 0.75);
+  push("introverted", (traits.introversion ?? 0.5) > 0.7);
+  push("high stamina", (traits.stamina ?? 0.5) > 0.75);
+  push("low death comfort", (traits.death_comfort ?? 0.5) < 0.35);
+  push("strong lifestyle priority", (traits.lifestyle_balance ?? 0.5) > 0.75);
+  push("high ambition", (traits.ambition ?? 0.5) > 0.8);
+  push("burnout-vulnerable", (traits.burnout_vulnerability ?? 0.5) > 0.7);
+  push("prestige-motivated", (traits.prestige_motivation ?? 0.5) > 0.8);
+  return out.slice(0, 6);
+}
+
+function describeRunnerDelta(top: SpecialtyMatch, runner: SpecialtyMatch | undefined): string | null {
+  if (!runner) return null;
+  const diffs: { label: string; delta: number }[] = [
+    { label: "lifestyle fit", delta: top.lifestyleFit - runner.lifestyleFit },
+    { label: "meaning fit", delta: top.meaningFit - runner.meaningFit },
+    { label: "cognitive fit", delta: top.cognitiveFit - runner.cognitiveFit },
+    { label: "emotional fit", delta: top.emotionalFit - runner.emotionalFit },
+    { label: "regional opportunity", delta: top.opportunityFit - runner.opportunityFit },
+    { label: "lower burnout risk", delta: runner.burnoutWarning - top.burnoutWarning },
+  ];
+  diffs.sort((a, b) => b.delta - a.delta);
+  const best = diffs[0];
+  const gap = top.compatibility - runner.compatibility;
+  if (best.delta < 3 && gap < 3) return `Edged out ${runner.specialty.name} by only ${gap} points — worth comparing them carefully.`;
+  if (best.delta < 3) return `Beat ${runner.specialty.name} by ${gap} points across several dimensions evenly.`;
+  return `Beat ${runner.specialty.name} (${runner.compatibility}%) mostly on ${best.label}.`;
+}
