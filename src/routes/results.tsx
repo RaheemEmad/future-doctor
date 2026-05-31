@@ -54,12 +54,19 @@ function ResultsPage() {
   const [showSave, setShowSave] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [shareHandled, setShareHandled] = useState(!shareToken);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const callSummary = useServerFn(generateSummary);
 
   // Decode share token if present
   useEffect(() => {
     if (!shareToken) return;
     const payload = decodeShare(shareToken);
-    if (!payload) return;
+    if (!payload) {
+      setShareHandled(true);
+      return;
+    }
     const choices = Object.entries(payload.a).map(([qid, idx]) => {
       const q = QUESTIONS.find((x) => x.id === qid);
       return q?.choices[idx];
@@ -69,6 +76,7 @@ function ResultsPage() {
     const next = { onboarding: payload.o, answers: payload.a, result };
     saveSession(next);
     setSession(next);
+    setShareHandled(true);
     // strip token from URL for cleanliness
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -78,8 +86,9 @@ function ResultsPage() {
   }, [shareToken]);
 
   useEffect(() => {
-    if (!shareToken && !session.result) navigate({ to: "/" });
-  }, [session.result, navigate, shareToken]);
+    if (!shareHandled) return;
+    if (!session.result) navigate({ to: "/" });
+  }, [session.result, navigate, shareHandled]);
 
   // Recompute on tweak
   const originalChoices: Choice[] = useMemo(() => {
@@ -98,21 +107,60 @@ function ResultsPage() {
     return score(merged, session.onboarding, originalChoices);
   }, [tweaks, session.result, session.onboarding, originalChoices]);
 
+  // AI personalized summary — fetch once per top match + intent, cache in sessionStorage
+  const top = liveResult?.matches[0];
+  const cacheKey = useMemo(() => {
+    if (!top || !session.onboarding) return null;
+    const t = liveResult!.traits;
+    const hash = `${top.specialty.id}|${top.compatibility}|${session.onboarding.geographicIntent}|${(session.onboarding.careerArchetypes ?? []).join(",")}|${(session.onboarding.meaningTop ?? []).join(",")}|${Math.round((t.empathy ?? 0.5) * 10)}|${Math.round((t.analytical ?? 0.5) * 10)}`;
+    return `aequitas:summary:${hash}`;
+  }, [top, session.onboarding, liveResult]);
+
+  useEffect(() => {
+    if (!top || !session.onboarding || !cacheKey || !liveResult) return;
+    if (typeof window === "undefined") return;
+    const cached = window.sessionStorage.getItem(cacheKey);
+    if (cached) { setAiSummary(cached); return; }
+    setAiLoading(true);
+    setAiSummary(null);
+    const traitHighlights = highlightTraits(liveResult.traits);
+    callSummary({
+      data: {
+        topSpecialty: top.specialty.name,
+        compatibility: top.compatibility,
+        geographicIntent: session.onboarding.geographicIntent ? GEO_INTENT_LABEL[session.onboarding.geographicIntent] : undefined,
+        archetypes: (session.onboarding.careerArchetypes ?? []).map((a) => CAREER_ARCHETYPE_LABEL[a]),
+        meaningTop: (session.onboarding.meaningTop ?? []).map((m) => MEANING_LABEL[m]),
+        tensions: liveResult.tensions,
+        regretRisk: liveResult.regretRisk.score,
+        traitHighlights,
+        reasonsFor: top.reasonsFor.slice(0, 3),
+      },
+    }).then((res) => {
+      setAiSummary(res.text);
+      try { window.sessionStorage.setItem(cacheKey, res.text); } catch {}
+    }).catch(() => {
+      // silent fallback to local narrative
+    }).finally(() => setAiLoading(false));
+  }, [cacheKey, top, session.onboarding, liveResult, callSummary]);
+
   if (!liveResult || !session.onboarding) return null;
 
   const result = liveResult;
-  const top = result.matches[0];
+  const topMatch = result.matches[0];
 
   const radarData = [
-    { axis: "Cognitive", value: top.cognitiveFit },
-    { axis: "Emotional", value: top.emotionalFit },
-    { axis: "Lifestyle", value: top.lifestyleFit },
-    { axis: "Meaning", value: top.meaningFit },
-    { axis: "Opportunity", value: top.opportunityFit },
-    { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
+    { axis: "Cognitive", value: topMatch.cognitiveFit },
+    { axis: "Emotional", value: topMatch.emotionalFit },
+    { axis: "Lifestyle", value: topMatch.lifestyleFit },
+    { axis: "Meaning", value: topMatch.meaningFit },
+    { axis: "Opportunity", value: topMatch.opportunityFit },
+    { axis: "Burnout resilience", value: 100 - topMatch.burnoutWarning },
   ];
 
-  const profileSummary = synthesizeNarrative(result.traits);
+  const localSummary = synthesizeNarrative(result.traits);
+  const profileSummary = aiSummary ?? localSummary;
+  const runnerDelta = describeRunnerDelta(topMatch, result.matches[1]);
 
   function startOver() {
     resetSession();
