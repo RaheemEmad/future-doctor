@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import {
   ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X,
@@ -18,6 +19,7 @@ import type { Choice, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, Tra
 import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
+import { generateSummary } from "@/lib/api/summary.functions";
 
 type Search = { s?: string };
 
@@ -52,12 +54,19 @@ function ResultsPage() {
   const [showSave, setShowSave] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [shareHandled, setShareHandled] = useState(!shareToken);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const callSummary = useServerFn(generateSummary);
 
   // Decode share token if present
   useEffect(() => {
     if (!shareToken) return;
     const payload = decodeShare(shareToken);
-    if (!payload) return;
+    if (!payload) {
+      setShareHandled(true);
+      return;
+    }
     const choices = Object.entries(payload.a).map(([qid, idx]) => {
       const q = QUESTIONS.find((x) => x.id === qid);
       return q?.choices[idx];
@@ -67,6 +76,7 @@ function ResultsPage() {
     const next = { onboarding: payload.o, answers: payload.a, result };
     saveSession(next);
     setSession(next);
+    setShareHandled(true);
     // strip token from URL for cleanliness
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
@@ -76,8 +86,9 @@ function ResultsPage() {
   }, [shareToken]);
 
   useEffect(() => {
-    if (!shareToken && !session.result) navigate({ to: "/" });
-  }, [session.result, navigate, shareToken]);
+    if (!shareHandled) return;
+    if (!session.result) navigate({ to: "/" });
+  }, [session.result, navigate, shareHandled]);
 
   // Recompute on tweak
   const originalChoices: Choice[] = useMemo(() => {
@@ -96,6 +107,43 @@ function ResultsPage() {
     return score(merged, session.onboarding, originalChoices);
   }, [tweaks, session.result, session.onboarding, originalChoices]);
 
+  // AI personalized summary — fetch once per top match + intent, cache in sessionStorage
+  const previewTop = liveResult?.matches[0];
+  const cacheKey = useMemo(() => {
+    if (!previewTop || !session.onboarding || !liveResult) return null;
+    const t = liveResult.traits;
+    const hash = `${previewTop.specialty.id}|${previewTop.compatibility}|${session.onboarding.geographicIntent}|${(session.onboarding.careerArchetypes ?? []).join(",")}|${(session.onboarding.meaningTop ?? []).join(",")}|${Math.round((t.empathy ?? 0.5) * 10)}|${Math.round((t.analytical ?? 0.5) * 10)}`;
+    return `aequitas:summary:${hash}`;
+  }, [previewTop, session.onboarding, liveResult]);
+
+  useEffect(() => {
+    if (!previewTop || !session.onboarding || !cacheKey || !liveResult) return;
+    if (typeof window === "undefined") return;
+    const cached = window.sessionStorage.getItem(cacheKey);
+    if (cached) { setAiSummary(cached); return; }
+    setAiLoading(true);
+    setAiSummary(null);
+    const traitHighlights = highlightTraits(liveResult.traits);
+    callSummary({
+      data: {
+        topSpecialty: previewTop.specialty.name,
+        compatibility: previewTop.compatibility,
+        geographicIntent: session.onboarding.geographicIntent ? GEO_INTENT_LABEL[session.onboarding.geographicIntent] : undefined,
+        archetypes: (session.onboarding.careerArchetypes ?? []).map((a) => CAREER_ARCHETYPE_LABEL[a]),
+        meaningTop: (session.onboarding.meaningTop ?? []).map((m) => MEANING_LABEL[m]),
+        tensions: liveResult.tensions,
+        regretRisk: liveResult.regretRisk.score,
+        traitHighlights,
+        reasonsFor: previewTop.reasonsFor.slice(0, 3),
+      },
+    }).then((res) => {
+      setAiSummary(res.text);
+      try { window.sessionStorage.setItem(cacheKey, res.text); } catch {}
+    }).catch(() => {
+      // silent fallback to local narrative
+    }).finally(() => setAiLoading(false));
+  }, [cacheKey, previewTop, session.onboarding, liveResult, callSummary]);
+
   if (!liveResult || !session.onboarding) return null;
 
   const result = liveResult;
@@ -110,7 +158,9 @@ function ResultsPage() {
     { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
   ];
 
-  const profileSummary = synthesizeNarrative(result.traits);
+  const localSummary = synthesizeNarrative(result.traits);
+  const profileSummary = aiSummary ?? localSummary;
+  const runnerDelta = describeRunnerDelta(top, result.matches[1]);
 
   function startOver() {
     resetSession();
@@ -166,9 +216,33 @@ function ResultsPage() {
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight max-w-3xl text-balance">
           Your path of <span className="italic">highest alignment.</span>
         </h1>
-        <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-relaxed">
-          {profileSummary}
-        </p>
+        <div className="mt-5 max-w-2xl">
+          {aiLoading && !aiSummary ? (
+            <div className="space-y-2.5">
+              <div className="h-3.5 w-full rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[92%] rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[78%] rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[88%] rounded bg-muted animate-pulse mt-4" />
+              <div className="h-3.5 w-[70%] rounded bg-muted animate-pulse" />
+            </div>
+          ) : (
+            <div className="text-muted-foreground text-lg leading-relaxed space-y-4">
+              {profileSummary.split(/\n\s*\n/).map((para, i) => (
+                <p key={i}>{para.trim()}</p>
+              ))}
+            </div>
+          )}
+          {aiSummary && (
+            <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-brand/70">
+              <Sparkles className="size-3" /> AI-personalized
+            </div>
+          )}
+          {runnerDelta && (
+            <p className="mt-5 text-sm text-foreground/70 border-l-2 border-brand/40 pl-3 italic">
+              {runnerDelta}
+            </p>
+          )}
+        </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <button onClick={startOver} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
@@ -691,4 +765,38 @@ function synthesizeNarrative(traits: Record<string, number | undefined>): string
     ? `Your profile shows ${parts.slice(0, 3).join(", ")}.`
     : "Your profile shows a balanced cognitive and emotional baseline across categories.";
   return `${lead} Below is what that means for the medical life you can sustainably build.`;
+}
+
+function highlightTraits(traits: TraitScores): string[] {
+  const out: string[] = [];
+  const push = (label: string, cond: boolean) => { if (cond) out.push(label); };
+  push("high empathy", (traits.empathy ?? 0.5) > 0.75);
+  push("analytical", (traits.analytical ?? 0.5) > 0.75);
+  push("procedural drive", (traits.procedural ?? 0.5) > 0.75);
+  push("introverted", (traits.introversion ?? 0.5) > 0.7);
+  push("high stamina", (traits.stamina ?? 0.5) > 0.75);
+  push("low death comfort", (traits.death_comfort ?? 0.5) < 0.35);
+  push("strong lifestyle priority", (traits.lifestyle_balance ?? 0.5) > 0.75);
+  push("high ambition", (traits.ambition ?? 0.5) > 0.8);
+  push("burnout-vulnerable", (traits.burnout_vulnerability ?? 0.5) > 0.7);
+  push("prestige-motivated", (traits.prestige_motivation ?? 0.5) > 0.8);
+  return out.slice(0, 6);
+}
+
+function describeRunnerDelta(top: SpecialtyMatch, runner: SpecialtyMatch | undefined): string | null {
+  if (!runner) return null;
+  const diffs: { label: string; delta: number }[] = [
+    { label: "lifestyle fit", delta: top.lifestyleFit - runner.lifestyleFit },
+    { label: "meaning fit", delta: top.meaningFit - runner.meaningFit },
+    { label: "cognitive fit", delta: top.cognitiveFit - runner.cognitiveFit },
+    { label: "emotional fit", delta: top.emotionalFit - runner.emotionalFit },
+    { label: "regional opportunity", delta: top.opportunityFit - runner.opportunityFit },
+    { label: "lower burnout risk", delta: runner.burnoutWarning - top.burnoutWarning },
+  ];
+  diffs.sort((a, b) => b.delta - a.delta);
+  const best = diffs[0];
+  const gap = top.compatibility - runner.compatibility;
+  if (best.delta < 3 && gap < 3) return `Edged out ${runner.specialty.name} by only ${gap} points — worth comparing them carefully.`;
+  if (best.delta < 3) return `Beat ${runner.specialty.name} by ${gap} points across several dimensions evenly.`;
+  return `Beat ${runner.specialty.name} (${runner.compatibility}%) mostly on ${best.label}.`;
 }
