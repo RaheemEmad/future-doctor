@@ -7,6 +7,7 @@ import { getSaved } from "@/lib/saved";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
 import { GEO_INTENT_LABEL } from "@/lib/types";
+import type { AssessmentResult, SpecialtyMatch } from "@/lib/types";
 
 type Search = { ids?: string };
 
