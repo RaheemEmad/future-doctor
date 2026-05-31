@@ -88,8 +88,42 @@ function ComparePage() {
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-5">
-                  {result.matches.slice(1, 5).map((m) => (
+                {/* Fit breakdown across waves */}
+                {result.matches[0] && (
+                  <div className="space-y-2 mb-5">
+                    <FitRow label="Lifestyle" v={result.matches[0].lifestyleFit} />
+                    <FitRow label="Meaning" v={result.matches[0].meaningFit} />
+                    <FitRow label="Cognitive" v={result.matches[0].cognitiveFit} />
+                    <FitRow label="Emotional" v={result.matches[0].emotionalFit} />
+                    <FitRow label="Opportunity" v={result.matches[0].opportunityFit} />
+                    <FitRow label="Archetype" v={result.matches[0].archetypeFit} />
+                  </div>
+                )}
+
+                {/* Lifecycle sparkline */}
+                {result.matches[0]?.specialty.lifecycle && (
+                  <div className="mb-5">
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">Yr 1 → 30 trajectory</div>
+                    <div className="h-14">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={result.matches[0].specialty.lifecycle}>
+                          <Line type="monotone" dataKey="lifestyle" stroke="oklch(0.62 0.09 195)" strokeWidth={1.8} dot={false} />
+                          <Line type="monotone" dataKey="fulfillment" stroke="oklch(0.48 0.16 274)" strokeWidth={1.8} dot={false} />
+                          <Line type="monotone" dataKey="financial" stroke="oklch(0.72 0.15 55)" strokeWidth={1.8} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex gap-3 text-[10px] text-muted-foreground mt-1">
+                      <Dot color="oklch(0.62 0.09 195)" label="Lifestyle" />
+                      <Dot color="oklch(0.48 0.16 274)" label="Fulfillment" />
+                      <Dot color="oklch(0.72 0.15 55)" label="Financial" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2 mb-5 pt-4 border-t border-border/60">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1">Other matches</div>
+                  {result.matches.slice(1, 4).map((m: SpecialtyMatch) => (
                     <div key={m.specialty.id} className="flex items-center justify-between text-sm">
                       <span className="truncate text-foreground/80">{m.specialty.name}</span>
                       <span className="tabular-nums text-muted-foreground">{m.compatibility}%</span>
@@ -107,7 +141,7 @@ function ComparePage() {
                   <div className="mt-5 pt-4 border-t border-border/60">
                     <div className="text-[10px] uppercase tracking-[0.22em] text-warning mb-2">Tensions</div>
                     <ul className="space-y-1.5 text-xs text-foreground/80">
-                      {result.tensions.slice(0, 2).map((t) => <li key={t}>— {t}</li>)}
+                      {result.tensions.slice(0, 2).map((t: string) => <li key={t}>— {t}</li>)}
                     </ul>
                   </div>
                 )}
