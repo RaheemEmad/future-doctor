@@ -216,9 +216,33 @@ function ResultsPage() {
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight max-w-3xl text-balance">
           Your path of <span className="italic">highest alignment.</span>
         </h1>
-        <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-relaxed">
-          {profileSummary}
-        </p>
+        <div className="mt-5 max-w-2xl">
+          {aiLoading && !aiSummary ? (
+            <div className="space-y-2.5">
+              <div className="h-3.5 w-full rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[92%] rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[78%] rounded bg-muted animate-pulse" />
+              <div className="h-3.5 w-[88%] rounded bg-muted animate-pulse mt-4" />
+              <div className="h-3.5 w-[70%] rounded bg-muted animate-pulse" />
+            </div>
+          ) : (
+            <div className="text-muted-foreground text-lg leading-relaxed space-y-4">
+              {profileSummary.split(/\n\s*\n/).map((para, i) => (
+                <p key={i}>{para.trim()}</p>
+              ))}
+            </div>
+          )}
+          {aiSummary && (
+            <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-brand/70">
+              <Sparkles className="size-3" /> AI-personalized
+            </div>
+          )}
+          {runnerDelta && (
+            <p className="mt-5 text-sm text-foreground/70 border-l-2 border-brand/40 pl-3 italic">
+              {runnerDelta}
+            </p>
+          )}
+        </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <button onClick={startOver} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
