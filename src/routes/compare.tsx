@@ -168,3 +168,26 @@ function Stat({ label, v, warn }: { label: string; v: string; warn?: boolean }) 
     </div>
   );
 }
+
+function FitRow({ label, v }: { label: string; v: number }) {
+  return (
+    <div>
+      <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
+        <span>{label}</span>
+        <span className="font-medium text-foreground tabular-nums">{v}%</span>
+      </div>
+      <div className="h-1 rounded-full bg-muted overflow-hidden">
+        <div className="h-full rounded-full bg-brand" style={{ width: `${v}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function Dot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+      {label}
+    </span>
+  );
+}
