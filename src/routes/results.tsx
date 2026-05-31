@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import {
   ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X,
@@ -18,6 +19,7 @@ import type { Choice, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, Tra
 import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
+import { generateSummary } from "@/lib/api/summary.functions";
 
 type Search = { s?: string };
 
