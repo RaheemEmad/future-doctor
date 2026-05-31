@@ -108,16 +108,16 @@ function ResultsPage() {
   }, [tweaks, session.result, session.onboarding, originalChoices]);
 
   // AI personalized summary — fetch once per top match + intent, cache in sessionStorage
-  const top = liveResult?.matches[0];
+  const previewTop = liveResult?.matches[0];
   const cacheKey = useMemo(() => {
-    if (!top || !session.onboarding) return null;
-    const t = liveResult!.traits;
-    const hash = `${top.specialty.id}|${top.compatibility}|${session.onboarding.geographicIntent}|${(session.onboarding.careerArchetypes ?? []).join(",")}|${(session.onboarding.meaningTop ?? []).join(",")}|${Math.round((t.empathy ?? 0.5) * 10)}|${Math.round((t.analytical ?? 0.5) * 10)}`;
+    if (!previewTop || !session.onboarding || !liveResult) return null;
+    const t = liveResult.traits;
+    const hash = `${previewTop.specialty.id}|${previewTop.compatibility}|${session.onboarding.geographicIntent}|${(session.onboarding.careerArchetypes ?? []).join(",")}|${(session.onboarding.meaningTop ?? []).join(",")}|${Math.round((t.empathy ?? 0.5) * 10)}|${Math.round((t.analytical ?? 0.5) * 10)}`;
     return `aequitas:summary:${hash}`;
-  }, [top, session.onboarding, liveResult]);
+  }, [previewTop, session.onboarding, liveResult]);
 
   useEffect(() => {
-    if (!top || !session.onboarding || !cacheKey || !liveResult) return;
+    if (!previewTop || !session.onboarding || !cacheKey || !liveResult) return;
     if (typeof window === "undefined") return;
     const cached = window.sessionStorage.getItem(cacheKey);
     if (cached) { setAiSummary(cached); return; }
@@ -126,15 +126,15 @@ function ResultsPage() {
     const traitHighlights = highlightTraits(liveResult.traits);
     callSummary({
       data: {
-        topSpecialty: top.specialty.name,
-        compatibility: top.compatibility,
+        topSpecialty: previewTop.specialty.name,
+        compatibility: previewTop.compatibility,
         geographicIntent: session.onboarding.geographicIntent ? GEO_INTENT_LABEL[session.onboarding.geographicIntent] : undefined,
         archetypes: (session.onboarding.careerArchetypes ?? []).map((a) => CAREER_ARCHETYPE_LABEL[a]),
         meaningTop: (session.onboarding.meaningTop ?? []).map((m) => MEANING_LABEL[m]),
         tensions: liveResult.tensions,
         regretRisk: liveResult.regretRisk.score,
         traitHighlights,
-        reasonsFor: top.reasonsFor.slice(0, 3),
+        reasonsFor: previewTop.reasonsFor.slice(0, 3),
       },
     }).then((res) => {
       setAiSummary(res.text);
@@ -142,25 +142,25 @@ function ResultsPage() {
     }).catch(() => {
       // silent fallback to local narrative
     }).finally(() => setAiLoading(false));
-  }, [cacheKey, top, session.onboarding, liveResult, callSummary]);
+  }, [cacheKey, previewTop, session.onboarding, liveResult, callSummary]);
 
   if (!liveResult || !session.onboarding) return null;
 
   const result = liveResult;
-  const topMatch = result.matches[0];
+  const top = result.matches[0];
 
   const radarData = [
-    { axis: "Cognitive", value: topMatch.cognitiveFit },
-    { axis: "Emotional", value: topMatch.emotionalFit },
-    { axis: "Lifestyle", value: topMatch.lifestyleFit },
-    { axis: "Meaning", value: topMatch.meaningFit },
-    { axis: "Opportunity", value: topMatch.opportunityFit },
-    { axis: "Burnout resilience", value: 100 - topMatch.burnoutWarning },
+    { axis: "Cognitive", value: top.cognitiveFit },
+    { axis: "Emotional", value: top.emotionalFit },
+    { axis: "Lifestyle", value: top.lifestyleFit },
+    { axis: "Meaning", value: top.meaningFit },
+    { axis: "Opportunity", value: top.opportunityFit },
+    { axis: "Burnout resilience", value: 100 - top.burnoutWarning },
   ];
 
   const localSummary = synthesizeNarrative(result.traits);
   const profileSummary = aiSummary ?? localSummary;
-  const runnerDelta = describeRunnerDelta(topMatch, result.matches[1]);
+  const runnerDelta = describeRunnerDelta(top, result.matches[1]);
 
   function startOver() {
     resetSession();
