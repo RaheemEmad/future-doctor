@@ -444,7 +444,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_10",
     category: "Existential Stamina",
     prompt: "Twenty years from now, what scares you more?",
-    helper: "For Egyptian doctors, migration to UK, US, Gulf, Germany is real. Some specialties travel; others don't.",
+    helper: "There is no neutral answer. The thing that scares you most is the thing your specialty must protect against.",
     choices: [
       { label: "Looking back at a brilliant career that cost me my relationships.", traits: { family_priority: 0.95, lifestyle_balance: 0.9, identity_career: 0.3 } },
       { label: "Looking back at a comfortable life I find quietly unremarkable.", traits: { ambition: 0.95, identity_career: 0.9, prestige_motivation: 0.7 }, regretFlags: ["prestige_driven"] },
