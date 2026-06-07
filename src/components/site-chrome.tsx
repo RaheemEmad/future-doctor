@@ -1,13 +1,32 @@
 import { Link } from "@tanstack/react-router";
 
+export function VocareLogo({ className = "size-9" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="20" cy="20" r="19" className="fill-brand" />
+      {/* ECG / heartbeat line forming a V */}
+      <path
+        d="M6 21 L13 21 L16 14 L20 27 L24 11 L27 21 L34 21"
+        stroke="currentColor"
+        className="text-background"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 export function SiteNav() {
   return (
     <nav className="flex items-center justify-between px-6 sm:px-10 py-6 max-w-7xl mx-auto">
       <Link to="/" className="flex items-center gap-2.5 group">
-        <div className="size-8 rounded-full bg-brand flex items-center justify-center transition-transform group-hover:scale-105">
-          <div className="size-2.5 bg-background rounded-full" />
+        <VocareLogo className="size-9 transition-transform group-hover:scale-105" />
+        <div className="flex flex-col leading-none">
+          <span className="font-serif text-xl tracking-tight">Vocare</span>
+          <span className="text-[9px] uppercase tracking-[0.22em] text-muted-foreground mt-0.5">Your calling in medicine</span>
         </div>
-        <span className="font-serif text-xl tracking-tight">Aequitas</span>
       </Link>
       <div className="hidden md:flex items-center gap-7 text-sm text-muted-foreground font-medium">
         <Link to="/methodology" className="hover:text-foreground transition-colors">Methodology</Link>
@@ -42,7 +61,7 @@ export function SiteFooter() {
         <Link to="/saved" className="hover:text-foreground">Saved runs</Link>
       </div>
       <div className="mt-4 text-xs text-muted-foreground/70 uppercase tracking-[0.2em]">
-        © {new Date().getFullYear()} Aequitas Medical Assessment
+        © {new Date().getFullYear()} Vocare · Built for medical students in Egypt & worldwide
       </div>
     </footer>
   );
