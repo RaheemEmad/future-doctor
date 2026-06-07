@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
+import { QuestionGlyph } from "@/components/question-glyph";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { QUESTIONS } from "@/lib/questions";
 import { aggregateTraits, score } from "@/lib/scoring";
 import { loadSession, saveSession } from "@/lib/session";
@@ -130,10 +132,32 @@ function AssessmentPage() {
               exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              <h2 className="text-2xl lg:text-3xl font-serif leading-snug mb-3 text-balance">
-                {q.prompt}
-              </h2>
-              <p className="text-muted-foreground italic font-serif mb-8">
+              <div className="flex items-start gap-4 mb-4">
+                <QuestionGlyph category={q.category} />
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl lg:text-3xl font-serif leading-snug text-balance">
+                    {q.prompt}
+                  </h2>
+                </div>
+                <TooltipProvider delayDuration={150}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Why this question matters"
+                        className="mt-1 size-8 rounded-full border border-border bg-card grid place-items-center text-muted-foreground hover:text-brand hover:border-brand/40 transition-colors shrink-0"
+                      >
+                        <Info className="size-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="max-w-xs text-xs leading-relaxed">
+                      <div className="font-semibold text-[10px] uppercase tracking-[0.15em] text-brand mb-1">Why we ask</div>
+                      {q.helper ?? reflectivePrompts[step % reflectivePrompts.length]}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <p className="text-muted-foreground italic font-serif mb-8 pl-[4.5rem]">
                 {q.helper ?? reflectivePrompts[step % reflectivePrompts.length]}
               </p>
 
