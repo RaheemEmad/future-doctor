@@ -325,7 +325,7 @@ export const QUESTIONS: Question[] = [
     id: "ms_2",
     category: "Source Of Meaning",
     prompt: "Which of these feelings do you most want medicine to give you?",
-    helper: "The 'why' you carry into medicine becomes the only thing that holds you up at year 12.",
+    helper: "Different specialties offer fundamentally different emotional rewards. Match the feeling, not the title.",
     choices: [
       { label: "Awe at the human body and biology.", traits: { analytical: 0.7 } },
       { label: "The closeness of being trusted by another person.", traits: { empathy: 0.8 } },
@@ -352,7 +352,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_2",
     category: "Litigation & Liability",
     prompt: "A patient files a complaint or lawsuit against you despite competent care. Your inner response…",
-    helper: "Different specialties offer fundamentally different emotional rewards. Match the feeling, not the title.",
+    helper: "Egyptian and international medicine both carry real litigation risk in OB/GYN, surgery, ER. Know your tolerance.",
     choices: [
       { label: "Devastating — I'd replay it for years.", traits: { perfectionism: 0.9, sensitivity: 0.9, burnout_vulnerability: 0.85, ethical_burden_tolerance: 0.3 } },
       { label: "Stressful but I'd compartmentalize and learn.", traits: { emotional_resilience: 0.85, ethical_burden_tolerance: 0.75 } },
@@ -363,7 +363,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_3",
     category: "Patient Volume vs Depth",
     prompt: "Which clinic feels more like home?",
-    helper: "Egyptian and international medicine both carry real litigation risk in OB/GYN, surgery, ER. Know your tolerance.",
+    helper: "Egyptian private clinics often run high-volume models; academic and Gulf settings allow more depth.",
     choices: [
       { label: "60 patients/day, 8 minutes each, brisk and efficient.", traits: { stamina: 0.85, focus_style: 0.9, chronic_vs_acute: 0.7, procedural: 0.6, empathy: 0.4 } },
       { label: "20 patients/day, 20 minutes each, room for the full story.", traits: { empathy: 0.85, patience: 0.85, communication: 0.85, chronic_vs_acute: 0.3 } },
@@ -374,7 +374,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_4",
     category: "Hierarchy & Power Dynamics",
     prompt: "Medicine has steep hierarchies. Your honest position is…",
-    helper: "Egyptian private clinics often run high-volume models; academic and Gulf settings allow more depth.",
+    helper: "Egyptian medical hierarchy is steep. Some specialties have flatter cultures than others — this matters daily.",
     choices: [
       { label: "I'll play the long game — pay dues, then earn authority.", traits: { delayed_gratification: 0.9, ambition: 0.85, identity_career: 0.85 } },
       { label: "I tolerate it because it's temporary, but it grates.", traits: { autonomy: 0.85, leadership: 0.7 } },
@@ -397,7 +397,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_6",
     category: "Solo vs Group Practice",
     prompt: "Ten years in, where do you picture yourself working?",
-    helper: "Egyptian medical hierarchy is steep. Some specialties have flatter cultures than others — this matters daily.",
+    helper: "In Egypt, the choice between government hospital, private practice, and academic medicine reshapes income and lifestyle.",
     choices: [
       { label: "Solo or small private practice — my rules, my patients.", traits: { autonomy: 0.95, ambition: 0.8, leadership: 0.7, income_priority: 0.75 } },
       { label: "Mid-size group — shared call, shared risk, real income.", traits: { autonomy: 0.6, lifestyle_balance: 0.7, income_priority: 0.7 } },
@@ -409,7 +409,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_7",
     category: "Administrative Burden",
     prompt: "Modern medicine = real clinical care + 2–3 hours of charting and paperwork daily. How do you feel about that ratio?",
-    helper: "In Egypt, the choice between government hospital, private practice, and academic medicine reshapes income and lifestyle.",
+    helper: "Documentation burden varies 5x between specialties. This single factor predicts mid-career burnout.",
     choices: [
       { label: "Fine — documentation IS care. I can systematize it.", traits: { procedural: 0.85, perfectionism: 0.75, routine_preference: 0.8 } },
       { label: "Tolerable but it's the part that burns me out.", traits: { burnout_vulnerability: 0.8, lifestyle_balance: 0.8, autonomy: 0.7 } },
@@ -420,7 +420,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_8",
     category: "Technology & AI Adoption",
     prompt: "AI is reshaping diagnostics, imaging, and documentation. Your stance…",
-    helper: "Documentation burden varies 5x between specialties. This single factor predicts mid-career burnout.",
+    helper: "Radiology, pathology, and some diagnostics face the most AI pressure. Surgical and relational fields, the least.",
     choices: [
       { label: "I want to be on the bleeding edge — even building tools.", traits: { ambition: 0.85, autonomy: 0.85, analytical: 0.9 } },
       { label: "I'll use what's proven, skeptically.", traits: { analytical: 0.8, perfectionism: 0.75 } },
@@ -432,7 +432,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_9",
     category: "Geographic & Career Mobility",
     prompt: "If your top match required you to leave your home country for 5–10 years (training abroad, fellowship, migration), you'd…",
-    helper: "Radiology, pathology, and some diagnostics face the most AI pressure. Surgical and relational fields, the least.",
+    helper: "For Egyptian doctors, migration to UK, US, Gulf, Germany is real. Some specialties travel; others don't.",
     choices: [
       { label: "Go without hesitation — the career comes first.", traits: { identity_career: 0.9, ambition: 0.9, family_priority: 0.3 } },
       { label: "Go, but with a clear plan to return.", traits: { ambition: 0.75, family_priority: 0.65 } },
