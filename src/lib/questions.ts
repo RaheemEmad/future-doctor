@@ -22,6 +22,7 @@ export const QUESTIONS: Question[] = [
     id: "er_2",
     category: "Trauma & Stress Tolerance",
     prompt: "Witnessing prolonged suffering at work most likely makes you…",
+    helper: "Think about the cumulative emotional weight — not a single hard day, but year after year.",
     choices: [
       { label: "Steady and useful; I lock in.", traits: { emotional_resilience: 0.95, death_comfort: 0.9, ethical_burden_tolerance: 0.9 } },
       { label: "Functional, but it builds up under the surface.", traits: { sensitivity: 0.7, burnout_vulnerability: 0.7, emotional_resilience: 0.5 } },
@@ -35,6 +36,7 @@ export const QUESTIONS: Question[] = [
     id: "cs_1",
     category: "Cognitive Style",
     prompt: "Which mental texture feels most like home?",
+    helper: "Where does your mind feel most alive? This shapes whether you'll love your daily work.",
     choices: [
       { label: "Slow, layered reasoning over a single complex case.", traits: { analytical: 0.9, patience: 0.9, focus_style: 0.2, specialized_vs_broad: 0.7 } },
       { label: "Rapid pattern recognition across many short encounters.", traits: { focus_style: 0.95, visual_spatial: 0.6, specialized_vs_broad: 0.2 } },
@@ -47,6 +49,7 @@ export const QUESTIONS: Question[] = [
     id: "cs_2",
     category: "Chaos vs Predictability",
     prompt: "A perfect Tuesday at work would feel…",
+    helper: "Predictability vs novelty is one of the strongest predictors of long-term specialty satisfaction.",
     choices: [
       { label: "Highly predictable, repetition I can master.", traits: { routine_preference: 0.95, lifestyle_balance: 0.7, focus_style: 0.2 } },
       { label: "Mostly structured with a couple of curveballs.", traits: { routine_preference: 0.55, focus_style: 0.5 } },
@@ -60,6 +63,7 @@ export const QUESTIONS: Question[] = [
     id: "pa_1",
     category: "Procedural vs Analytical",
     prompt: "Which felt more satisfying in training so far?",
+    helper: "Procedural fields demand hands; cognitive fields demand patience. Which deeply satisfied you?",
     choices: [
       { label: "Nailing a procedure with my hands.", traits: { procedural: 0.95, visual_spatial: 0.8 } },
       { label: "Cracking a difficult diagnosis with reasoning.", traits: { analytical: 0.95, patience: 0.7 } },
@@ -73,6 +77,7 @@ export const QUESTIONS: Question[] = [
     id: "cm_1",
     category: "Communication Style",
     prompt: "After a full clinical day with people, you feel…",
+    helper: "Be honest — many doctors discover too late that their specialty drains their social battery every single day.",
     choices: [
       { label: "Energized — people are my fuel.", traits: { social_battery: 0.95, empathy: 0.8, communication: 0.85, introversion: 0.1 } },
       { label: "Satisfied but drained, need quiet to recover.", traits: { social_battery: 0.5, introversion: 0.7, sensitivity: 0.6 } },
@@ -83,6 +88,7 @@ export const QUESTIONS: Question[] = [
     id: "cm_2",
     category: "Comfort With Death & Suffering",
     prompt: "How comfortable are you sitting with a dying patient and their family?",
+    helper: "End-of-life care is daily reality in oncology, ICU, palliative, geriatrics. Imagine doing it weekly.",
     choices: [
       { label: "Very — it feels like sacred work.", traits: { death_comfort: 0.95, empathy: 0.9, ethical_burden_tolerance: 0.95 } },
       { label: "Manageable, but I'd rather not make it my daily life.", traits: { death_comfort: 0.55, empathy: 0.7 } },
@@ -95,6 +101,7 @@ export const QUESTIONS: Question[] = [
     id: "id_1",
     category: "Identity & Ego",
     prompt: "How attached is your sense of self to your medical career?",
+    helper: "In Egypt and across the world, doctors whose identity equals their job burn out hardest when life shifts.",
     choices: [
       { label: "Medicine IS who I am.", traits: { identity_career: 0.95, ambition: 0.9, prestige_motivation: 0.7 } },
       { label: "Important, but one part of me.", traits: { identity_career: 0.6, lifestyle_balance: 0.7 } },
@@ -105,6 +112,7 @@ export const QUESTIONS: Question[] = [
     id: "id_2",
     category: "Need For Recognition",
     prompt: "Recognition and prestige in your specialty matters to you…",
+    helper: "Prestige fades. The work remains. Be honest about how much you need to be seen.",
     choices: [
       { label: "A lot — being respected fuels me.", traits: { prestige_motivation: 0.95, ambition: 0.85, recognition_need: 0.95 }, regretFlags: ["prestige_driven", "peer_comparison"] },
       { label: "Somewhat.", traits: { prestige_motivation: 0.55, recognition_need: 0.5 } },
@@ -129,6 +137,7 @@ export const QUESTIONS: Question[] = [
     id: "ls_1",
     category: "Lifestyle Priorities",
     prompt: "How important is a predictable, balanced lifestyle to you?",
+    helper: "In Egypt, surgical residencies and ICU work can demand 80+ hours weekly. Lifestyle isn't shallow — it's strategic.",
     choices: [
       { label: "Non-negotiable. I will not compromise it.", traits: { lifestyle_balance: 1.0, family_priority: 0.9, burnout_vulnerability: 0.6, identity_career: 0.2 } },
       { label: "Very important, with some flexibility.", traits: { lifestyle_balance: 0.75, family_priority: 0.7 } },
@@ -140,6 +149,7 @@ export const QUESTIONS: Question[] = [
     id: "ls_2",
     category: "Relationship & Family Goals",
     prompt: "What role do partnership and family play in your future life?",
+    helper: "If you want children, your specialty's call schedule will shape your role as a parent for 30 years.",
     choices: [
       { label: "Central — I'm building my career around them.", traits: { family_priority: 1.0, lifestyle_balance: 0.85, identity_career: 0.3 } },
       { label: "Important, but I'll integrate them with career.", traits: { family_priority: 0.7, lifestyle_balance: 0.6 } },
@@ -151,6 +161,7 @@ export const QUESTIONS: Question[] = [
     id: "ls_3",
     category: "Sleep & Schedule Tolerance",
     prompt: "Your tolerance for sustained sleep disruption and overnight call is…",
+    helper: "Some humans recover from broken sleep in a day; others never fully do. Know which one you are.",
     choices: [
       { label: "High — I recover quickly and don't mind.", traits: { stamina: 0.95, emotional_resilience: 0.85 } },
       { label: "Moderate — I can do it in bursts.", traits: { stamina: 0.6 } },
@@ -163,6 +174,7 @@ export const QUESTIONS: Question[] = [
     id: "ra_1",
     category: "Risk & Ambition",
     prompt: "Which feels most like you when stakes are highest?",
+    helper: "High-stakes specialties (trauma, ER, neurosurgery) reward one type; ambulatory fields reward another.",
     choices: [
       { label: "I get sharper and more decisive under pressure.", traits: { risk_tolerance: 0.95, focus_style: 0.9, emotional_resilience: 0.9, leadership: 0.8 } },
       { label: "I slow down and become methodical.", traits: { perfectionism: 0.85, analytical: 0.85, patience: 0.7 } },
@@ -174,6 +186,7 @@ export const QUESTIONS: Question[] = [
     id: "ra_2",
     category: "Delayed Gratification",
     prompt: "Spending 7–10 years in training before reaching your final career feels…",
+    helper: "In Egypt, the full path through Master's + Doctorate or fellowship abroad can take a decade. Sit with that timeline.",
     choices: [
       { label: "Worth it — I think long-term.", traits: { delayed_gratification: 0.95, ambition: 0.9, identity_career: 0.85 } },
       { label: "Acceptable if the destination is exceptional.", traits: { delayed_gratification: 0.7, ambition: 0.7 } },
@@ -184,6 +197,7 @@ export const QUESTIONS: Question[] = [
     id: "ra_3",
     category: "Financial Priorities",
     prompt: "How central is high income to your career choice?",
+    helper: "In the Egyptian context, private practice income varies wildly by specialty. This question shapes everything.",
     choices: [
       { label: "Very — I want financial freedom and security.", traits: { income_priority: 0.95, ambition: 0.8 }, regretFlags: ["money_driven"] },
       { label: "Important but not the deciding factor.", traits: { income_priority: 0.6 } },
@@ -196,6 +210,7 @@ export const QUESTIONS: Question[] = [
     id: "un_1",
     category: "Tolerance For Uncertainty",
     prompt: "A patient case may not have a definitive answer for weeks. Your inner experience is…",
+    helper: "Internal medicine, rheumatology, psychiatry live in uncertainty. Surgery and procedures live in resolution.",
     choices: [
       { label: "I find the gray area intellectually invigorating.", traits: { uncertainty_tolerance: 0.95, analytical: 0.85, patience: 0.85 } },
       { label: "I can hold it, but I want to keep working the problem.", traits: { uncertainty_tolerance: 0.7, analytical: 0.8 } },
@@ -207,6 +222,7 @@ export const QUESTIONS: Question[] = [
     id: "un_2",
     category: "Perfectionism",
     prompt: "When you make a small clinical error, you typically…",
+    helper: "Perfectionism in surgery becomes mastery; perfectionism in primary care becomes burnout.",
     choices: [
       { label: "Replay it for days.", traits: { perfectionism: 0.95, sensitivity: 0.85, burnout_vulnerability: 0.7 } },
       { label: "Log the lesson and move on within hours.", traits: { emotional_resilience: 0.9, focus_style: 0.7, perfectionism: 0.5 } },
@@ -219,6 +235,7 @@ export const QUESTIONS: Question[] = [
     id: "we_1",
     category: "Work Environment Preference",
     prompt: "Where do you feel most yourself working?",
+    helper: "Your physical environment is your daily life. Most doctors underestimate how much this matters.",
     choices: [
       { label: "A bright clinic with steady patient flow.", traits: { lifestyle_balance: 0.8, communication: 0.8, chronic_vs_acute: 0.2 } },
       { label: "An operating room.", traits: { procedural: 0.95, visual_spatial: 0.85, stamina: 0.8 } },
@@ -231,6 +248,7 @@ export const QUESTIONS: Question[] = [
     id: "we_2",
     category: "Leadership & Team",
     prompt: "Your preferred role in a team is…",
+    helper: "Egyptian hospitals and Gulf systems both reward strong team players — but solo private practice rewards independence.",
     choices: [
       { label: "The decisive lead — I make the call.", traits: { leadership: 0.95, autonomy: 0.85, competitiveness: 0.7 } },
       { label: "The thoughtful collaborator.", traits: { communication: 0.85, empathy: 0.7, patience: 0.7 } },
@@ -244,6 +262,7 @@ export const QUESTIONS: Question[] = [
     id: "ca_1",
     category: "Chronic vs Acute",
     prompt: "Which feels more meaningful to you?",
+    helper: "Long-term relationships heal a different part of the doctor than acute resolution does.",
     choices: [
       { label: "Walking with one patient across years of their life.", traits: { chronic_vs_acute: 0.05, empathy: 0.9, patience: 0.9, communication: 0.85 } },
       { label: "Resolving an acute problem in a single visit or shift.", traits: { chronic_vs_acute: 0.95, focus_style: 0.85, procedural: 0.7 } },
@@ -253,6 +272,7 @@ export const QUESTIONS: Question[] = [
     id: "ca_2",
     category: "Specialized vs Broad",
     prompt: "Would you rather be…",
+    helper: "Deep subspecialty offers mastery; generalism offers variety and human breadth.",
     choices: [
       { label: "A deep expert in a narrow domain.", traits: { specialized_vs_broad: 0.95, perfectionism: 0.7, analytical: 0.8 } },
       { label: "A broad generalist who sees everything.", traits: { specialized_vs_broad: 0.05, empathy: 0.7, communication: 0.8 } },
@@ -265,6 +285,7 @@ export const QUESTIONS: Question[] = [
     id: "bn_1",
     category: "Burnout Vulnerability",
     prompt: "Looking back at hard semesters, you'd say…",
+    helper: "Look at your real history — not your aspirational self. Past patterns predict future ones.",
     choices: [
       { label: "I bounce back fast and stay clear-headed.", traits: { burnout_vulnerability: 0.1, emotional_resilience: 0.95, stamina: 0.9 } },
       { label: "I push through, but I notice the cost later.", traits: { burnout_vulnerability: 0.6, stamina: 0.7 } },
@@ -275,6 +296,7 @@ export const QUESTIONS: Question[] = [
     id: "bn_2",
     category: "Long-Term Stamina",
     prompt: "Imagine your work life at 50. What protects your wellbeing?",
+    helper: "Project forward 20 years. The specialty you choose now must still feel sustainable then.",
     choices: [
       { label: "Predictable hours and family time.", traits: { lifestyle_balance: 0.95, family_priority: 0.9 } },
       { label: "Continued mastery and meaningful complexity.", traits: { identity_career: 0.85, ambition: 0.7, analytical: 0.7 } },
@@ -303,6 +325,7 @@ export const QUESTIONS: Question[] = [
     id: "ms_2",
     category: "Source Of Meaning",
     prompt: "Which of these feelings do you most want medicine to give you?",
+    helper: "The 'why' you carry into medicine becomes the only thing that holds you up at year 12.",
     choices: [
       { label: "Awe at the human body and biology.", traits: { analytical: 0.7 } },
       { label: "The closeness of being trusted by another person.", traits: { empathy: 0.8 } },
@@ -329,6 +352,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_2",
     category: "Litigation & Liability",
     prompt: "A patient files a complaint or lawsuit against you despite competent care. Your inner response…",
+    helper: "Different specialties offer fundamentally different emotional rewards. Match the feeling, not the title.",
     choices: [
       { label: "Devastating — I'd replay it for years.", traits: { perfectionism: 0.9, sensitivity: 0.9, burnout_vulnerability: 0.85, ethical_burden_tolerance: 0.3 } },
       { label: "Stressful but I'd compartmentalize and learn.", traits: { emotional_resilience: 0.85, ethical_burden_tolerance: 0.75 } },
@@ -339,6 +363,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_3",
     category: "Patient Volume vs Depth",
     prompt: "Which clinic feels more like home?",
+    helper: "Egyptian and international medicine both carry real litigation risk in OB/GYN, surgery, ER. Know your tolerance.",
     choices: [
       { label: "60 patients/day, 8 minutes each, brisk and efficient.", traits: { stamina: 0.85, focus_style: 0.9, chronic_vs_acute: 0.7, procedural: 0.6, empathy: 0.4 } },
       { label: "20 patients/day, 20 minutes each, room for the full story.", traits: { empathy: 0.85, patience: 0.85, communication: 0.85, chronic_vs_acute: 0.3 } },
@@ -349,6 +374,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_4",
     category: "Hierarchy & Power Dynamics",
     prompt: "Medicine has steep hierarchies. Your honest position is…",
+    helper: "Egyptian private clinics often run high-volume models; academic and Gulf settings allow more depth.",
     choices: [
       { label: "I'll play the long game — pay dues, then earn authority.", traits: { delayed_gratification: 0.9, ambition: 0.85, identity_career: 0.85 } },
       { label: "I tolerate it because it's temporary, but it grates.", traits: { autonomy: 0.85, leadership: 0.7 } },
@@ -371,6 +397,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_6",
     category: "Solo vs Group Practice",
     prompt: "Ten years in, where do you picture yourself working?",
+    helper: "Egyptian medical hierarchy is steep. Some specialties have flatter cultures than others — this matters daily.",
     choices: [
       { label: "Solo or small private practice — my rules, my patients.", traits: { autonomy: 0.95, ambition: 0.8, leadership: 0.7, income_priority: 0.75 } },
       { label: "Mid-size group — shared call, shared risk, real income.", traits: { autonomy: 0.6, lifestyle_balance: 0.7, income_priority: 0.7 } },
@@ -382,6 +409,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_7",
     category: "Administrative Burden",
     prompt: "Modern medicine = real clinical care + 2–3 hours of charting and paperwork daily. How do you feel about that ratio?",
+    helper: "In Egypt, the choice between government hospital, private practice, and academic medicine reshapes income and lifestyle.",
     choices: [
       { label: "Fine — documentation IS care. I can systematize it.", traits: { procedural: 0.85, perfectionism: 0.75, routine_preference: 0.8 } },
       { label: "Tolerable but it's the part that burns me out.", traits: { burnout_vulnerability: 0.8, lifestyle_balance: 0.8, autonomy: 0.7 } },
@@ -392,6 +420,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_8",
     category: "Technology & AI Adoption",
     prompt: "AI is reshaping diagnostics, imaging, and documentation. Your stance…",
+    helper: "Documentation burden varies 5x between specialties. This single factor predicts mid-career burnout.",
     choices: [
       { label: "I want to be on the bleeding edge — even building tools.", traits: { ambition: 0.85, autonomy: 0.85, analytical: 0.9 } },
       { label: "I'll use what's proven, skeptically.", traits: { analytical: 0.8, perfectionism: 0.75 } },
@@ -403,6 +432,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_9",
     category: "Geographic & Career Mobility",
     prompt: "If your top match required you to leave your home country for 5–10 years (training abroad, fellowship, migration), you'd…",
+    helper: "Radiology, pathology, and some diagnostics face the most AI pressure. Surgical and relational fields, the least.",
     choices: [
       { label: "Go without hesitation — the career comes first.", traits: { identity_career: 0.9, ambition: 0.9, family_priority: 0.3 } },
       { label: "Go, but with a clear plan to return.", traits: { ambition: 0.75, family_priority: 0.65 } },
@@ -414,6 +444,7 @@ export const QUESTIONS: Question[] = [
     id: "cl_10",
     category: "Existential Stamina",
     prompt: "Twenty years from now, what scares you more?",
+    helper: "For Egyptian doctors, migration to UK, US, Gulf, Germany is real. Some specialties travel; others don't.",
     choices: [
       { label: "Looking back at a brilliant career that cost me my relationships.", traits: { family_priority: 0.95, lifestyle_balance: 0.9, identity_career: 0.3 } },
       { label: "Looking back at a comfortable life I find quietly unremarkable.", traits: { ambition: 0.95, identity_career: 0.9, prestige_motivation: 0.7 }, regretFlags: ["prestige_driven"] },
