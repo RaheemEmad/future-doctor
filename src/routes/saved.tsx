@@ -11,7 +11,7 @@ import { QUESTIONS } from "@/lib/questions";
 export const Route = createFileRoute("/saved")({
   head: () => ({
     meta: [
-      { title: "Saved runs — Aequitas" },
+      { title: "Saved runs — Vocare" },
       { name: "description", content: "Review, reload, and compare your saved assessments." },
     ],
   }),

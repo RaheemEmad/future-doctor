@@ -10,7 +10,7 @@ import { loadSession, saveSession } from "@/lib/session";
 export const Route = createFileRoute("/assessment")({
   head: () => ({
     meta: [
-      { title: "Assessment — Aequitas" },
+      { title: "Assessment — Vocare" },
       { name: "description", content: "A reflective psychometric assessment that maps your inner world to medical specialties." },
     ],
   }),
