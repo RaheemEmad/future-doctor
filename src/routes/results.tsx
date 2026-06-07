@@ -27,7 +27,7 @@ export const Route = createFileRoute("/results")({
   validateSearch: (s: Record<string, unknown>): Search => ({ s: typeof s.s === "string" ? s.s : undefined }),
   head: () => ({
     meta: [
-      { title: "Your results — Aequitas" },
+      { title: "Your results — Vocare" },
       { name: "description", content: "Your personalized medical specialty compatibility profile." },
     ],
   }),
@@ -179,10 +179,10 @@ function ResultsPage() {
     const url = typeof window !== "undefined"
       ? `${window.location.origin}/results?s=${token}`
       : `/results?s=${token}`;
-    const text = `My top Aequitas match is ${top.specialty.name} (${top.compatibility}%).`;
+    const text = `My top Vocare match is ${top.specialty.name} (${top.compatibility}%).`;
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
-        await (navigator as any).share({ title: "My Aequitas result", text, url });
+        await (navigator as any).share({ title: "My Vocare result", text, url });
         return;
       } catch { /* fallthrough to copy */ }
     }

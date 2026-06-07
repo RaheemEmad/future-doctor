@@ -10,7 +10,7 @@ import { loadSession, saveSession } from "@/lib/session";
 export const Route = createFileRoute("/assessment")({
   head: () => ({
     meta: [
-      { title: "Assessment — Aequitas" },
+      { title: "Assessment — Vocare" },
       { name: "description", content: "A reflective psychometric assessment that maps your inner world to medical specialties." },
     ],
   }),
@@ -77,7 +77,7 @@ function AssessmentPage() {
       <SiteNav />
       <main className="flex-1 flex flex-col items-center px-6 py-10 lg:py-16">
         <div className="w-full max-w-2xl">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
                 {q.category}
@@ -92,6 +92,34 @@ function AssessmentPage() {
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               />
             </div>
+          </div>
+
+          {/* Clickable rewind strip — jump to any answered question */}
+          <div className="flex flex-wrap gap-1.5 mb-10" role="navigation" aria-label="Question navigation">
+            {QUESTIONS.map((qq, i) => {
+              const answered = session.answers[qq.id] !== undefined;
+              const isCurrent = i === step;
+              const reachable = answered || i <= step;
+              return (
+                <button
+                  key={qq.id}
+                  type="button"
+                  onClick={() => reachable && setStep(i)}
+                  disabled={!reachable}
+                  aria-label={`Question ${i + 1}${answered ? " — answered" : ""}`}
+                  title={`${i + 1}. ${qq.category}`}
+                  className={`h-2 rounded-full transition-all ${
+                    isCurrent
+                      ? "w-6 bg-brand"
+                      : answered
+                      ? "w-2 bg-brand/60 hover:bg-brand"
+                      : reachable
+                      ? "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
+                      : "w-2 bg-muted cursor-not-allowed"
+                  }`}
+                />
+              );
+            })}
           </div>
 
           <AnimatePresence mode="wait">

@@ -17,7 +17,7 @@ import {
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Onboarding — Aequitas" },
+      { title: "Onboarding — Vocare" },
       { name: "description", content: "Tell us about your life so we can map your cognitive and emotional fit to medical specialties." },
     ],
   }),

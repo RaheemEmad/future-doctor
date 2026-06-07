@@ -6,8 +6,8 @@ import { SiteFooter, SiteNav } from "@/components/site-chrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aequitas — Find the medical specialty that fits your mind, life, and identity." },
-      { name: "description", content: "A psychometric assessment that maps your cognitive style, emotional resilience, and lifestyle vision to 40+ medical specialties." },
+      { title: "Vocare — Find your calling in medicine. Built for Egyptian medical students." },
+      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties — with Egypt-specific career, income, and migration insight." },
     ],
   }),
   component: LandingPage,
@@ -28,14 +28,16 @@ function LandingPage() {
             className="space-y-8"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-soft border border-brand/10 text-brand text-[11px] font-semibold tracking-[0.15em] uppercase">
-              Next-generation career psychometrics
+              Built for Egyptian & international medical students
             </div>
             <h1 className="text-5xl lg:text-7xl font-serif leading-[1.05] text-balance">
               Find the medicine that <span className="italic">fits</span> your soul.
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl">
-              Your specialty is more than a career — it's the environment in which the rest of your life happens.
-              We map your cognitive style, emotional resilience, and lifestyle vision to 40 medical pathways.
+              Choosing a specialty in Egypt is choosing a life — government vs private, takleef, Master's,
+              fellowship abroad, the Gulf, or staying close to family. Vocare maps your cognitive style,
+              emotional resilience, and lifestyle vision to 40+ medical pathways, with Egypt-specific
+              income, training, and migration context.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
@@ -159,7 +161,6 @@ function LandingPage() {
 }
 
 function RadialPreview() {
-  // Decorative concentric/radar look — pure CSS
   return (
     <div className="relative size-72">
       {[0, 1, 2, 3].map((i) => (
@@ -179,6 +180,22 @@ function RadialPreview() {
         {[[0, -80], [70, -25], [55, 65], [-55, 65], [-70, -25]].map(([x, y], i) => (
           <circle key={i} cx={x} cy={y} r="3.5" fill="oklch(0.48 0.16 274)" />
         ))}
+      </svg>
+      {/* ECG heartbeat across the diagram */}
+      <svg viewBox="0 0 240 60" className="absolute left-0 right-0 bottom-6 mx-auto w-[80%] h-10" aria-hidden="true">
+        <path
+          d="M0 30 L60 30 L75 30 L82 12 L92 48 L102 6 L112 30 L240 30"
+          fill="none"
+          stroke="oklch(0.48 0.16 274)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="320"
+          strokeDashoffset="320"
+        >
+          <animate attributeName="stroke-dashoffset" from="320" to="0" dur="2.2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" />
+        </path>
       </svg>
       <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Emotional</div>
       <div className="absolute top-1/4 -right-6 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Cognitive</div>
