@@ -161,7 +161,6 @@ function LandingPage() {
 }
 
 function RadialPreview() {
-  // Decorative concentric/radar look — pure CSS
   return (
     <div className="relative size-72">
       {[0, 1, 2, 3].map((i) => (
@@ -181,6 +180,22 @@ function RadialPreview() {
         {[[0, -80], [70, -25], [55, 65], [-55, 65], [-70, -25]].map(([x, y], i) => (
           <circle key={i} cx={x} cy={y} r="3.5" fill="oklch(0.48 0.16 274)" />
         ))}
+      </svg>
+      {/* ECG heartbeat across the diagram */}
+      <svg viewBox="0 0 240 60" className="absolute left-0 right-0 bottom-6 mx-auto w-[80%] h-10" aria-hidden="true">
+        <path
+          d="M0 30 L60 30 L75 30 L82 12 L92 48 L102 6 L112 30 L240 30"
+          fill="none"
+          stroke="oklch(0.48 0.16 274)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="320"
+          strokeDashoffset="320"
+        >
+          <animate attributeName="stroke-dashoffset" from="320" to="0" dur="2.2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" />
+        </path>
       </svg>
       <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Emotional</div>
       <div className="absolute top-1/4 -right-6 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Cognitive</div>
