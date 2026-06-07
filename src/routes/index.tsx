@@ -6,8 +6,8 @@ import { SiteFooter, SiteNav } from "@/components/site-chrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Aequitas — Find the medical specialty that fits your mind, life, and identity." },
-      { name: "description", content: "A psychometric assessment that maps your cognitive style, emotional resilience, and lifestyle vision to 40+ medical specialties." },
+      { title: "Vocare — Find your calling in medicine. Built for Egyptian medical students." },
+      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties — with Egypt-specific career, income, and migration insight." },
     ],
   }),
   component: LandingPage,
@@ -28,14 +28,16 @@ function LandingPage() {
             className="space-y-8"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-soft border border-brand/10 text-brand text-[11px] font-semibold tracking-[0.15em] uppercase">
-              Next-generation career psychometrics
+              Built for Egyptian & international medical students
             </div>
             <h1 className="text-5xl lg:text-7xl font-serif leading-[1.05] text-balance">
               Find the medicine that <span className="italic">fits</span> your soul.
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl">
-              Your specialty is more than a career — it's the environment in which the rest of your life happens.
-              We map your cognitive style, emotional resilience, and lifestyle vision to 40 medical pathways.
+              Choosing a specialty in Egypt is choosing a life — government vs private, takleef, Master's,
+              fellowship abroad, the Gulf, or staying close to family. Vocare maps your cognitive style,
+              emotional resilience, and lifestyle vision to 40+ medical pathways, with Egypt-specific
+              income, training, and migration context.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
