@@ -104,7 +104,10 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <ReadingProgress />
       <Outlet />
+      <BackToTop />
     </QueryClientProvider>
   );
 }
+
