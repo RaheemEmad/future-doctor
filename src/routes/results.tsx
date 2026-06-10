@@ -275,12 +275,21 @@ function ResultsPage() {
           <button onClick={startOver} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <RefreshCw className="size-4" /> Retake
           </button>
+          <button onClick={downloadPdf} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background hover:opacity-90 text-sm font-medium transition-opacity">
+            <Download className="size-4" /> Download PDF
+          </button>
           <button onClick={share} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Share2 className="size-4" /> Share
           </button>
           <button onClick={() => setShowSave(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Bookmark className="size-4" /> Save run
           </button>
+          {persona && (
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-soft text-brand text-sm font-medium" title={persona.label}>
+              <UserCircle2 className="size-4" /> {persona.short}
+            </span>
+          )}
+
           <button onClick={() => setShowRefine((v) => !v)} className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${showRefine ? "bg-brand text-brand-foreground" : "bg-card border border-border hover:bg-muted"}`}>
             <SlidersHorizontal className="size-4" /> Refine
           </button>
