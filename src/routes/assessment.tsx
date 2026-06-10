@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, UserCircle2 } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
 import { QuestionGlyph } from "@/components/question-glyph";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { QUESTIONS } from "@/lib/questions";
 import { aggregateTraits, score } from "@/lib/scoring";
 import { loadSession, saveSession } from "@/lib/session";
+import { derivePersona, getActiveQuestions } from "@/lib/persona";
+
 
 export const Route = createFileRoute("/assessment")({
   head: () => ({
