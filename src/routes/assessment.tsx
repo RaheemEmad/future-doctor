@@ -1,13 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight, Info, UserCircle2 } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
 import { QuestionGlyph } from "@/components/question-glyph";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { QUESTIONS } from "@/lib/questions";
 import { aggregateTraits, score } from "@/lib/scoring";
 import { loadSession, saveSession } from "@/lib/session";
+import { derivePersona, getActiveQuestions } from "@/lib/persona";
+
 
 export const Route = createFileRoute("/assessment")({
   head: () => ({
@@ -30,9 +31,12 @@ function AssessmentPage() {
     }
   }, [session.onboarding, navigate]);
 
-  const total = QUESTIONS.length;
-  const q = QUESTIONS[step];
-  const selected = session.answers[q.id];
+  const persona = useMemo(() => (session.onboarding ? derivePersona(session.onboarding) : null), [session.onboarding]);
+  const questions = useMemo(() => (session.onboarding ? getActiveQuestions(session.onboarding) : []), [session.onboarding]);
+  const total = questions.length;
+  const q = questions[Math.min(step, Math.max(0, total - 1))];
+  const selected = q ? session.answers[q.id] : undefined;
+
 
   const reflectivePrompts = useMemo(
     () => [
@@ -57,7 +61,7 @@ function AssessmentPage() {
       return;
     }
     // finalize
-    const choices = QUESTIONS.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
+    const choices = questions.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
     const traits = aggregateTraits(choices);
     const result = score(traits, session.onboarding!, choices);
     const finalSession = { ...session, result };
@@ -70,15 +74,27 @@ function AssessmentPage() {
     else setStep(step - 1);
   }
 
-  if (!session.onboarding) return null;
+  if (!session.onboarding || !q || !persona) return null;
 
   const progress = ((step + (selected !== undefined ? 1 : 0)) / total) * 100;
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteNav />
       <main className="flex-1 flex flex-col items-center px-6 py-10 lg:py-16">
         <div className="w-full max-w-2xl">
+          {/* Persona chip */}
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand/20 bg-brand-soft/30 px-4 py-3">
+            <UserCircle2 className="size-4 text-brand mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-[0.18em] text-brand font-semibold">Your track</div>
+              <div className="text-sm font-medium text-foreground/90 mt-0.5">{persona.label}</div>
+              <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{persona.accentNote}</div>
+            </div>
+          </div>
+
+
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
@@ -98,7 +114,7 @@ function AssessmentPage() {
 
           {/* Clickable rewind strip — jump to any answered question */}
           <div className="flex flex-wrap gap-1.5 mb-10" role="navigation" aria-label="Question navigation">
-            {QUESTIONS.map((qq, i) => {
+            {questions.map((qq, i) => {
               const answered = session.answers[qq.id] !== undefined;
               const isCurrent = i === step;
               const reachable = answered || i <= step;

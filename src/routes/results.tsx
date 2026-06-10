@@ -4,8 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import {
   ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X,
-  Compass, Heart, Globe2, TrendingUp, Bookmark, SlidersHorizontal, Link2,
+  Compass, Heart, Globe2, TrendingUp, Bookmark, SlidersHorizontal, Link2, Download, UserCircle2,
 } from "lucide-react";
+
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
@@ -20,6 +21,9 @@ import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 import { generateSummary } from "@/lib/api/summary.functions";
+import { derivePersona } from "@/lib/persona";
+import { generateResultsPdf } from "@/lib/pdf";
+
 
 type Search = { s?: string };
 
@@ -199,8 +203,31 @@ function ResultsPage() {
     const run = saveRun(saveName, session.onboarding, session.answers, result);
     setShowSave(false);
     setSaveName("");
-    flash(`Saved as “${run.name}”.`);
+    flash(`Saved as "${run.name}".`);
   }
+
+  const persona = useMemo(
+    () => (session.onboarding ? derivePersona(session.onboarding) : null),
+    [session.onboarding],
+  );
+
+  function downloadPdf() {
+    if (!session.onboarding || !persona) return;
+    try {
+      const doc = generateResultsPdf({
+        onboarding: session.onboarding,
+        result,
+        persona,
+        summary: profileSummary,
+      });
+      const safeName = top.specialty.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      doc.save(`vocare-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      flash("PDF downloaded.");
+    } catch {
+      flash("Couldn't generate the PDF. Try again.");
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -248,12 +275,21 @@ function ResultsPage() {
           <button onClick={startOver} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <RefreshCw className="size-4" /> Retake
           </button>
+          <button onClick={downloadPdf} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background hover:opacity-90 text-sm font-medium transition-opacity">
+            <Download className="size-4" /> Download PDF
+          </button>
           <button onClick={share} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Share2 className="size-4" /> Share
           </button>
           <button onClick={() => setShowSave(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Bookmark className="size-4" /> Save run
           </button>
+          {persona && (
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-soft text-brand text-sm font-medium" title={persona.label}>
+              <UserCircle2 className="size-4" /> {persona.short}
+            </span>
+          )}
+
           <button onClick={() => setShowRefine((v) => !v)} className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${showRefine ? "bg-brand text-brand-foreground" : "bg-card border border-border hover:bg-muted"}`}>
             <SlidersHorizontal className="size-4" /> Refine
           </button>
