@@ -31,9 +31,12 @@ function AssessmentPage() {
     }
   }, [session.onboarding, navigate]);
 
-  const total = QUESTIONS.length;
-  const q = QUESTIONS[step];
-  const selected = session.answers[q.id];
+  const persona = useMemo(() => (session.onboarding ? derivePersona(session.onboarding) : null), [session.onboarding]);
+  const questions = useMemo(() => (session.onboarding ? getActiveQuestions(session.onboarding) : []), [session.onboarding]);
+  const total = questions.length;
+  const q = questions[Math.min(step, Math.max(0, total - 1))];
+  const selected = q ? session.answers[q.id] : undefined;
+
 
   const reflectivePrompts = useMemo(
     () => [
