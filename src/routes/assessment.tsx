@@ -61,7 +61,7 @@ function AssessmentPage() {
       return;
     }
     // finalize
-    const choices = QUESTIONS.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
+    const choices = questions.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
     const traits = aggregateTraits(choices);
     const result = score(traits, session.onboarding!, choices);
     const finalSession = { ...session, result };
@@ -74,9 +74,10 @@ function AssessmentPage() {
     else setStep(step - 1);
   }
 
-  if (!session.onboarding) return null;
+  if (!session.onboarding || !q || !persona) return null;
 
   const progress = ((step + (selected !== undefined ? 1 : 0)) / total) * 100;
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -102,7 +103,7 @@ function AssessmentPage() {
 
           {/* Clickable rewind strip — jump to any answered question */}
           <div className="flex flex-wrap gap-1.5 mb-10" role="navigation" aria-label="Question navigation">
-            {QUESTIONS.map((qq, i) => {
+            {questions.map((qq, i) => {
               const answered = session.answers[qq.id] !== undefined;
               const isCurrent = i === step;
               const reachable = answered || i <= step;
