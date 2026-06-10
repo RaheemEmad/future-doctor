@@ -4,8 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import {
   ArrowRight, RefreshCw, Share2, AlertTriangle, Sparkles, Check, X,
-  Compass, Heart, Globe2, TrendingUp, Bookmark, SlidersHorizontal, Link2,
+  Compass, Heart, Globe2, TrendingUp, Bookmark, SlidersHorizontal, Link2, Download, UserCircle2,
 } from "lucide-react";
+
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
@@ -20,6 +21,9 @@ import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 import { generateSummary } from "@/lib/api/summary.functions";
+import { derivePersona } from "@/lib/persona";
+import { generateResultsPdf } from "@/lib/pdf";
+
 
 type Search = { s?: string };
 
