@@ -203,8 +203,31 @@ function ResultsPage() {
     const run = saveRun(saveName, session.onboarding, session.answers, result);
     setShowSave(false);
     setSaveName("");
-    flash(`Saved as “${run.name}”.`);
+    flash(`Saved as "${run.name}".`);
   }
+
+  const persona = useMemo(
+    () => (session.onboarding ? derivePersona(session.onboarding) : null),
+    [session.onboarding],
+  );
+
+  function downloadPdf() {
+    if (!session.onboarding || !persona) return;
+    try {
+      const doc = generateResultsPdf({
+        onboarding: session.onboarding,
+        result,
+        persona,
+        summary: profileSummary,
+      });
+      const safeName = top.specialty.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      doc.save(`vocare-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      flash("PDF downloaded.");
+    } catch {
+      flash("Couldn't generate the PDF. Try again.");
+    }
+  }
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
