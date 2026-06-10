@@ -6,7 +6,9 @@ import "@fontsource/lora/400.css";
 import "@fontsource/lora/400-italic.css";
 import "@fontsource/lora/500.css";
 
+import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import {
   Outlet,
   Link,
@@ -46,7 +48,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   const errorId = (typeof window !== "undefined" ? window.crypto?.randomUUID?.().slice(0, 8) : null)
     ?.toUpperCase() ?? "LOCAL";
-  const [copied, setCopied] = (require("react") as typeof import("react")).useState(false);
+  const [copied, setCopied] = useState(false);
   const copyId = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(errorId).catch(() => {});
