@@ -35,7 +35,7 @@ function LandingPage() {
               Find the medicine that <span className="italic">fits</span> your soul.
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl">
-              Choosing a specialty in Egypt is choosing a life — government vs private, takleef, Master's,
+              Choosing a specialty in Egypt is choosing a life. Government or private, takleef, Master's,
               fellowship abroad, the Gulf, or staying close to family. Vocare maps your cognitive style,
               emotional resilience, and lifestyle vision to 40+ medical pathways, with Egypt-specific
               income, training, and migration context.
