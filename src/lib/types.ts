@@ -191,6 +191,25 @@ export type EnrichedSpecialty = Specialty & {
   lifecycle: LifecyclePoint[]; // year 1, 5, 15, 30
 };
 
+export type ScoreContribution = {
+  channel:
+    | "trait"
+    | "lifestyle"
+    | "emotional"
+    | "cognitive"
+    | "meaning"
+    | "opportunity"
+    | "archetype"
+    | "income";
+  label: string;
+  weight: number;       // share of composite, 0..100
+  fit: number;          // raw channel fit, 0..100
+  contribution: number; // points of final % attributable to this channel
+  explanation: string;  // plain-language reason tied to user's answers
+};
+
+export type ScorePenalty = { label: string; points: number; reason: string };
+
 export type SpecialtyMatch = {
   specialty: EnrichedSpecialty;
   compatibility: number;
@@ -204,7 +223,11 @@ export type SpecialtyMatch = {
   reasonsFor: string[];
   reasonsAgainst: string[];
   highlightedPaths: CareerPath[];
+  breakdown: ScoreContribution[];
+  penalties: ScorePenalty[];
+  baseScore: number;     // composite before penalties
 };
+
 
 export type RegretSignal = {
   flag: RegretFlag;
