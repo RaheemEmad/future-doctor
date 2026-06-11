@@ -8,13 +8,17 @@ import type {
   OnboardingData,
   RegretFlag,
   RegretSignal,
+  ScoreContribution,
+  ScorePenalty,
   Specialty,
   SpecialtyMatch,
   Trait,
   TraitScores,
 } from "./types";
+import { CAREER_ARCHETYPE_LABEL, GEO_INTENT_LABEL, MEANING_LABEL } from "./types";
 import { ENRICHED_SPECIALTIES } from "./enrichment";
 import { QUESTIONS } from "./questions";
+
 
 const ALL_TRAITS: Trait[] = [
   "emotional_resilience", "empathy", "introversion", "perfectionism", "uncertainty_tolerance",
