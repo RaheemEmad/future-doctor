@@ -8,9 +8,9 @@ import { Search, ArrowRight } from "lucide-react";
 export const Route = createFileRoute("/specialties")({
   head: () => ({
     meta: [
-      { title: "Specialties — Vocare" },
-      { name: "description", content: "Browse 40+ medical specialties with lifestyle, burnout, income, opportunity, and AI-exposure data." },
-      { property: "og:title", content: "Specialties — Vocare" },
+      { title: "Specialties · Vocare" },
+      { name: "description", content: "Browse 40+ medical specialties with lifestyle, burnout, income, opportunity, and AI exposure data." },
+      { property: "og:title", content: "Specialties · Vocare" },
       { property: "og:description", content: "40+ specialties scored on lifestyle, burnout, opportunity, and AI exposure." },
     ],
   }),
