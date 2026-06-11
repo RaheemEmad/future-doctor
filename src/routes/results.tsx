@@ -63,6 +63,12 @@ function ResultsPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const callSummary = useServerFn(generateSummary);
 
+  const persona = useMemo(
+    () => (session.onboarding ? derivePersona(session.onboarding) : null),
+    [session.onboarding],
+  );
+
+
   // Decode share token if present
   useEffect(() => {
     if (!shareToken) return;
