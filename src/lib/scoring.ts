@@ -381,3 +381,113 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
 }
 
 export function getQuestions() { return QUESTIONS; }
+
+// --- Explainability helpers ---------------------------------------------------
+
+function bandLabel(score1to5: number): string {
+  if (score1to5 >= 5) return "very high (5/5)";
+  if (score1to5 >= 4) return "high (4/5)";
+  if (score1to5 >= 3) return "moderate (3/5)";
+  if (score1to5 >= 2) return "low (2/5)";
+  return "very low (1/5)";
+}
+
+function userBand(v: number): string {
+  if (v > 0.8) return "very high";
+  if (v > 0.6) return "high";
+  if (v > 0.4) return "moderate";
+  if (v > 0.2) return "low";
+  return "very low";
+}
+
+function explainChannel(
+  channel: ScoreContribution["channel"],
+  u: TraitScores,
+  sp: EnrichedSpecialty,
+  ob: OnboardingData,
+  mWeights: Record<MeaningSource, number>,
+  matchedPaths: EnrichedSpecialty["careerPaths"],
+): string {
+  const name = sp.name;
+  switch (channel) {
+    case "trait": {
+      const aligned: string[] = [];
+      const off: string[] = [];
+      for (const [trait, target] of Object.entries(sp.ideal)) {
+        const user = u[trait as Trait] ?? 0.5;
+        const t = target as number;
+        const diff = Math.abs(user - t);
+        if (Math.abs(t - 0.5) < 0.15) continue;
+        if (diff < 0.15) aligned.push(humanTrait(trait as Trait).toLowerCase());
+        else if (diff > 0.35) off.push(humanTrait(trait as Trait).toLowerCase());
+      }
+      const a = aligned.slice(0, 3).join(", ");
+      const o = off.slice(0, 2).join(", ");
+      if (a && o) return `Your answers matched ${name}'s ideal profile on ${a}, but pulled away on ${o}.`;
+      if (a) return `Across the trait questions, your answers landed close to ${name}'s ideal on ${a}.`;
+      if (o) return `Your trait answers were the right shape overall, with friction on ${o}.`;
+      return `Your trait pattern is balanced and not strongly aligned with or against ${name}.`;
+    }
+    case "lifestyle": {
+      const lb = u.lifestyle_balance ?? 0.5;
+      const fp = u.family_priority ?? 0.5;
+      const st = u.stamina ?? 0.5;
+      return `You set work-life balance at ${ob.workLifeBalance}/5 (${userBand(lb)}), family priority ${userBand(fp)}, and willingness to sacrifice ${ob.willingnessToSacrifice}/5. ${name} scores lifestyle ${bandLabel(sp.lifestyle)}, family-friendliness ${bandLabel(sp.familyFriendly)}, and call burden ${bandLabel(sp.callBurden)}.`;
+    }
+    case "emotional": {
+      const er = u.emotional_resilience ?? 0.5;
+      const dc = u.death_comfort ?? 0.5;
+      return `Your emotional resilience reads ${userBand(er)} and your comfort with mortality ${userBand(dc)}. ${name} carries an emotional burden of ${bandLabel(sp.emotionalBurden)}, so the gap between what the field demands and what you carry is what this channel measures.`;
+    }
+    case "cognitive": {
+      const an = u.analytical ?? 0.5;
+      const pr = u.procedural ?? 0.5;
+      return `Your analytical thinking reads ${userBand(an)} and your procedural drive ${userBand(pr)}. ${name} sits at procedural ${bandLabel(sp.procedural)}, which sets the target this channel compares you against.`;
+    }
+    case "meaning": {
+      const picks = (ob.meaningTop ?? []).slice(0, 3);
+      if (picks.length === 0) return `You didn't rank specific meaning sources, so this channel uses an even baseline. ${name}'s strongest meaning sources are ${topMeaningLabels(sp).join(" and ")}.`;
+      const userLabels = picks.map((m) => MEANING_LABEL[m]);
+      const hits = picks.filter((m) => sp.meaningProfile[m] >= 0.6).map((m) => MEANING_LABEL[m]);
+      const misses = picks.filter((m) => sp.meaningProfile[m] < 0.35).map((m) => MEANING_LABEL[m]);
+      const parts = [`You ranked ${userLabels.join(", ")} as where you draw meaning.`];
+      if (hits.length) parts.push(`${name} delivers strongly on ${hits.join(" and ")}.`);
+      if (misses.length) parts.push(`It is weaker on ${misses.join(" and ")}.`);
+      return parts.join(" ");
+    }
+    case "opportunity": {
+      const intent = ob.geographicIntent || "undecided";
+      const label = GEO_INTENT_LABEL[intent as GeographicIntent] ?? "undecided";
+      const map: Record<string, string> = {
+        egypt_private: `Egypt private potential ${sp.egyptPrivatePotential}/10 and AI resilience ${10 - sp.aiDisruptionRisk}/10`,
+        egypt_gov: `fellowship pipeline ${sp.fellowshipPipeline}/10 and Egypt private potential ${sp.egyptPrivatePotential}/10`,
+        gulf: `GCC demand ${sp.gccDemand}/10 and AI resilience ${10 - sp.aiDisruptionRisk}/10`,
+        uk: `UK migration friendliness ${sp.ukMigrationFriendliness}/10`,
+        us: `US match difficulty ${sp.usMatchDifficulty}/10 (lower is easier) and fellowship pipeline ${sp.fellowshipPipeline}/10`,
+        canada_aus: `UK pathway ${sp.ukMigrationFriendliness}/10 and GCC demand ${sp.gccDemand}/10`,
+        undecided: `regional scores averaged across markets`,
+      };
+      return `You said you're heading toward ${label.toLowerCase()}. For ${name}, this channel is driven by ${map[intent] ?? map.undecided}.`;
+    }
+    case "archetype": {
+      const picks = ob.careerArchetypes ?? [];
+      if (!picks.length) return `You didn't pick career archetypes, so this channel is neutral. ${name} supports paths like ${sp.careerPaths.slice(0, 2).map((p) => p.label).join(" and ")}.`;
+      const labels = picks.map((a) => CAREER_ARCHETYPE_LABEL[a]);
+      const matched = matchedPaths.slice(0, 2).map((p) => p.label);
+      if (matched.length) return `You chose ${labels.join(", ")}. ${name} offers ${matched.join(" and ")}, which line up with that.`;
+      return `You chose ${labels.join(", ")}, but ${name}'s common paths don't lean that direction.`;
+    }
+    case "income": {
+      const ip = u.income_priority ?? 0.5;
+      return `You ranked income priority ${ob.financialPriority}/5 (${userBand(ip)}). ${name} sits in income band ${"$".repeat(sp.incomeBand)} (${sp.incomeBand}/5).`;
+    }
+  }
+}
+
+function topMeaningLabels(sp: EnrichedSpecialty): string[] {
+  return (Object.entries(sp.meaningProfile) as [MeaningSource, number][])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([m]) => MEANING_LABEL[m]);
+}
+
