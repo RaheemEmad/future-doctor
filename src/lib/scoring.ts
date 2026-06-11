@@ -8,13 +8,17 @@ import type {
   OnboardingData,
   RegretFlag,
   RegretSignal,
+  ScoreContribution,
+  ScorePenalty,
   Specialty,
   SpecialtyMatch,
   Trait,
   TraitScores,
 } from "./types";
+import { CAREER_ARCHETYPE_LABEL, GEO_INTENT_LABEL, MEANING_LABEL } from "./types";
 import { ENRICHED_SPECIALTIES } from "./enrichment";
 import { QUESTIONS } from "./questions";
+
 
 const ALL_TRAITS: Trait[] = [
   "emotional_resilience", "empathy", "introversion", "perfectionism", "uncertainty_tolerance",
@@ -281,24 +285,57 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
       0.3 * (1 - (adjusted.emotional_resilience ?? 0.5)) * 100 +
       0.2 * (adjusted.burnout_vulnerability ?? 0.5) * 100;
 
-    const compatibility =
-      100 * (
-        0.32 * traitFit +
-        0.15 * lifestyleScore +
-        0.12 * emotionalFit +
-        0.07 * incomeFit +
-        0.08 * cognitiveFit +
-        0.12 * mFit +
-        opp.weight * opp.score +
-        0.08 * arche.score
-      ) / (0.32 + 0.15 + 0.12 + 0.07 + 0.08 + 0.12 + opp.weight + 0.08);
+    // Weighted composite (same weights as before).
+    const channels: Array<{ key: ScoreContribution["channel"]; label: string; weight: number; fit: number }> = [
+      { key: "trait", label: "Trait similarity", weight: 0.32, fit: traitFit },
+      { key: "lifestyle", label: "Lifestyle, family and stamina", weight: 0.15, fit: lifestyleScore },
+      { key: "emotional", label: "Emotional and ethical fit", weight: 0.12, fit: emotionalFit },
+      { key: "meaning", label: "Meaning source alignment", weight: 0.12, fit: mFit },
+      { key: "cognitive", label: "Cognitive style fit", weight: 0.08, fit: cognitiveFit },
+      { key: "archetype", label: "Career archetype overlap", weight: 0.08, fit: arche.score },
+      { key: "opportunity", label: "Regional opportunity", weight: opp.weight, fit: opp.score },
+      { key: "income", label: "Income band fit", weight: 0.07, fit: incomeFit },
+    ];
+    const denom = channels.reduce((s, c) => s + c.weight, 0);
+    const baseScore = (100 * channels.reduce((s, c) => s + c.weight * c.fit, 0)) / denom;
 
-    let final = compatibility;
-    if ((adjusted.lifestyle_balance ?? 0.5) > 0.8 && sp.lifestyle <= 2) final -= 12;
-    if ((adjusted.family_priority ?? 0.5) > 0.8 && sp.familyFriendly <= 2) final -= 10;
-    if ((adjusted.stamina ?? 0.5) < 0.3 && sp.callBurden >= 4) final -= 8;
-    if ((adjusted.death_comfort ?? 0.5) < 0.3 && sp.emotionalBurden >= 4) final -= 8;
+    // Penalties (same conditions as before).
+    const penalties: ScorePenalty[] = [];
+    if ((adjusted.lifestyle_balance ?? 0.5) > 0.8 && sp.lifestyle <= 2) {
+      penalties.push({ label: "Lifestyle collision", points: 12, reason: `You ranked work-life balance very high, but ${sp.name} sits at lifestyle ${sp.lifestyle}/5.` });
+    }
+    if ((adjusted.family_priority ?? 0.5) > 0.8 && sp.familyFriendly <= 2) {
+      penalties.push({ label: "Family-time collision", points: 10, reason: `You marked family priority as central, while ${sp.name} scores ${sp.familyFriendly}/5 for family-friendliness.` });
+    }
+    if ((adjusted.stamina ?? 0.5) < 0.3 && sp.callBurden >= 4) {
+      penalties.push({ label: "Stamina vs call burden", points: 8, reason: `Your willingness to sacrifice was low, but ${sp.name} carries a ${sp.callBurden}/5 call burden.` });
+    }
+    if ((adjusted.death_comfort ?? 0.5) < 0.3 && sp.emotionalBurden >= 4) {
+      penalties.push({ label: "Mortality exposure", points: 8, reason: `You showed low comfort with mortality, yet ${sp.name} carries an emotional burden of ${sp.emotionalBurden}/5.` });
+    }
+    const penaltyPoints = penalties.reduce((s, p) => s + p.points, 0);
+
+    let final = baseScore - penaltyPoints;
     final = Math.max(15, Math.min(99, final));
+
+    // Build human-readable breakdown using actual contribution to the final %.
+    const safeFinal = Math.max(1, final);
+    const breakdown: ScoreContribution[] = channels
+      .map((c) => {
+        const rawContribution = (100 * c.weight * c.fit) / denom;
+        const scaled = rawContribution * (safeFinal / Math.max(1, baseScore));
+        const fitPct = Math.round(c.fit * 100);
+        const weightPct = Math.round((c.weight / denom) * 100);
+        return {
+          channel: c.key,
+          label: c.label,
+          weight: weightPct,
+          fit: fitPct,
+          contribution: Math.round(scaled * 10) / 10,
+          explanation: explainChannel(c.key, adjusted, sp, onboarding, mWeights, arche.matched),
+        } satisfies ScoreContribution;
+      })
+      .sort((a, b) => b.contribution - a.contribution);
 
     const { fors, against } = buildReasons(adjusted, sp);
 
@@ -315,8 +352,12 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
       reasonsFor: fors,
       reasonsAgainst: against,
       highlightedPaths: arche.matched.slice(0, 4),
+      breakdown,
+      penalties,
+      baseScore: Math.round(baseScore),
     };
   }).sort((a, b) => b.compatibility - a.compatibility);
+
 
   const avoid = [...matches].sort((a, b) => a.compatibility - b.compatibility).slice(0, 3);
   const top5 = matches.slice(0, 5);
@@ -340,3 +381,113 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
 }
 
 export function getQuestions() { return QUESTIONS; }
+
+// --- Explainability helpers ---------------------------------------------------
+
+function bandLabel(score1to5: number): string {
+  if (score1to5 >= 5) return "very high (5/5)";
+  if (score1to5 >= 4) return "high (4/5)";
+  if (score1to5 >= 3) return "moderate (3/5)";
+  if (score1to5 >= 2) return "low (2/5)";
+  return "very low (1/5)";
+}
+
+function userBand(v: number): string {
+  if (v > 0.8) return "very high";
+  if (v > 0.6) return "high";
+  if (v > 0.4) return "moderate";
+  if (v > 0.2) return "low";
+  return "very low";
+}
+
+function explainChannel(
+  channel: ScoreContribution["channel"],
+  u: TraitScores,
+  sp: EnrichedSpecialty,
+  ob: OnboardingData,
+  mWeights: Record<MeaningSource, number>,
+  matchedPaths: EnrichedSpecialty["careerPaths"],
+): string {
+  const name = sp.name;
+  switch (channel) {
+    case "trait": {
+      const aligned: string[] = [];
+      const off: string[] = [];
+      for (const [trait, target] of Object.entries(sp.ideal)) {
+        const user = u[trait as Trait] ?? 0.5;
+        const t = target as number;
+        const diff = Math.abs(user - t);
+        if (Math.abs(t - 0.5) < 0.15) continue;
+        if (diff < 0.15) aligned.push(humanTrait(trait as Trait).toLowerCase());
+        else if (diff > 0.35) off.push(humanTrait(trait as Trait).toLowerCase());
+      }
+      const a = aligned.slice(0, 3).join(", ");
+      const o = off.slice(0, 2).join(", ");
+      if (a && o) return `Your answers matched ${name}'s ideal profile on ${a}, but pulled away on ${o}.`;
+      if (a) return `Across the trait questions, your answers landed close to ${name}'s ideal on ${a}.`;
+      if (o) return `Your trait answers were the right shape overall, with friction on ${o}.`;
+      return `Your trait pattern is balanced and not strongly aligned with or against ${name}.`;
+    }
+    case "lifestyle": {
+      const lb = u.lifestyle_balance ?? 0.5;
+      const fp = u.family_priority ?? 0.5;
+      const st = u.stamina ?? 0.5;
+      return `You set work-life balance at ${ob.workLifeBalance}/5 (${userBand(lb)}), family priority ${userBand(fp)}, and willingness to sacrifice ${ob.willingnessToSacrifice}/5. ${name} scores lifestyle ${bandLabel(sp.lifestyle)}, family-friendliness ${bandLabel(sp.familyFriendly)}, and call burden ${bandLabel(sp.callBurden)}.`;
+    }
+    case "emotional": {
+      const er = u.emotional_resilience ?? 0.5;
+      const dc = u.death_comfort ?? 0.5;
+      return `Your emotional resilience reads ${userBand(er)} and your comfort with mortality ${userBand(dc)}. ${name} carries an emotional burden of ${bandLabel(sp.emotionalBurden)}, so the gap between what the field demands and what you carry is what this channel measures.`;
+    }
+    case "cognitive": {
+      const an = u.analytical ?? 0.5;
+      const pr = u.procedural ?? 0.5;
+      return `Your analytical thinking reads ${userBand(an)} and your procedural drive ${userBand(pr)}. ${name} sits at procedural ${bandLabel(sp.procedural)}, which sets the target this channel compares you against.`;
+    }
+    case "meaning": {
+      const picks = (ob.meaningTop ?? []).slice(0, 3);
+      if (picks.length === 0) return `You didn't rank specific meaning sources, so this channel uses an even baseline. ${name}'s strongest meaning sources are ${topMeaningLabels(sp).join(" and ")}.`;
+      const userLabels = picks.map((m) => MEANING_LABEL[m]);
+      const hits = picks.filter((m) => sp.meaningProfile[m] >= 0.6).map((m) => MEANING_LABEL[m]);
+      const misses = picks.filter((m) => sp.meaningProfile[m] < 0.35).map((m) => MEANING_LABEL[m]);
+      const parts = [`You ranked ${userLabels.join(", ")} as where you draw meaning.`];
+      if (hits.length) parts.push(`${name} delivers strongly on ${hits.join(" and ")}.`);
+      if (misses.length) parts.push(`It is weaker on ${misses.join(" and ")}.`);
+      return parts.join(" ");
+    }
+    case "opportunity": {
+      const intent = ob.geographicIntent || "undecided";
+      const label = GEO_INTENT_LABEL[intent as GeographicIntent] ?? "undecided";
+      const map: Record<string, string> = {
+        egypt_private: `Egypt private potential ${sp.egyptPrivatePotential}/10 and AI resilience ${10 - sp.aiDisruptionRisk}/10`,
+        egypt_gov: `fellowship pipeline ${sp.fellowshipPipeline}/10 and Egypt private potential ${sp.egyptPrivatePotential}/10`,
+        gulf: `GCC demand ${sp.gccDemand}/10 and AI resilience ${10 - sp.aiDisruptionRisk}/10`,
+        uk: `UK migration friendliness ${sp.ukMigrationFriendliness}/10`,
+        us: `US match difficulty ${sp.usMatchDifficulty}/10 (lower is easier) and fellowship pipeline ${sp.fellowshipPipeline}/10`,
+        canada_aus: `UK pathway ${sp.ukMigrationFriendliness}/10 and GCC demand ${sp.gccDemand}/10`,
+        undecided: `regional scores averaged across markets`,
+      };
+      return `You said you're heading toward ${label.toLowerCase()}. For ${name}, this channel is driven by ${map[intent] ?? map.undecided}.`;
+    }
+    case "archetype": {
+      const picks = ob.careerArchetypes ?? [];
+      if (!picks.length) return `You didn't pick career archetypes, so this channel is neutral. ${name} supports paths like ${sp.careerPaths.slice(0, 2).map((p) => p.label).join(" and ")}.`;
+      const labels = picks.map((a) => CAREER_ARCHETYPE_LABEL[a]);
+      const matched = matchedPaths.slice(0, 2).map((p) => p.label);
+      if (matched.length) return `You chose ${labels.join(", ")}. ${name} offers ${matched.join(" and ")}, which line up with that.`;
+      return `You chose ${labels.join(", ")}, but ${name}'s common paths don't lean that direction.`;
+    }
+    case "income": {
+      const ip = u.income_priority ?? 0.5;
+      return `You ranked income priority ${ob.financialPriority}/5 (${userBand(ip)}). ${name} sits in income band ${"$".repeat(sp.incomeBand)} (${sp.incomeBand}/5).`;
+    }
+  }
+}
+
+function topMeaningLabels(sp: EnrichedSpecialty): string[] {
+  return (Object.entries(sp.meaningProfile) as [MeaningSource, number][])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([m]) => MEANING_LABEL[m]);
+}
+
