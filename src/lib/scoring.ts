@@ -285,24 +285,57 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
       0.3 * (1 - (adjusted.emotional_resilience ?? 0.5)) * 100 +
       0.2 * (adjusted.burnout_vulnerability ?? 0.5) * 100;
 
-    const compatibility =
-      100 * (
-        0.32 * traitFit +
-        0.15 * lifestyleScore +
-        0.12 * emotionalFit +
-        0.07 * incomeFit +
-        0.08 * cognitiveFit +
-        0.12 * mFit +
-        opp.weight * opp.score +
-        0.08 * arche.score
-      ) / (0.32 + 0.15 + 0.12 + 0.07 + 0.08 + 0.12 + opp.weight + 0.08);
+    // Weighted composite (same weights as before).
+    const channels: Array<{ key: ScoreContribution["channel"]; label: string; weight: number; fit: number }> = [
+      { key: "trait", label: "Trait similarity", weight: 0.32, fit: traitFit },
+      { key: "lifestyle", label: "Lifestyle, family and stamina", weight: 0.15, fit: lifestyleScore },
+      { key: "emotional", label: "Emotional and ethical fit", weight: 0.12, fit: emotionalFit },
+      { key: "meaning", label: "Meaning source alignment", weight: 0.12, fit: mFit },
+      { key: "cognitive", label: "Cognitive style fit", weight: 0.08, fit: cognitiveFit },
+      { key: "archetype", label: "Career archetype overlap", weight: 0.08, fit: arche.score },
+      { key: "opportunity", label: "Regional opportunity", weight: opp.weight, fit: opp.score },
+      { key: "income", label: "Income band fit", weight: 0.07, fit: incomeFit },
+    ];
+    const denom = channels.reduce((s, c) => s + c.weight, 0);
+    const baseScore = (100 * channels.reduce((s, c) => s + c.weight * c.fit, 0)) / denom;
 
-    let final = compatibility;
-    if ((adjusted.lifestyle_balance ?? 0.5) > 0.8 && sp.lifestyle <= 2) final -= 12;
-    if ((adjusted.family_priority ?? 0.5) > 0.8 && sp.familyFriendly <= 2) final -= 10;
-    if ((adjusted.stamina ?? 0.5) < 0.3 && sp.callBurden >= 4) final -= 8;
-    if ((adjusted.death_comfort ?? 0.5) < 0.3 && sp.emotionalBurden >= 4) final -= 8;
+    // Penalties (same conditions as before).
+    const penalties: ScorePenalty[] = [];
+    if ((adjusted.lifestyle_balance ?? 0.5) > 0.8 && sp.lifestyle <= 2) {
+      penalties.push({ label: "Lifestyle collision", points: 12, reason: `You ranked work-life balance very high, but ${sp.name} sits at lifestyle ${sp.lifestyle}/5.` });
+    }
+    if ((adjusted.family_priority ?? 0.5) > 0.8 && sp.familyFriendly <= 2) {
+      penalties.push({ label: "Family-time collision", points: 10, reason: `You marked family priority as central, while ${sp.name} scores ${sp.familyFriendly}/5 for family-friendliness.` });
+    }
+    if ((adjusted.stamina ?? 0.5) < 0.3 && sp.callBurden >= 4) {
+      penalties.push({ label: "Stamina vs call burden", points: 8, reason: `Your willingness to sacrifice was low, but ${sp.name} carries a ${sp.callBurden}/5 call burden.` });
+    }
+    if ((adjusted.death_comfort ?? 0.5) < 0.3 && sp.emotionalBurden >= 4) {
+      penalties.push({ label: "Mortality exposure", points: 8, reason: `You showed low comfort with mortality, yet ${sp.name} carries an emotional burden of ${sp.emotionalBurden}/5.` });
+    }
+    const penaltyPoints = penalties.reduce((s, p) => s + p.points, 0);
+
+    let final = baseScore - penaltyPoints;
     final = Math.max(15, Math.min(99, final));
+
+    // Build human-readable breakdown using actual contribution to the final %.
+    const safeFinal = Math.max(1, final);
+    const breakdown: ScoreContribution[] = channels
+      .map((c) => {
+        const rawContribution = (100 * c.weight * c.fit) / denom;
+        const scaled = rawContribution * (safeFinal / Math.max(1, baseScore));
+        const fitPct = Math.round(c.fit * 100);
+        const weightPct = Math.round((c.weight / denom) * 100);
+        return {
+          channel: c.key,
+          label: c.label,
+          weight: weightPct,
+          fit: fitPct,
+          contribution: Math.round(scaled * 10) / 10,
+          explanation: explainChannel(c.key, adjusted, sp, onboarding, mWeights, arche.matched),
+        } satisfies ScoreContribution;
+      })
+      .sort((a, b) => b.contribution - a.contribution);
 
     const { fors, against } = buildReasons(adjusted, sp);
 
@@ -319,8 +352,12 @@ export function score(traits: TraitScores, onboarding: OnboardingData, answers: 
       reasonsFor: fors,
       reasonsAgainst: against,
       highlightedPaths: arche.matched.slice(0, 4),
+      breakdown,
+      penalties,
+      baseScore: Math.round(baseScore),
     };
   }).sort((a, b) => b.compatibility - a.compatibility);
+
 
   const avoid = [...matches].sort((a, b) => a.compatibility - b.compatibility).slice(0, 3);
   const top5 = matches.slice(0, 5);
