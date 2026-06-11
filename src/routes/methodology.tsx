@@ -6,9 +6,9 @@ import { ArrowRight, Brain, Compass, Globe2, Heart, ShieldAlert, TrendingUp } fr
 export const Route = createFileRoute("/methodology")({
   head: () => ({
     meta: [
-      { title: "Methodology — Vocare" },
+      { title: "Methodology · Vocare" },
       { name: "description", content: "How Vocare scores medical specialty compatibility: traits, meaning, opportunity, regret risk, and lifecycle modeling." },
-      { property: "og:title", content: "Methodology — Vocare" },
+      { property: "og:title", content: "Methodology · Vocare" },
       { property: "og:description", content: "How we model physician life-fit, not just specialty prestige." },
     ],
   }),
