@@ -85,10 +85,10 @@ function MethodologyPage() {
       <section className="max-w-5xl mx-auto px-6 sm:px-10 mt-16">
         <h2 className="font-serif text-2xl mb-6">What this model is not</h2>
         <ul className="space-y-3 text-sm text-muted-foreground leading-relaxed max-w-3xl">
-          <li>— It is not a medical career oracle. It is a structured second opinion against your own gut.</li>
-          <li>— It is not a substitute for shadowing, off-service rotations, or talking to physicians 10 years ahead of you.</li>
-          <li>— It is not stable to gaming. If you optimize answers for an outcome, the regret-risk model will quietly flag the inconsistency.</li>
-          <li>— It is not anonymous benchmarking. Nothing leaves your device unless you explicitly share a result link.</li>
+          <li>It is not a medical career oracle. It is a structured second opinion against your own gut.</li>
+          <li>It is not a substitute for shadowing, off-service rotations, or talking to physicians ten years ahead of you.</li>
+          <li>It is not stable to gaming. If you optimize answers for an outcome, the regret-risk model will quietly flag the inconsistency.</li>
+          <li>It is not anonymous benchmarking. Nothing leaves your device unless you explicitly share a result link.</li>
         </ul>
       </section>
 
