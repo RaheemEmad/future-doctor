@@ -66,10 +66,10 @@ function MethodologyPage() {
         <div className="rounded-3xl bg-brand text-brand-foreground p-10 lg:p-14">
           <h2 className="font-serif text-3xl lg:text-4xl mb-4">The composite, in one sentence.</h2>
           <p className="text-base lg:text-lg opacity-90 max-w-3xl leading-relaxed">
-            Compatibility = weighted blend of trait similarity (32%), lifestyle/family/stamina fit (15%), emotional
-            burden alignment (12%), meaning fit (12%), cognitive style fit (8%), career archetype overlap (8%),
-            geographic opportunity (6–18% depending on intent), and income band fit (7%). Hard contradictions
-            (low stamina vs high call burden, etc.) apply explicit penalties on top.
+            Compatibility is a weighted blend of trait similarity (32%), lifestyle, family, and stamina fit (15%),
+            emotional burden alignment (12%), meaning fit (12%), cognitive style fit (8%), career archetype overlap
+            (8%), geographic opportunity (6 to 18% depending on intent), and income band fit (7%). Hard
+            contradictions, like low stamina against high call burden, apply explicit penalties on top.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/onboarding" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-background text-foreground text-sm font-medium hover:opacity-90 transition">
