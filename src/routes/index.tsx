@@ -6,8 +6,9 @@ import { SiteFooter, SiteNav } from "@/components/site-chrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vocare — Find your calling in medicine. Built for Egyptian medical students." },
-      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties — with Egypt-specific career, income, and migration insight." },
+      { title: "Vocare · Find your calling in medicine, built for Egyptian medical students" },
+      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties, with Egypt-specific career, income, and migration insight." },
+
     ],
   }),
   component: LandingPage,
