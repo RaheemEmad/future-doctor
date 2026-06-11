@@ -403,6 +403,12 @@ function ResultsPage() {
         </motion.div>
       </section>
 
+      {/* Why this percentage */}
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+        <ScoreBreakdown match={top} title={`Why ${top.compatibility}% for ${top.specialty.name}`} defaultOpen />
+      </section>
+
+
       {/* Tensions + Regret Risk */}
       {(result.tensions.length > 0 || result.regretRisk.score > 25) && (
         <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10 grid lg:grid-cols-2 gap-6">
