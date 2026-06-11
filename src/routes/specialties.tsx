@@ -134,7 +134,7 @@ function SpecialtiesPage() {
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mb-16">
         <div className="rounded-3xl bg-brand text-brand-foreground p-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
-            <h2 className="font-serif text-2xl mb-1">Don't just browse — get matched.</h2>
+            <h2 className="font-serif text-2xl mb-1">Don't just browse, get matched.</h2>
             <p className="opacity-80 text-sm">The assessment scores all of these against your psychology in ~6 minutes.</p>
           </div>
           <Link to="/onboarding" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-background text-foreground text-sm font-medium hover:opacity-90 transition shrink-0">
