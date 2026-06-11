@@ -8,9 +8,9 @@ import { Search, ArrowRight } from "lucide-react";
 export const Route = createFileRoute("/specialties")({
   head: () => ({
     meta: [
-      { title: "Specialties — Vocare" },
-      { name: "description", content: "Browse 40+ medical specialties with lifestyle, burnout, income, opportunity, and AI-exposure data." },
-      { property: "og:title", content: "Specialties — Vocare" },
+      { title: "Specialties · Vocare" },
+      { name: "description", content: "Browse 40+ medical specialties with lifestyle, burnout, income, opportunity, and AI exposure data." },
+      { property: "og:title", content: "Specialties · Vocare" },
       { property: "og:description", content: "40+ specialties scored on lifestyle, burnout, opportunity, and AI exposure." },
     ],
   }),
@@ -61,7 +61,7 @@ function SpecialtiesPage() {
           All {ENRICHED_SPECIALTIES.length} specialties, with the data we use to score them.
         </h1>
         <p className="mt-4 text-muted-foreground max-w-2xl">
-          Browse, filter, or search. Numbers are 1–5 unless noted; opportunity bars are 1–10.
+          Browse, filter, or search. Numbers are 1 to 5 unless noted; opportunity bars are 1 to 10.
         </p>
       </motion.section>
 
@@ -134,7 +134,7 @@ function SpecialtiesPage() {
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mb-16">
         <div className="rounded-3xl bg-brand text-brand-foreground p-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
-            <h2 className="font-serif text-2xl mb-1">Don't just browse — get matched.</h2>
+            <h2 className="font-serif text-2xl mb-1">Don't just browse, get matched.</h2>
             <p className="opacity-80 text-sm">The assessment scores all of these against your psychology in ~6 minutes.</p>
           </div>
           <Link to="/onboarding" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-background text-foreground text-sm font-medium hover:opacity-90 transition shrink-0">

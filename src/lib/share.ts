@@ -1,3 +1,4 @@
+import LZString from "lz-string";
 import type { OnboardingData } from "./types";
 
 export type SharePayload = {
@@ -6,29 +7,30 @@ export type SharePayload = {
   v: 2;
 };
 
-function toB64Url(s: string): string {
-  if (typeof window === "undefined") {
-    return Buffer.from(s, "utf-8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  const b = btoa(unescape(encodeURIComponent(s)));
-  return b.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function fromB64Url(s: string): string {
-  const padded = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
-  if (typeof window === "undefined") {
-    return Buffer.from(padded, "base64").toString("utf-8");
-  }
-  return decodeURIComponent(escape(atob(padded)));
-}
-
 export function encodeShare(payload: SharePayload): string {
-  return toB64Url(JSON.stringify(payload));
+  return LZString.compressToEncodedURIComponent(JSON.stringify(payload));
 }
 
 export function decodeShare(token: string): SharePayload | null {
   try {
-    const parsed = JSON.parse(fromB64Url(token)) as SharePayload;
+    // New compressed format
+    const json = LZString.decompressFromEncodedURIComponent(token);
+    if (json) {
+      const parsed = JSON.parse(json) as SharePayload;
+      if (parsed && parsed.o && parsed.a) return parsed;
+    }
+  } catch {
+    /* fall through to legacy */
+  }
+
+  // Legacy base64url format (older share links)
+  try {
+    const padded = token.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((token.length + 3) % 4);
+    const raw =
+      typeof window === "undefined"
+        ? Buffer.from(padded, "base64").toString("utf-8")
+        : decodeURIComponent(escape(atob(padded)));
+    const parsed = JSON.parse(raw) as SharePayload;
     if (!parsed || !parsed.o || !parsed.a) return null;
     return parsed;
   } catch {

@@ -6,8 +6,9 @@ import { SiteFooter, SiteNav } from "@/components/site-chrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vocare — Find your calling in medicine. Built for Egyptian medical students." },
-      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties — with Egypt-specific career, income, and migration insight." },
+      { title: "Vocare · Find your calling in medicine, built for Egyptian medical students" },
+      { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties, with Egypt-specific career, income, and migration insight." },
+
     ],
   }),
   component: LandingPage,
@@ -34,7 +35,7 @@ function LandingPage() {
               Find the medicine that <span className="italic">fits</span> your soul.
             </h1>
             <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-xl">
-              Choosing a specialty in Egypt is choosing a life — government vs private, takleef, Master's,
+              Choosing a specialty in Egypt is choosing a life. Government or private, takleef, Master's,
               fellowship abroad, the Gulf, or staying close to family. Vocare maps your cognitive style,
               emotional resilience, and lifestyle vision to 40+ medical pathways, with Egypt-specific
               income, training, and migration context.
@@ -99,7 +100,7 @@ function LandingPage() {
           <div className="max-w-2xl mb-14">
             <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">The Methodology</span>
             <h2 className="text-3xl lg:text-5xl font-serif mt-4 leading-tight">
-              Not a personality quiz. A psychometric map of who you'll be at 50.
+              Not a personality quiz. A psychometric map of who you'll be at fifty.
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
