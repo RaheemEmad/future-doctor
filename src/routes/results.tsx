@@ -725,6 +725,7 @@ function Panel({ tone, title, items }: { tone: "positive" | "warn"; title: strin
 
 function MatchCard({ match }: { match: SpecialtyMatch }) {
   const m = match;
+  const [open, setOpen] = useState(false);
   return (
     <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
@@ -741,6 +742,92 @@ function MatchCard({ match }: { match: SpecialtyMatch }) {
         <Bar label="Opportunity" value={m.opportunityFit} />
         <Bar label="Burnout risk" value={m.burnoutWarning} tone="warn" />
       </div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="mt-4 text-xs text-brand hover:underline font-medium"
+      >
+        {open ? "Hide reasoning" : `Why ${m.compatibility}%?`}
+      </button>
+      {open && (
+        <div className="mt-4 pt-4 border-t border-border/60">
+          <ScoreBreakdown match={m} compact />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ScoreBreakdown({ match, title, defaultOpen = true, compact = false }: { match: SpecialtyMatch; title?: string; defaultOpen?: boolean; compact?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const wrapperCls = compact
+    ? ""
+    : "rounded-3xl border border-border bg-card p-8 lg:p-10";
+  return (
+    <div className={wrapperCls}>
+      {title && (
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <div>
+            <div className="flex items-center gap-3">
+              <Sparkles className="size-5 text-brand" />
+              <h3 className="font-serif text-xl">{title}</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+              Your match is a weighted blend. Each row shows how much that channel added to the final percentage,
+              and how it ties back to what you answered.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="text-xs px-3 py-1.5 rounded-full bg-background border border-border hover:bg-muted shrink-0"
+          >
+            {open ? "Hide" : "Show"}
+          </button>
+        </div>
+      )}
+      {open && (
+        <>
+          <div className="mt-5 space-y-3">
+            {match.breakdown.map((c) => (
+              <div key={c.channel} className="rounded-2xl border border-border/70 bg-background/60 p-4">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+                  <span className="font-medium text-sm">{c.label}</span>
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Weight {c.weight}%</span>
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Fit {c.fit}%</span>
+                  <span className="ml-auto text-sm font-serif text-brand">+{c.contribution.toFixed(1)} pts</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+                  <div className="h-full rounded-full bg-brand" style={{ width: `${c.fit}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{c.explanation}</p>
+              </div>
+            ))}
+          </div>
+
+          {match.penalties.length > 0 && (
+            <div className="mt-5">
+              <div className="text-[10px] uppercase tracking-[0.22em] text-warning mb-2 flex items-center gap-2">
+                <AlertTriangle className="size-3.5" /> Penalties applied
+              </div>
+              <ul className="space-y-2">
+                {match.penalties.map((p) => (
+                  <li key={p.label} className="text-xs text-foreground/80 flex gap-3 rounded-xl bg-orange-50/40 dark:bg-orange-950/15 border border-orange-200/30 dark:border-orange-900/30 p-3">
+                    <span className="font-serif text-warning shrink-0">-{p.points}</span>
+                    <span><span className="font-medium">{p.label}.</span> {p.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mt-5 text-[11px] text-muted-foreground italic">
+            Base composite {match.baseScore}%
+            {match.penalties.length > 0 ? `, minus ${match.penalties.reduce((s, p) => s + p.points, 0)} points in penalties` : ""}
+            {" "}rounded to {match.compatibility}%.
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -758,6 +845,7 @@ function Bar({ label, value, tone }: { label: string; value: number; tone?: "war
     </div>
   );
 }
+
 
 function OutlookBar({ label, value, tone }: { label: string; value: number; tone?: "warn" }) {
   return (
