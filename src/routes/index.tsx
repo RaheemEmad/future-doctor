@@ -100,7 +100,7 @@ function LandingPage() {
           <div className="max-w-2xl mb-14">
             <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">The Methodology</span>
             <h2 className="text-3xl lg:text-5xl font-serif mt-4 leading-tight">
-              Not a personality quiz. A psychometric map of who you'll be at 50.
+              Not a personality quiz. A psychometric map of who you'll be at fifty.
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
