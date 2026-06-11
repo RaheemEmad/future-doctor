@@ -212,10 +212,8 @@ function ResultsPage() {
     flash(`Saved as "${run.name}".`);
   }
 
-  const persona = useMemo(
-    () => (session.onboarding ? derivePersona(session.onboarding) : null),
-    [session.onboarding],
-  );
+
+
 
   function downloadPdf() {
     if (!session.onboarding || !persona) return;
