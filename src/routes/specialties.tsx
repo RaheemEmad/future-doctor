@@ -61,7 +61,7 @@ function SpecialtiesPage() {
           All {ENRICHED_SPECIALTIES.length} specialties, with the data we use to score them.
         </h1>
         <p className="mt-4 text-muted-foreground max-w-2xl">
-          Browse, filter, or search. Numbers are 1–5 unless noted; opportunity bars are 1–10.
+          Browse, filter, or search. Numbers are 1 to 5 unless noted; opportunity bars are 1 to 10.
         </p>
       </motion.section>
 
