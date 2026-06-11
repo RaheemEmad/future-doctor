@@ -36,11 +36,12 @@ function MethodologyPage() {
       >
         <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">How it works</span>
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight text-balance max-w-3xl">
-          Methodology — a <span className="italic">life-fit</span> model, not a popularity quiz.
+          A <span className="italic">life-fit</span> model, not a popularity quiz.
         </h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl leading-relaxed">
-          Most medical specialty quizzes optimize for prestige or exam fit. We optimize for the question that actually
-          matters at year fifteen: <em>what kind of medical life can this person sustainably thrive in without losing themselves?</em>
+          Most medical specialty quizzes optimize for prestige or exam fit. We optimize for the question that
+          actually matters at year fifteen: <em>what kind of medical life can this person sustainably thrive in
+          without losing themselves?</em>
         </p>
       </motion.section>
 
