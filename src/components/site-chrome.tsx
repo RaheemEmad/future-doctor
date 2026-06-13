@@ -22,6 +22,7 @@ export function VocareLogo({ className = "size-9" }: { className?: string }) {
 const NAV_LINKS = [
   { to: "/methodology", label: "Methodology" },
   { to: "/specialties", label: "Specialties" },
+  { to: "/sources", label: "Sources" },
   { to: "/saved", label: "Saved" },
 ] as const;
 
