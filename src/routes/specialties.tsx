@@ -63,6 +63,10 @@ function SpecialtiesPage() {
         <p className="mt-4 text-muted-foreground max-w-2xl">
           Browse, filter, or search. Numbers are 1 to 5 unless noted; opportunity bars are 1 to 10.
         </p>
+        <p className="mt-3 text-xs text-muted-foreground max-w-2xl leading-relaxed">
+          Every rating below is calibrated against published surveys and workforce data. See the full
+          bibliography on the <Link to="/sources" className="underline hover:text-foreground">Credibility &amp; sources</Link> page. Treat these as an initial reference, not a clinical recommendation.
+        </p>
       </motion.section>
 
       <section className="max-w-6xl mx-auto px-6 sm:px-10 sticky top-[64px] z-20 bg-background/85 backdrop-blur-sm border-b border-border py-4 -mx-px">
