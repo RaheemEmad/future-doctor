@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SpecialtiesRouteImport } from './routes/specialties'
+import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -21,6 +22,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const SpecialtiesRoute = SpecialtiesRouteImport.update({
   id: '/specialties',
   path: '/specialties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SavedRoute = SavedRouteImport.update({
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/saved': typeof SavedRoute
+  '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/saved': typeof SavedRoute
+  '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/saved': typeof SavedRoute
+  '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/results'
     | '/saved'
+    | '/sources'
     | '/specialties'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/results'
     | '/saved'
+    | '/sources'
     | '/specialties'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/results'
     | '/saved'
+    | '/sources'
     | '/specialties'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   ResultsRoute: typeof ResultsRoute
   SavedRoute: typeof SavedRoute
+  SourcesRoute: typeof SourcesRoute
   SpecialtiesRoute: typeof SpecialtiesRoute
 }
 
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/specialties'
       fullPath: '/specialties'
       preLoaderRoute: typeof SpecialtiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/saved': {
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   ResultsRoute: ResultsRoute,
   SavedRoute: SavedRoute,
+  SourcesRoute: SourcesRoute,
   SpecialtiesRoute: SpecialtiesRoute,
 }
 export const routeTree = rootRouteImport
