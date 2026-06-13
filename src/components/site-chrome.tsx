@@ -176,7 +176,6 @@ export function SiteFooter() {
         Vocare is a utility test that offers an initial opinion on your medical career direction. It is not
         clinical advice and should not be the sole basis for irreversible career decisions. See our <Link to="/sources" className="underline hover:text-foreground">sources</Link> for the studies and frameworks behind every prediction.
       </p>
-      </div>
       <div className="mt-4 text-[11px] text-muted-foreground/70 uppercase tracking-[0.2em] px-4">
         © {new Date().getFullYear()} Vocare · Built for medical students in Egypt & worldwide
       </div>
