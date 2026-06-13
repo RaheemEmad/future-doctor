@@ -273,6 +273,12 @@ function ResultsPage() {
               {runnerDelta}
             </p>
           )}
+          <p className="mt-5 text-xs text-muted-foreground leading-relaxed">
+            This is a structured initial opinion, not a clinical recommendation. The scoring blends validated
+            personality, burnout, and workforce frameworks. See the full bibliography on the{" "}
+            <Link to="/sources" className="underline hover:text-foreground">Credibility &amp; sources</Link> page,
+            and treat it as one input alongside shadowing and mentorship.
+          </p>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
