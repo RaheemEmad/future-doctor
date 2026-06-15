@@ -110,16 +110,17 @@ function SampleResultPage() {
               {topMatch.breakdown.slice(0, 5).map((b) => (
                 <li key={b.channel} className="flex items-start justify-between gap-4 text-sm">
                   <span className="text-foreground/85">{b.explanation}</span>
-                  <span className="shrink-0 tabular-nums text-brand font-medium">+{b.points.toFixed(1)} pts</span>
+                  <span className="shrink-0 tabular-nums text-brand font-medium">+{b.contribution.toFixed(1)} pts</span>
                 </li>
               ))}
               {topMatch.penalties.slice(0, 2).map((p, i) => (
                 <li key={i} className="flex items-start justify-between gap-4 text-sm">
-                  <span className="text-foreground/85">{p.explanation}</span>
+                  <span className="text-foreground/85">{p.reason}</span>
                   <span className="shrink-0 tabular-nums text-warning font-medium">−{Math.abs(p.points).toFixed(1)} pts</span>
                 </li>
               ))}
             </ul>
+
           </div>
         </section>
 
