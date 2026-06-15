@@ -48,20 +48,26 @@ function LandingPage() {
                 Start Free Assessment
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <a
-                href="#methodology"
+              <Link
+                to="/sample-result"
                 className="inline-flex items-center justify-center px-7 py-4 bg-card border border-border rounded-xl font-medium text-base hover:bg-muted transition-colors"
               >
-                Our Methodology
-              </a>
+                See a sample result
+              </Link>
             </div>
-            <div className="flex items-center gap-6 pt-6 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-6 text-xs text-muted-foreground">
               <span>~12 minutes</span>
               <span className="size-1 rounded-full bg-muted-foreground/40" />
               <span>40+ specialties</span>
               <span className="size-1 rounded-full bg-muted-foreground/40" />
-              <span>No account required</span>
+              <span>Answers stay on your device</span>
+              <span className="size-1 rounded-full bg-muted-foreground/40" />
+              <Link to="/privacy" className="underline hover:text-foreground">Privacy</Link>
             </div>
+            <p className="text-[11px] text-muted-foreground/80 pt-2">
+              Early access · built in 2026 with practising physicians and medical students across Egypt, the Gulf, and the UK.
+            </p>
+
           </motion.div>
 
           <motion.div

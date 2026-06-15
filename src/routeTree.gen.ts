@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SpecialtiesRouteImport } from './routes/specialties'
 import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SavedRouteImport } from './routes/saved'
+import { Route as SampleResultRouteImport } from './routes/sample-result'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as CompareRouteImport } from './routes/compare'
@@ -34,9 +36,19 @@ const SavedRoute = SavedRouteImport.update({
   path: '/saved',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SampleResultRoute = SampleResultRouteImport.update({
+  id: '/sample-result',
+  path: '/sample-result',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -71,7 +83,9 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
+  '/sample-result': typeof SampleResultRoute
   '/saved': typeof SavedRoute
   '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
@@ -82,7 +96,9 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
+  '/sample-result': typeof SampleResultRoute
   '/saved': typeof SavedRoute
   '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
@@ -94,7 +110,9 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
+  '/sample-result': typeof SampleResultRoute
   '/saved': typeof SavedRoute
   '/sources': typeof SourcesRoute
   '/specialties': typeof SpecialtiesRoute
@@ -107,7 +125,9 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/privacy'
     | '/results'
+    | '/sample-result'
     | '/saved'
     | '/sources'
     | '/specialties'
@@ -118,7 +138,9 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/privacy'
     | '/results'
+    | '/sample-result'
     | '/saved'
     | '/sources'
     | '/specialties'
@@ -129,7 +151,9 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/privacy'
     | '/results'
+    | '/sample-result'
     | '/saved'
     | '/sources'
     | '/specialties'
@@ -141,7 +165,9 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResultsRoute: typeof ResultsRoute
+  SampleResultRoute: typeof SampleResultRoute
   SavedRoute: typeof SavedRoute
   SourcesRoute: typeof SourcesRoute
   SpecialtiesRoute: typeof SpecialtiesRoute
@@ -170,11 +196,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SavedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sample-result': {
+      id: '/sample-result'
+      path: '/sample-result'
+      fullPath: '/sample-result'
+      preLoaderRoute: typeof SampleResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
       fullPath: '/results'
       preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -221,7 +261,9 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ResultsRoute: ResultsRoute,
+  SampleResultRoute: SampleResultRoute,
   SavedRoute: SavedRoute,
   SourcesRoute: SourcesRoute,
   SpecialtiesRoute: SpecialtiesRoute,
@@ -229,13 +271,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

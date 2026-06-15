@@ -94,6 +94,10 @@ function SpecialtiesPage() {
             ))}
           </div>
         </div>
+        <p className="mt-3 text-xs text-muted-foreground tabular-nums" aria-live="polite">
+          Showing {list.length} of {ENRICHED_SPECIALTIES.length}{q || facet !== "all" ? " (filtered)" : ""}
+        </p>
+
       </section>
 
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-12">
