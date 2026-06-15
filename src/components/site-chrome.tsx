@@ -169,9 +169,12 @@ export function SiteFooter() {
       <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground/80 px-4">
         <Link to="/methodology" className="hover:text-foreground transition-colors">Methodology</Link>
         <Link to="/specialties" className="hover:text-foreground transition-colors">Specialties</Link>
+        <Link to="/sample-result" className="hover:text-foreground transition-colors">Sample result</Link>
         <Link to="/sources" className="hover:text-foreground transition-colors">Credibility &amp; sources</Link>
         <Link to="/saved" className="hover:text-foreground transition-colors">Saved runs</Link>
+        <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
       </div>
+
       <p className="mt-5 text-[11px] text-muted-foreground/80 max-w-2xl mx-auto px-6 leading-relaxed">
         Vocare is a utility test that offers an initial opinion on your medical career direction. It is not
         clinical advice and should not be the sole basis for irreversible career decisions. See our <Link to="/sources" className="underline hover:text-foreground">sources</Link> for the studies and frameworks behind every prediction.
