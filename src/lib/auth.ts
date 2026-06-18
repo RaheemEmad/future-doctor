@@ -24,12 +24,14 @@ function ensureInit() {
   });
 }
 
+const SERVER_SNAPSHOT: AuthState = { user: null, loading: true };
+
 export function useAuth(): AuthState {
   useEffect(ensureInit, []);
   return useSyncExternalStore(
     (cb) => { listeners.add(cb); return () => listeners.delete(cb); },
     () => state,
-    () => ({ user: null, loading: true }),
+    () => SERVER_SNAPSHOT,
   );
 }
 
