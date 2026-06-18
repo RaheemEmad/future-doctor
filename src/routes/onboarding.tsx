@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
 import { loadSession, saveSession } from "@/lib/session";
+import { pushOnboarding, pullOnboarding } from "@/lib/cloud-sync";
+import { useAuth } from "@/lib/auth";
 import {
   CAREER_ARCHETYPE_LABEL,
   GEO_INTENT_LABEL,
@@ -128,6 +130,20 @@ function OnboardingPage() {
   const current = STEPS[step];
   const totalSteps = STEPS.length;
   const value = data[current.id];
+  const { user } = useAuth();
+
+  // When a signed-in user lands here without local onboarding, hydrate from their profile.
+  useEffect(() => {
+    if (!user) return;
+    if (session.onboarding) return;
+    let cancelled = false;
+    pullOnboarding().then((remote) => {
+      if (cancelled || !remote) return;
+      setData(remote);
+      saveSession({ ...session, onboarding: remote });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [user, session]);
 
   function setField<K extends keyof OnboardingData>(key: K, val: OnboardingData[K]) {
     setData((prev) => ({ ...prev, [key]: val }));
@@ -153,8 +169,10 @@ function OnboardingPage() {
   function next() {
     if (step < totalSteps - 1) { setStep(step + 1); return; }
     saveSession({ ...session, onboarding: data });
+    pushOnboarding(data).catch(() => {});
     navigate({ to: "/assessment" });
   }
+
 
   function back() {
     if (step === 0) navigate({ to: "/" });

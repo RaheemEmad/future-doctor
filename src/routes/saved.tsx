@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Bookmark, Compass, Download, GitCompare, Info, Link2, Trash2, Upload } from "lucide-react";
+import { Bookmark, Cloud, CloudOff, Compass, Download, GitCompare, Link2, Trash2, Upload } from "lucide-react";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { deleteSaved, listSaved, type SavedRun } from "@/lib/saved";
 import { loadSession, saveSession } from "@/lib/session";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
 import { encodeShare } from "@/lib/share";
+import { useAuth } from "@/lib/auth";
+import { syncSavedRuns } from "@/lib/cloud-sync";
 
 export const Route = createFileRoute("/saved")({
   head: () => ({
@@ -25,10 +27,24 @@ function SavedPage() {
   const [runs, setRuns] = useState<SavedRun[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => { setRuns(listSaved()); }, []);
+
+  // Pull cloud runs whenever the user signs in (or on first mount if already signed in).
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setSyncing(true);
+    syncSavedRuns()
+      .then((merged) => { if (!cancelled) { setRuns(merged); setToast("Synced from your account."); } })
+      .catch(() => { if (!cancelled) setToast("Could not reach the cloud. Showing local runs."); })
+      .finally(() => { if (!cancelled) setSyncing(false); });
+    return () => { cancelled = true; };
+  }, [user]);
 
   useEffect(() => {
     if (!toast) return;
@@ -127,15 +143,20 @@ function SavedPage() {
         </p>
 
         <div className="mt-5 rounded-2xl border border-border bg-card/60 p-4 flex items-start gap-3 max-w-3xl">
-          <Info className="size-4 text-brand shrink-0 mt-0.5" />
+          {user ? <Cloud className="size-4 text-brand shrink-0 mt-0.5" /> : <CloudOff className="size-4 text-muted-foreground shrink-0 mt-0.5" />}
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Saved runs live only in <strong className="text-foreground">this browser</strong> on this device.
-            They will not appear if you switch laptops, use a private window, or clear site data.
-            To keep a run portable, copy its <em>share link</em> (the run is encoded into the URL),
-            or use <em>Export</em> to download a backup file. See the{" "}
-            <Link to="/privacy" className="underline hover:text-foreground">privacy page</Link> for the full story.
+            {user ? (
+              <>
+                Signed in as <strong className="text-foreground">{user.email}</strong>. Your saved runs and onboarding answers sync to your account. {syncing && <em>Syncing…</em>}
+              </>
+            ) : (
+              <>
+                Saved runs live only in <strong className="text-foreground">this browser</strong>. To sync across devices, <Link to="/auth" className="underline hover:text-foreground">sign in with a magic link</Link>. You can still copy a <em>share link</em> per run, or use <em>Export</em> for a backup file. See the <Link to="/privacy" className="underline hover:text-foreground">privacy page</Link> for details.
+              </>
+            )}
           </p>
         </div>
+
       </motion.section>
 
       {runs.length === 0 ? (

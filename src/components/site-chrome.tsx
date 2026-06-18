@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export function VocareLogo({ className = "size-9" }: { className?: string }) {
   return (
@@ -30,6 +31,7 @@ export function SiteNav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -98,11 +100,22 @@ export function SiteNav() {
               );
             })}
             <Link
+              to="/auth"
+              className="ml-2 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+              aria-label={user ? "Account" : "Sign in"}
+              title={user ? user.email ?? "Account" : "Sign in to sync"}
+            >
+              <User className="size-4" />
+              <span className="hidden lg:inline">{user ? "Account" : "Sign in"}</span>
+              {user && <span className="size-1.5 rounded-full bg-brand" aria-hidden />}
+            </Link>
+            <Link
               to="/onboarding"
-              className="ml-3 px-5 py-2.5 bg-brand text-brand-foreground rounded-full hover:opacity-90 hover:shadow-md hover:shadow-brand/20 active:scale-[0.98] transition-all"
+              className="ml-1 px-5 py-2.5 bg-brand text-brand-foreground rounded-full hover:opacity-90 hover:shadow-md hover:shadow-brand/20 active:scale-[0.98] transition-all"
             >
               Begin Assessment
             </Link>
+
           </div>
 
           <div className="md:hidden flex items-center gap-2">
@@ -153,7 +166,17 @@ export function SiteNav() {
                 </li>
               );
             })}
+            <li>
+              <Link
+                to="/auth"
+                className="flex items-center justify-between px-5 py-3 text-base font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <span className="inline-flex items-center gap-2"><User className="size-4" /> {user ? "Account" : "Sign in"}</span>
+                {user && <span className="size-1.5 rounded-full bg-brand" />}
+              </Link>
+            </li>
           </ul>
+
         </div>
       </div>
     </>
@@ -172,8 +195,10 @@ export function SiteFooter() {
         <Link to="/sample-result" className="hover:text-foreground transition-colors">Sample result</Link>
         <Link to="/sources" className="hover:text-foreground transition-colors">Credibility &amp; sources</Link>
         <Link to="/saved" className="hover:text-foreground transition-colors">Saved runs</Link>
+        <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
         <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
       </div>
+
 
       <p className="mt-5 text-[11px] text-muted-foreground/80 max-w-2xl mx-auto px-6 leading-relaxed">
         Vocare is a utility test that offers an initial opinion on your medical career direction. It is not

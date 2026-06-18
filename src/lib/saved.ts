@@ -32,6 +32,10 @@ export function listSaved(): SavedRun[] {
   } catch { return []; }
 }
 
+export function writeSaved(runs: SavedRun[]) {
+  storage()?.setItem(KEY, JSON.stringify(runs.slice(0, 50)));
+}
+
 export function saveRun(
   name: string,
   onboarding: OnboardingData,
@@ -53,12 +57,19 @@ export function saveRun(
   const all = listSaved();
   all.unshift(run);
   storage()?.setItem(KEY, JSON.stringify(all.slice(0, 20)));
+  // Best-effort cloud push for signed-in users.
+  if (typeof window !== "undefined") {
+    import("./cloud-sync").then((m) => m.pushRun(run)).catch(() => {});
+  }
   return run;
 }
 
 export function deleteSaved(id: string) {
   const all = listSaved().filter((r) => r.id !== id);
   storage()?.setItem(KEY, JSON.stringify(all));
+  if (typeof window !== "undefined") {
+    import("./cloud-sync").then((m) => m.deleteRun(id)).catch(() => {});
+  }
 }
 
 export function getSaved(id: string): SavedRun | undefined {
