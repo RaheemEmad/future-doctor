@@ -26,21 +26,38 @@ function PrivacyPage() {
           Honest version, no legalese. Last updated June 2026.
         </p>
 
-        <Section title="Your answers stay on your device">
+        <Section title="Your answers stay on your device by default">
           <p>
             The onboarding answers and the 16-step assessment are written to your browser's
-            <code className="mx-1 px-1.5 py-0.5 rounded bg-muted text-foreground/90 text-[12px]">localStorage</code>
-            and nowhere else. We do not have a database row with your name, your email, or your
-            responses. If you clear your browser data, switch devices, or use a private window,
-            those answers are gone.
+            <code className="mx-1 px-1.5 py-0.5 rounded bg-muted text-foreground/90 text-[12px]">localStorage</code>.
+            If you never sign in, we never have a database row with your name, your email, or your responses.
           </p>
           <p>
-            That has a real trade-off, which we want you to see clearly: <strong>saved runs are
-            not recoverable</strong> if you lose this browser. To keep results portable, use the
-            <em> share link</em> on any saved run (the entire run is encoded into the URL itself)
-            or the <em>export</em> button on the Saved page (downloads a JSON file you can re-import).
+            Trade-off, clearly: <strong>saved runs are not recoverable</strong> on this device if you
+            clear browser data, switch laptops, or use a private window. Two ways out: (1) use the
+            <em> share link</em> on any saved run (the entire run is encoded into the URL itself) or
+            the <em>export</em> button on the Saved page (downloads a JSON file you can re-import),
+            or (2) sign in below.
           </p>
         </Section>
+
+        <Section title="If you sign in (optional)">
+          <p>
+            <Link to="/auth" className="underline hover:text-foreground">Signing in with a magic link</Link>{" "}
+            stores three things in our database, scoped to your account by row-level security:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Your <strong>email address</strong> (so we can send the link).</li>
+            <li>Your <strong>onboarding answers</strong> (year, region, intent, values) so the assessment pre-fills next time.</li>
+            <li>Your <strong>saved runs</strong> (name, top match, full payload) so they appear on every device you sign in from.</li>
+          </ul>
+          <p>
+            We do not store your raw assessment answers unless you explicitly Save the run. There is
+            no marketing, no profile enrichment, no third-party share. You can sign out at any time
+            on the Account page; signing out keeps the cloud copy intact for the next sign-in.
+          </p>
+        </Section>
+
 
         <Section title="What does leave your device">
           <p>
