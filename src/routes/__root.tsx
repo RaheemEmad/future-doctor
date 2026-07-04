@@ -20,6 +20,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { ReadingProgress, BackToTop } from "@/components/reading-aids";
+import { OfflineBanner } from "@/components/site-chrome";
 
 function NotFoundComponent() {
   return (
@@ -133,6 +134,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <OfflineBanner />
       <ReadingProgress />
       <Outlet />
       <BackToTop />

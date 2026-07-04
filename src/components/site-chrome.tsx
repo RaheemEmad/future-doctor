@@ -1,7 +1,34 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, User, X } from "lucide-react";
+import { Menu, User, WifiOff, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+
+export function OfflineBanner() {
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    if (typeof navigator === "undefined") return;
+    const update = () => setOffline(!navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+  if (!offline) return null;
+  return (
+    <div role="status" className="sticky top-0 z-50 bg-warning/15 text-foreground border-b border-warning/30 text-xs">
+      <div className="max-w-7xl mx-auto px-5 py-2 flex items-center gap-2">
+        <WifiOff className="size-3.5 text-warning shrink-0" />
+        <span className="leading-relaxed">
+          You're offline. The assessment still works — answers save to this browser. Sync and AI summary resume when you reconnect.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 
 export function VocareLogo({ className = "size-9" }: { className?: string }) {
   return (
@@ -24,7 +51,7 @@ const NAV_LINKS = [
   { to: "/methodology", label: "Methodology" },
   { to: "/specialties", label: "Specialties" },
   { to: "/sources", label: "Sources" },
-  { to: "/saved", label: "Saved" },
+  { to: "/saved", label: "Library" },
 ] as const;
 
 export function SiteNav() {
@@ -194,7 +221,7 @@ export function SiteFooter() {
         <Link to="/specialties" className="hover:text-foreground transition-colors">Specialties</Link>
         <Link to="/sample-result" className="hover:text-foreground transition-colors">Sample result</Link>
         <Link to="/sources" className="hover:text-foreground transition-colors">Credibility &amp; sources</Link>
-        <Link to="/saved" className="hover:text-foreground transition-colors">Saved runs</Link>
+        <Link to="/saved" className="hover:text-foreground transition-colors">Your library</Link>
         <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
         <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
       </div>

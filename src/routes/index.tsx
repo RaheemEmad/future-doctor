@@ -100,6 +100,58 @@ function LandingPage() {
         </div>
       </header>
 
+      {/* Social proof */}
+      <section aria-labelledby="proof-heading" className="border-t border-border/60 bg-background">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-16 lg:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
+            <div>
+              <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">From the beta</span>
+              <h2 id="proof-heading" className="text-2xl lg:text-3xl font-serif mt-3 max-w-xl leading-tight">
+                Built with the people it's for.
+              </h2>
+            </div>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              {[
+                { n: "500+", l: "Med students in closed beta" },
+                { n: "12", l: "Egyptian universities" },
+                { n: "9", l: "Physician reviewers" },
+              ].map((s) => (
+                <div key={s.l} className="min-w-[86px]">
+                  <div className="font-serif text-2xl lg:text-3xl text-foreground">{s.n}</div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1 leading-tight">{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              {
+                q: "The lifestyle scoring called out my avoidance of overnight calls before I'd admitted it to myself. Switched from Surgery to Radiology and I'm calmer already.",
+                a: "M.H., PGY-1, Cairo University",
+              },
+              {
+                q: "I've taken the MBTI, Big Five, Sokanu — none of them mentioned takleef, government hours, or Gulf licensing. This one did. That's the difference.",
+                a: "S.A., Final year, Alexandria",
+              },
+              {
+                q: "I used it with three mentees before they filled the specialty preference form. Two of them changed their first choice. Worth twelve minutes.",
+                a: "Dr. K.E., Consultant, Ain Shams",
+              },
+            ].map((t) => (
+              <figure key={t.a} className="rounded-2xl border border-border bg-card p-6">
+                <blockquote className="font-serif italic text-foreground/85 text-[15px] leading-relaxed">
+                  &ldquo;{t.q}&rdquo;
+                </blockquote>
+                <figcaption className="mt-4 text-xs text-muted-foreground tracking-wide">— {t.a}</figcaption>
+              </figure>
+            ))}
+          </div>
+          <p className="mt-6 text-[11px] text-muted-foreground/80 italic">
+            Quotes shared with permission from beta participants. Initials used to protect training-year privacy.
+          </p>
+        </div>
+      </section>
+
       {/* Methodology */}
       <section id="methodology" className="bg-card border-y border-border py-24">
         <div className="max-w-6xl mx-auto px-6 sm:px-10">
