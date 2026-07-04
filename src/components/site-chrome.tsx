@@ -221,7 +221,7 @@ export function SiteFooter() {
         <Link to="/specialties" className="hover:text-foreground transition-colors">Specialties</Link>
         <Link to="/sample-result" className="hover:text-foreground transition-colors">Sample result</Link>
         <Link to="/sources" className="hover:text-foreground transition-colors">Credibility &amp; sources</Link>
-        <Link to="/saved" className="hover:text-foreground transition-colors">Saved runs</Link>
+        <Link to="/saved" className="hover:text-foreground transition-colors">Your library</Link>
         <Link to="/auth" className="hover:text-foreground transition-colors">Sign in</Link>
         <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
       </div>
