@@ -76,7 +76,13 @@ function AssessmentPage() {
 
   if (!session.onboarding || !q || !persona) return null;
 
+  const answeredCount = questions.reduce((n, qq) => n + (session.answers[qq.id] !== undefined ? 1 : 0), 0);
   const progress = ((step + (selected !== undefined ? 1 : 0)) / total) * 100;
+  const secondsPerQ = 40;
+  const remaining = Math.max(0, total - step - (selected !== undefined ? 1 : 0));
+  const minutesLeft = Math.max(1, Math.round((remaining * secondsPerQ) / 60));
+  const midpoint = Math.floor(total / 2);
+  const atCheckpoint = step === midpoint && selected === undefined && answeredCount >= midpoint;
 
 
   return (
@@ -94,13 +100,29 @@ function AssessmentPage() {
             </div>
           </div>
 
+          {atCheckpoint && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 rounded-2xl border border-calm/30 bg-calm-soft/50 px-4 py-3.5"
+              role="status"
+            >
+              <div className="text-[10px] uppercase tracking-[0.18em] text-calm font-semibold">Halfway there</div>
+              <p className="text-sm text-foreground/85 mt-1 leading-relaxed">
+                You've answered {answeredCount} of {total}. Your top three specialties are already forming — the next block sharpens lifestyle and identity weights. Roughly {minutesLeft} min left.
+              </p>
+            </motion.div>
+          )}
+
 
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
                 {q.category}
               </span>
-              <span className="text-xs text-muted-foreground mt-1">Question {step + 1} of {total}</span>
+              <span className="text-xs text-muted-foreground mt-1">
+                Question {step + 1} of {total} · ~{minutesLeft} min left
+              </span>
             </div>
             <div className="w-40 h-1 bg-muted rounded-full overflow-hidden">
               <motion.div
