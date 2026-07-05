@@ -62,6 +62,15 @@ function SpecialtiesPage() {
     });
   }, [q, facet]);
 
+  // Debounced filter analytics.
+  const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (filterTimer.current) clearTimeout(filterTimer.current);
+    filterTimer.current = setTimeout(() => trackSpecialtyFilter(facet, q), 500);
+    return () => { if (filterTimer.current) clearTimeout(filterTimer.current); };
+  }, [facet, q]);
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
