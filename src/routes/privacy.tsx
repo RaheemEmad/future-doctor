@@ -8,7 +8,10 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "What Vocare stores, where it lives, and what leaves your device. Plain language, no dark patterns." },
       { property: "og:title", content: "Privacy — Vocare" },
       { property: "og:description", content: "What Vocare stores, where it lives, and what leaves your device." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/privacy" }],
   }),
   component: PrivacyPage,
 });
