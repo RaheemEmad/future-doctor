@@ -33,6 +33,7 @@ export const Route = createFileRoute("/results")({
     meta: [
       { title: "Your results — Vocare" },
       { name: "description", content: "Your personalized medical specialty compatibility profile." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: ResultsPage,
