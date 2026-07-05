@@ -156,6 +156,7 @@ function ResultsPage() {
       },
     }).then((res) => {
       setAiSummary(res.text);
+      trackAiSummary();
       try { window.sessionStorage.setItem(cacheKey, res.text); } catch {}
     }).catch(() => {
       // silent fallback to local narrative
