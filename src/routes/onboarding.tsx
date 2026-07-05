@@ -168,9 +168,11 @@ function OnboardingPage() {
   }
 
   function next() {
+    trackOnboardingStepComplete(step, String(current.id));
     if (step < totalSteps - 1) { setStep(step + 1); return; }
     saveSession({ ...session, onboarding: data });
     pushOnboarding(data).catch(() => {});
+    trackOnboardingComplete(data.geographicIntent || undefined);
     navigate({ to: "/assessment" });
   }
 
