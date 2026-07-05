@@ -8,7 +8,37 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Vocare · Find your calling in medicine, built for Egyptian medical students" },
       { name: "description", content: "A psychometric assessment for medical students in Egypt and worldwide. Map your cognitive style, emotional resilience, and lifestyle vision to 40+ specialties, with Egypt-specific career, income, and migration insight." },
-
+      { property: "og:title", content: "Vocare · Find your calling in medicine" },
+      { property: "og:description", content: "A psychometric assessment mapping mind, life, and identity to 40+ medical specialties." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/" },
+    ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Vocare",
+          url: "https://future-doctor.lovable.app/",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://future-doctor.lovable.app/specialties?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Vocare",
+          url: "https://future-doctor.lovable.app/",
+          description: "Psychometric medical specialty matching for medical students.",
+        }),
+      },
     ],
   }),
   component: LandingPage,
