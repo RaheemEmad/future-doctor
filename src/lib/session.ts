@@ -7,6 +7,12 @@ export type SessionState = {
   onboarding?: OnboardingData;
   answers: Record<string, number>;
   result?: AssessmentResult;
+  // Server-verified provenance (present when result was computed server-side).
+  verification?: {
+    signature: string;
+    computedAt: number;
+    source: "server" | "local";
+  };
 };
 
 function safeStorage(): Storage | null {

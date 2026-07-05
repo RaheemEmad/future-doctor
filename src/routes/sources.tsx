@@ -10,7 +10,10 @@ export const Route = createFileRoute("/sources")({
       { name: "description", content: "Every framework, study, dataset, and reference that shaped Vocare's specialty matching, trait modeling, regret signals, and regional opportunity scoring." },
       { property: "og:title", content: "Credibility & Sources · Vocare" },
       { property: "og:description", content: "Full bibliography of the studies, surveys, and frameworks behind our predictions." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/sources" },
     ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/sources" }],
   }),
   component: SourcesPage,
 });

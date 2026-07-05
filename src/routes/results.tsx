@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "framer-motion";
 import {
@@ -23,6 +23,13 @@ import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 import { generateSummary } from "@/lib/api/summary.functions";
 import { derivePersona } from "@/lib/persona";
 import { generateResultsPdf } from "@/lib/pdf";
+import {
+  trackAiSummary,
+  trackResultExported,
+  trackResultSaved,
+  trackResultShared,
+  trackResultViewed,
+} from "@/lib/analytics";
 
 
 type Search = { s?: string };
@@ -33,6 +40,7 @@ export const Route = createFileRoute("/results")({
     meta: [
       { title: "Your results — Vocare" },
       { name: "description", content: "Your personalized medical specialty compatibility profile." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: ResultsPage,
@@ -148,6 +156,7 @@ function ResultsPage() {
       },
     }).then((res) => {
       setAiSummary(res.text);
+      trackAiSummary();
       try { window.sessionStorage.setItem(cacheKey, res.text); } catch {}
     }).catch(() => {
       // silent fallback to local narrative
@@ -158,6 +167,17 @@ function ResultsPage() {
 
   const result = liveResult;
   const top = result.matches[0];
+  const verified = session.verification?.source === "server" && !!session.verification.signature;
+
+  // Track a single result_viewed once we have a top match rendered.
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (viewedRef.current) return;
+    if (!top) return;
+    viewedRef.current = true;
+    trackResultViewed(top.specialty.id, !!shareToken);
+  }, [top, shareToken]);
+
 
   const radarData = [
     { axis: "Cognitive", value: top.cognitiveFit },
@@ -190,6 +210,8 @@ function ResultsPage() {
       ? `${window.location.origin}/results?s=${token}`
       : `/results?s=${token}`;
     const text = `My top Vocare match is ${top.specialty.name} (${top.compatibility}%).`;
+    trackResultShared();
+    trackResultExported("link");
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({ title: "My Vocare result", text, url });
@@ -209,11 +231,9 @@ function ResultsPage() {
     const run = saveRun(saveName, session.onboarding, session.answers, result);
     setShowSave(false);
     setSaveName("");
+    trackResultSaved();
     flash(`Saved as "${run.name}".`);
   }
-
-
-
 
   function downloadPdf() {
     if (!session.onboarding || !persona) return;
@@ -226,6 +246,7 @@ function ResultsPage() {
       });
       const safeName = top.specialty.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       doc.save(`vocare-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      trackResultExported("pdf");
       flash("PDF downloaded.");
     } catch {
       flash("Couldn't generate the PDF. Try again.");
@@ -371,7 +392,18 @@ function ResultsPage() {
             <div className="relative">
               <div className="flex items-start justify-between gap-6 mb-10">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] opacity-70 mb-2">Top match</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="text-[10px] uppercase tracking-[0.22em] opacity-70">Top match</div>
+                    {verified ? (
+                      <span title={`Server-signed at ${new Date(session.verification!.computedAt).toLocaleString()}`} className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
+                        <Check className="size-3" /> Verified
+                      </span>
+                    ) : (
+                      <span title="Scored on your device (offline fallback). Reload with a connection to re-verify." className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider opacity-80">
+                        Local
+                      </span>
+                    )}
+                  </div>
                   <h2 className="text-4xl lg:text-5xl font-serif">{top.specialty.name}</h2>
                   <p className="text-sm opacity-70 mt-2 max-w-md">{top.specialty.blurb}</p>
                 </div>

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /assessment
+Disallow: /results
+Disallow: /saved
+Disallow: /compare
+
+Sitemap: https://future-doctor.lovable.app/sitemap.xml

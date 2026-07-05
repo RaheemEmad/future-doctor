@@ -1,18 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
+import { trackSpecialtyFilter } from "@/lib/analytics";
 import { Search, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/specialties")({
   head: () => ({
     meta: [
-      { title: "Specialties · Vocare" },
+      { title: "Specialties · Vocare — 40+ medical specialties compared" },
       { name: "description", content: "Browse 40+ medical specialties with lifestyle, burnout, income, opportunity, and AI exposure data." },
       { property: "og:title", content: "Specialties · Vocare" },
       { property: "og:description", content: "40+ specialties scored on lifestyle, burnout, opportunity, and AI exposure." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/specialties" },
     ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/specialties" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Medical specialties compared — Vocare",
+        url: "https://future-doctor.lovable.app/specialties",
+        description: "40+ medical specialties scored on lifestyle, burnout, income, opportunity, and AI exposure.",
+        numberOfItems: ENRICHED_SPECIALTIES.length,
+      }),
+    }],
   }),
   component: SpecialtiesPage,
 });
@@ -46,6 +61,15 @@ function SpecialtiesPage() {
       );
     });
   }, [q, facet]);
+
+  // Debounced filter analytics.
+  const filterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (filterTimer.current) clearTimeout(filterTimer.current);
+    filterTimer.current = setTimeout(() => trackSpecialtyFilter(facet, q), 500);
+    return () => { if (filterTimer.current) clearTimeout(filterTimer.current); };
+  }, [facet, q]);
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">

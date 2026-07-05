@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/site-chrome";
 import { loadSession, saveSession } from "@/lib/session";
 import { pushOnboarding, pullOnboarding } from "@/lib/cloud-sync";
 import { useAuth } from "@/lib/auth";
+import { trackOnboardingStart, trackOnboardingStepComplete, trackOnboardingComplete } from "@/lib/analytics";
 import {
   CAREER_ARCHETYPE_LABEL,
   GEO_INTENT_LABEL,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/onboarding")({
     meta: [
       { title: "Onboarding — Vocare" },
       { name: "description", content: "Tell us about your life so we can map your cognitive and emotional fit to medical specialties." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: OnboardingPage,
@@ -131,6 +133,7 @@ function OnboardingPage() {
   const totalSteps = STEPS.length;
   const value = data[current.id];
   const { user } = useAuth();
+  useEffect(() => { trackOnboardingStart(); }, []);
 
   // When a signed-in user lands here without local onboarding, hydrate from their profile.
   useEffect(() => {
@@ -167,9 +170,11 @@ function OnboardingPage() {
   }
 
   function next() {
+    trackOnboardingStepComplete(step, String(current.id));
     if (step < totalSteps - 1) { setStep(step + 1); return; }
     saveSession({ ...session, onboarding: data });
     pushOnboarding(data).catch(() => {});
+    trackOnboardingComplete(data.geographicIntent || undefined);
     navigate({ to: "/assessment" });
   }
 

@@ -10,7 +10,10 @@ export const Route = createFileRoute("/methodology")({
       { name: "description", content: "How Vocare scores medical specialty compatibility: traits, meaning, opportunity, regret risk, and lifecycle modeling." },
       { property: "og:title", content: "Methodology · Vocare" },
       { property: "og:description", content: "How we model physician life-fit, not just specialty prestige." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/methodology" },
     ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/methodology" }],
   }),
   component: MethodologyPage,
 });
