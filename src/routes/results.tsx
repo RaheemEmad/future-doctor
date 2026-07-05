@@ -23,6 +23,13 @@ import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 import { generateSummary } from "@/lib/api/summary.functions";
 import { derivePersona } from "@/lib/persona";
 import { generateResultsPdf } from "@/lib/pdf";
+import {
+  trackAiSummary,
+  trackResultExported,
+  trackResultSaved,
+  trackResultShared,
+  trackResultViewed,
+} from "@/lib/analytics";
 
 
 type Search = { s?: string };
