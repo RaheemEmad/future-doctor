@@ -21,6 +21,7 @@ export const Route = createFileRoute("/onboarding")({
     meta: [
       { title: "Onboarding — Vocare" },
       { name: "description", content: "Tell us about your life so we can map your cognitive and emotional fit to medical specialties." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: OnboardingPage,
