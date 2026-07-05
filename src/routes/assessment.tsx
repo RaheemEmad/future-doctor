@@ -1,13 +1,21 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Info, UserCircle2 } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
 import { QuestionGlyph } from "@/components/question-glyph";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { aggregateTraits, score } from "@/lib/scoring";
+import { computeResult } from "@/lib/scoring.functions";
 import { loadSession, saveSession } from "@/lib/session";
 import { derivePersona, getActiveQuestions } from "@/lib/persona";
+import {
+  attachAbandonBeacon,
+  trackAssessmentComplete,
+  trackAssessmentStart,
+  trackQuestionAnswered,
+} from "@/lib/analytics";
 
 
 export const Route = createFileRoute("/assessment")({
@@ -15,6 +23,7 @@ export const Route = createFileRoute("/assessment")({
     meta: [
       { title: "Assessment — Vocare" },
       { name: "description", content: "A reflective psychometric assessment that maps your inner world to medical specialties." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AssessmentPage,
@@ -24,6 +33,11 @@ function AssessmentPage() {
   const navigate = useNavigate();
   const [session, setSession] = useState(() => loadSession());
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const startedAt = useRef<number>(Date.now());
+  const stepStartAt = useRef<number>(Date.now());
+  const stateRef = useRef({ lastIndex: 0, total: 0, completed: false });
+  const computeResultFn = useServerFn(computeResult);
 
   useEffect(() => {
     if (!session.onboarding) {
@@ -37,6 +51,22 @@ function AssessmentPage() {
   const q = questions[Math.min(step, Math.max(0, total - 1))];
   const selected = q ? session.answers[q.id] : undefined;
 
+  // Fire assessment_start once on mount when we know the total.
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current || total === 0) return;
+    startedRef.current = true;
+    trackAssessmentStart(total);
+    startedAt.current = Date.now();
+    stepStartAt.current = Date.now();
+  }, [total]);
+
+  // Abandon beacon.
+  useEffect(() => {
+    stateRef.current.total = total;
+    return attachAbandonBeacon(() => stateRef.current);
+  }, [total]);
+  useEffect(() => { stateRef.current.lastIndex = step; }, [step]);
 
   const reflectivePrompts = useMemo(
     () => [
@@ -54,18 +84,45 @@ function AssessmentPage() {
     saveSession(next);
   }
 
-  function goNext() {
-    if (selected === undefined) return;
+  async function goNext() {
+    if (selected === undefined || submitting) return;
+    // Track time-on-step for the just-answered question.
+    trackQuestionAnswered(step, q.id, Date.now() - stepStartAt.current);
+    stepStartAt.current = Date.now();
+
     if (step < total - 1) {
       setStep(step + 1);
       return;
     }
     // finalize
+    setSubmitting(true);
     const choices = questions.map((qq) => qq.choices[session.answers[qq.id] ?? 0]);
-    const traits = aggregateTraits(choices);
-    const result = score(traits, session.onboarding!, choices);
-    const finalSession = { ...session, result };
+    const answers: Record<string, number> = {};
+    for (const qq of questions) answers[qq.id] = session.answers[qq.id] ?? 0;
+
+    let result;
+    let verification: import("@/lib/session").SessionState["verification"];
+    try {
+      const server = await computeResultFn({ data: { onboarding: session.onboarding!, answers } });
+      result = server.result;
+      verification = { signature: server.signature, computedAt: server.computedAt, source: "server" };
+    } catch (err) {
+      // Offline / server error — fall back to local scoring.
+      console.warn("[scoring] server compute failed, falling back to local", err);
+      const traits = aggregateTraits(choices);
+      result = score(traits, session.onboarding!, choices);
+      verification = { signature: "", computedAt: Date.now(), source: "local" };
+    }
+
+    const finalSession = { ...session, result, verification };
     saveSession(finalSession);
+    stateRef.current.completed = true;
+    trackAssessmentComplete(
+      Date.now() - startedAt.current,
+      result.matches[0]?.specialty.id ?? "unknown",
+      verification.source === "server",
+    );
+    setSubmitting(false);
     navigate({ to: "/results" });
   }
 
@@ -73,6 +130,7 @@ function AssessmentPage() {
     if (step === 0) navigate({ to: "/onboarding" });
     else setStep(step - 1);
   }
+
 
   if (!session.onboarding || !q || !persona) return null;
 
