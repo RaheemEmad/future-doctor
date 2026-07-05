@@ -6,6 +6,7 @@ import { SiteNav } from "@/components/site-chrome";
 import { loadSession, saveSession } from "@/lib/session";
 import { pushOnboarding, pullOnboarding } from "@/lib/cloud-sync";
 import { useAuth } from "@/lib/auth";
+import { trackOnboardingStart, trackOnboardingStepComplete, trackOnboardingComplete } from "@/lib/analytics";
 import {
   CAREER_ARCHETYPE_LABEL,
   GEO_INTENT_LABEL,
