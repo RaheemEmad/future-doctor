@@ -166,6 +166,17 @@ function ResultsPage() {
 
   const result = liveResult;
   const top = result.matches[0];
+  const verified = session.verification?.source === "server" && !!session.verification.signature;
+
+  // Track a single result_viewed once we have a top match rendered.
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (viewedRef.current) return;
+    if (!top) return;
+    viewedRef.current = true;
+    trackResultViewed(top.specialty.id, !!shareToken);
+  }, [top, shareToken]);
+
 
   const radarData = [
     { axis: "Cognitive", value: top.cognitiveFit },
