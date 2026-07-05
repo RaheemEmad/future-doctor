@@ -14,8 +14,9 @@ import { syncSavedRuns } from "@/lib/cloud-sync";
 export const Route = createFileRoute("/saved")({
   head: () => ({
     meta: [
-      { title: "Saved runs — Vocare" },
+      { title: "Library — Vocare" },
       { name: "description", content: "Review, reload, and compare your saved assessments." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: SavedPage,
