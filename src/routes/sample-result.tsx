@@ -67,6 +67,7 @@ function buildSampleAnswers(): Record<string, number> {
 }
 
 function SampleResultPage() {
+  useEffect(() => { trackSampleResultViewed(); }, []);
   const { result, topMatch } = useMemo(() => {
     const answers = buildSampleAnswers();
     const choices = Object.entries(answers).map(([qid, idx]) => {
