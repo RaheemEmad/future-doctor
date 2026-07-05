@@ -210,6 +210,8 @@ function ResultsPage() {
       ? `${window.location.origin}/results?s=${token}`
       : `/results?s=${token}`;
     const text = `My top Vocare match is ${top.specialty.name} (${top.compatibility}%).`;
+    trackResultShared();
+    trackResultExported("link");
     if (typeof navigator !== "undefined" && (navigator as any).share) {
       try {
         await (navigator as any).share({ title: "My Vocare result", text, url });
@@ -229,11 +231,9 @@ function ResultsPage() {
     const run = saveRun(saveName, session.onboarding, session.answers, result);
     setShowSave(false);
     setSaveName("");
+    trackResultSaved();
     flash(`Saved as "${run.name}".`);
   }
-
-
-
 
   function downloadPdf() {
     if (!session.onboarding || !persona) return;
@@ -246,6 +246,7 @@ function ResultsPage() {
       });
       const safeName = top.specialty.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       doc.save(`vocare-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      trackResultExported("pdf");
       flash("PDF downloaded.");
     } catch {
       flash("Couldn't generate the PDF. Try again.");
