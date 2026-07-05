@@ -11,6 +11,7 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { title: "Sign in — Vocare" },
       { name: "description", content: "Sign in with a magic link to sync your saved runs and onboarding profile across devices." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AuthPage,
