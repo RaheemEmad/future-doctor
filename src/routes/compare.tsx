@@ -17,6 +17,7 @@ export const Route = createFileRoute("/compare")({
     meta: [
       { title: "Compare results — Vocare" },
       { name: "description", content: "Side-by-side comparison of saved assessment runs." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: ComparePage,
