@@ -133,6 +133,7 @@ function OnboardingPage() {
   const totalSteps = STEPS.length;
   const value = data[current.id];
   const { user } = useAuth();
+  useEffect(() => { trackOnboardingStart(); }, []);
 
   // When a signed-in user lands here without local onboarding, hydrate from their profile.
   useEffect(() => {
