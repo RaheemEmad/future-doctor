@@ -392,7 +392,18 @@ function ResultsPage() {
             <div className="relative">
               <div className="flex items-start justify-between gap-6 mb-10">
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] opacity-70 mb-2">Top match</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="text-[10px] uppercase tracking-[0.22em] opacity-70">Top match</div>
+                    {verified ? (
+                      <span title={`Server-signed at ${new Date(session.verification!.computedAt).toLocaleString()}`} className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
+                        <Check className="size-3" /> Verified
+                      </span>
+                    ) : (
+                      <span title="Scored on your device (offline fallback). Reload with a connection to re-verify." className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider opacity-80">
+                        Local
+                      </span>
+                    )}
+                  </div>
                   <h2 className="text-4xl lg:text-5xl font-serif">{top.specialty.name}</h2>
                   <p className="text-sm opacity-70 mt-2 max-w-md">{top.specialty.blurb}</p>
                 </div>
