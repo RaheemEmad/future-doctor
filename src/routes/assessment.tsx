@@ -292,10 +292,10 @@ function AssessmentPage() {
             </button>
             <button
               onClick={goNext}
-              disabled={selected === undefined}
+              disabled={selected === undefined || submitting}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand text-brand-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              {step === total - 1 ? "See my results" : "Next"} <ArrowRight className="size-4" />
+              {submitting ? "Scoring…" : step === total - 1 ? "See my results" : "Next"} <ArrowRight className="size-4" />
             </button>
           </div>
         </div>
