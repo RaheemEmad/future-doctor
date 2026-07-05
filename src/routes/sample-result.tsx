@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { QUESTIONS } from "@/lib/questions";
 import { aggregateTraits, score } from "@/lib/scoring";
+import { trackSampleResultViewed } from "@/lib/analytics";
 import type { Choice, OnboardingData } from "@/lib/types";
 
 export const Route = createFileRoute("/sample-result")({
@@ -13,7 +14,10 @@ export const Route = createFileRoute("/sample-result")({
       { name: "description", content: "See what a full Vocare result looks like before you spend 12 minutes on the assessment." },
       { property: "og:title", content: "Sample result — Vocare" },
       { property: "og:description", content: "A worked example of a Vocare specialty match, with reasoning." },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: "https://future-doctor.lovable.app/sample-result" },
     ],
+    links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/sample-result" }],
   }),
   component: SampleResultPage,
 });
