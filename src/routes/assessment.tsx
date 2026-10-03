@@ -175,8 +175,9 @@ function AssessmentPage() {
 
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
-              <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
-                {q.category}
+              <span className="inline-flex items-center gap-2 hud-tag text-monitor">
+                <span className="size-1.5 rounded-full bg-vitals animate-vitals" />
+                CH {String(step + 1).padStart(2, "0")}/{String(total).padStart(2, "0")} · {q.category}
               </span>
               <span className="text-xs text-muted-foreground mt-1">
                 Question {step + 1} of {total} · ~{minutesLeft} min left

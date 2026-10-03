@@ -104,6 +104,10 @@ export function SiteNav() {
               </span>
             </div>
           </Link>
+          <span className="hidden lg:inline-flex items-center gap-1.5 ml-4 px-2 py-1 rounded-md border border-monitor/20 bg-monitor/5 text-monitor hud-tag">
+            <span className="size-1.5 rounded-full bg-vitals animate-vitals" />
+            Registry live · 40 pathways
+          </span>
 
           <div className="hidden md:flex items-center gap-1 text-sm font-medium">
             {NAV_LINKS.map((l) => {

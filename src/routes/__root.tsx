@@ -44,7 +44,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   const errorId = (typeof window !== "undefined" ? window.crypto?.randomUUID?.().slice(0, 8) : null)
