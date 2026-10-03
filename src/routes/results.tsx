@@ -264,7 +264,7 @@ function ResultsPage() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-6xl mx-auto px-6 sm:px-10 pt-12 lg:pt-20 pb-10"
       >
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Your verdict</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Your verdict</span>
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight max-w-3xl text-balance">
           Your path of <span className="italic">highest alignment.</span>
         </h1>
@@ -285,7 +285,7 @@ function ResultsPage() {
             </div>
           )}
           {aiSummary && (
-            <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-brand/70">
+            <div className="mt-3 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] font-mono text-brand/70">
               <Sparkles className="size-3" /> AI-personalized
             </div>
           )}
@@ -393,7 +393,7 @@ function ResultsPage() {
               <div className="flex items-start justify-between gap-6 mb-10">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="text-[10px] uppercase tracking-[0.22em] opacity-70">Top match</div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] font-mono opacity-70">Top match</div>
                     {verified ? (
                       <span title={`Server-signed at ${new Date(session.verification!.computedAt).toLocaleString()}`} className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
                         <Check className="size-3" /> Verified
@@ -409,7 +409,7 @@ function ResultsPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <div className="text-6xl font-serif leading-none">{top.compatibility}<span className="text-2xl">%</span></div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] opacity-70 mt-1">Match</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] font-mono opacity-70 mt-1">Match</div>
                 </div>
               </div>
               <p className="text-base lg:text-lg leading-relaxed opacity-90 max-w-xl">
@@ -426,7 +426,7 @@ function ResultsPage() {
           </div>
 
           <div className="lg:col-span-5 rounded-3xl border border-border bg-card p-8 min-h-[420px] flex flex-col">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">Six-axis alignment</div>
+            <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-muted-foreground mb-3">Six-axis alignment</div>
             <div className="flex-1 min-h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
@@ -614,17 +614,17 @@ function ResultsPage() {
         <div className="rounded-3xl border border-border bg-card p-8 lg:p-10">
           <div className="grid lg:grid-cols-3 gap-8">
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-brand mb-2">A day in the life</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-brand mb-2">A day in the life</div>
               <p className="text-sm leading-relaxed text-muted-foreground">{top.specialty.dayInLife}</p>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-brand mb-2">Hidden trade-offs</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-brand mb-2">Hidden trade-offs</div>
               <ul className="text-sm space-y-1.5 text-muted-foreground">
                 {top.specialty.downsides.map((d) => <li key={d}>— {d}</li>)}
               </ul>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-brand mb-2">Realities</div>
+              <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-brand mb-2">Realities</div>
               <ul className="text-sm space-y-1.5 text-muted-foreground">
                 <li>Training: {top.specialty.trainingYears}</li>
                 <li>Income band: {"$".repeat(top.specialty.incomeBand)}</li>
@@ -731,7 +731,7 @@ function Stat({ label, value, inverse }: { label: string; value: number; inverse
     : "bg-white/80";
   return (
     <div className="rounded-2xl bg-white/10 border border-white/15 p-4 backdrop-blur-sm">
-      <div className="text-[10px] uppercase tracking-[0.18em] opacity-70 mb-2">{label}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] font-mono opacity-70 mb-2">{label}</div>
       <div className="flex items-baseline gap-2 mb-2">
         <span className="text-2xl font-serif">{value}<span className="text-sm opacity-70">%</span></span>
       </div>
@@ -748,7 +748,7 @@ function Panel({ tone, title, items }: { tone: "positive" | "warn"; title: strin
   const Icon = tone === "positive" ? Check : X;
   return (
     <div className={`rounded-3xl border p-8 ${cls}`}>
-      <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">{title}</div>
+      <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-muted-foreground mb-4">{title}</div>
       <ul className="space-y-3">
         {items.map((it) => (
           <li key={it} className="flex gap-3 text-sm leading-relaxed">
@@ -768,7 +768,7 @@ function MatchCard({ match }: { match: SpecialtyMatch }) {
     <div className="rounded-2xl border border-border bg-card p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">{m.compatibility}% match</div>
+          <div className="text-xs text-brand font-semibold tracking-[0.18em] uppercase font-mono">{m.compatibility}% match</div>
           <h4 className="text-xl font-serif mt-1">{m.specialty.name}</h4>
         </div>
         <div className="text-xs text-muted-foreground text-right">{m.specialty.trainingYears}</div>
@@ -845,7 +845,7 @@ function ScoreBreakdown({ match, title, defaultOpen = true, compact = false }: {
 
           {match.penalties.length > 0 && (
             <div className="mt-5">
-              <div className="text-[10px] uppercase tracking-[0.22em] text-warning mb-2 flex items-center gap-2">
+              <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-warning mb-2 flex items-center gap-2">
                 <AlertTriangle className="size-3.5" /> Penalties applied
               </div>
               <ul className="space-y-2">
@@ -888,7 +888,7 @@ function Bar({ label, value, tone }: { label: string; value: number; tone?: "war
 function OutlookBar({ label, value, tone }: { label: string; value: number; tone?: "warn" }) {
   return (
     <div className="rounded-2xl border border-border bg-background p-4">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">{label}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-muted-foreground mb-2">{label}</div>
       <div className="flex items-baseline gap-1 mb-2">
         <span className="text-2xl font-serif">{Math.round(value / 10)}</span>
         <span className="text-xs text-muted-foreground">/ 10</span>
@@ -903,7 +903,7 @@ function OutlookBar({ label, value, tone }: { label: string; value: number; tone
 function PredictionCard({ title, value, body, warn }: { title: string; value: string; body: string; warn?: boolean }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
-      <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">{title}</div>
+      <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-muted-foreground mb-2">{title}</div>
       <div className={`text-3xl font-serif mb-3 ${warn ? "text-warning" : ""}`}>{value}</div>
       <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
     </div>

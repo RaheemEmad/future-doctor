@@ -58,7 +58,7 @@ function LandingPage() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-8"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-soft border border-brand/10 text-brand text-[11px] font-semibold tracking-[0.15em] uppercase">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-soft border border-brand/10 text-brand text-[11px] font-semibold tracking-[0.15em] uppercase font-mono">
               Built for Egyptian & international medical students
             </div>
             <h1 className="text-5xl lg:text-7xl font-serif leading-[1.05] text-balance">
@@ -132,7 +132,7 @@ function LandingPage() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="size-2 bg-calm rounded-full animate-pulse" />
-                <span className="text-[10px] font-bold text-calm uppercase tracking-[0.18em]">Real-time insight</span>
+                <span className="text-[10px] font-bold text-calm uppercase tracking-[0.18em] font-mono">Real-time insight</span>
               </div>
               <p className="text-sm italic font-serif text-muted-foreground leading-relaxed">
                 "Your tolerance for diagnostic uncertainty suggests a higher affinity for Emergency Medicine over Pathology."
@@ -147,7 +147,7 @@ function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 sm:px-10 py-16 lg:py-20">
           <div className="flex flex-wrap items-end justify-between gap-6 mb-10">
             <div>
-              <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">From the beta</span>
+              <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase font-mono">From the beta</span>
               <h2 id="proof-heading" className="text-2xl lg:text-3xl font-serif mt-3 max-w-xl leading-tight">
                 Built with the people it's for.
               </h2>
@@ -160,7 +160,7 @@ function LandingPage() {
               ].map((s) => (
                 <div key={s.l} className="min-w-[86px]">
                   <div className="font-serif text-2xl lg:text-3xl text-foreground">{s.n}</div>
-                  <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1 leading-tight">{s.l}</div>
+                  <div className="text-[10px] uppercase tracking-[0.16em] font-mono text-muted-foreground mt-1 leading-tight">{s.l}</div>
                 </div>
               ))}
             </div>
@@ -198,7 +198,7 @@ function LandingPage() {
       <section id="methodology" className="bg-card border-y border-border py-24">
         <div className="max-w-6xl mx-auto px-6 sm:px-10">
           <div className="max-w-2xl mb-14">
-            <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">The Methodology</span>
+            <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase font-mono">The Methodology</span>
             <h2 className="text-3xl lg:text-5xl font-serif mt-4 leading-tight">
               Not a personality quiz. A psychometric map of who you'll be at fifty.
             </h2>
@@ -226,7 +226,7 @@ function LandingPage() {
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-6 sm:px-10">
           <div className="text-center mb-10">
-            <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase">A sample question</span>
+            <span className="text-xs text-brand font-semibold tracking-[0.18em] uppercase font-mono">A sample question</span>
             <h2 className="text-3xl lg:text-4xl font-serif mt-4">The weight of intervention</h2>
           </div>
           <p className="text-lg text-muted-foreground mb-8 text-center italic font-serif">
@@ -298,11 +298,11 @@ function RadialPreview() {
           <animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" />
         </path>
       </svg>
-      <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Emotional</div>
-      <div className="absolute top-1/4 -right-6 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Cognitive</div>
-      <div className="absolute bottom-2 right-4 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Lifestyle</div>
-      <div className="absolute bottom-2 left-4 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Relational</div>
-      <div className="absolute top-1/4 -left-8 text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Identity</div>
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-medium uppercase tracking-[0.2em] font-mono text-muted-foreground">Emotional</div>
+      <div className="absolute top-1/4 -right-6 text-[9px] font-medium uppercase tracking-[0.2em] font-mono text-muted-foreground">Cognitive</div>
+      <div className="absolute bottom-2 right-4 text-[9px] font-medium uppercase tracking-[0.2em] font-mono text-muted-foreground">Lifestyle</div>
+      <div className="absolute bottom-2 left-4 text-[9px] font-medium uppercase tracking-[0.2em] font-mono text-muted-foreground">Relational</div>
+      <div className="absolute top-1/4 -left-8 text-[9px] font-medium uppercase tracking-[0.2em] font-mono text-muted-foreground">Identity</div>
     </div>
   );
 }

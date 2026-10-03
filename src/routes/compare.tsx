@@ -45,7 +45,7 @@ function ComparePage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
       <section className="max-w-6xl mx-auto px-6 sm:px-10 pt-10 lg:pt-14">
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Side by side</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Side by side</span>
         <h1 className="text-4xl lg:text-5xl font-serif mt-4 leading-tight max-w-3xl text-balance">
           Compare your saved runs.
         </h1>
@@ -82,7 +82,7 @@ function ComparePage() {
                 </p>
 
                 <div className="rounded-2xl bg-brand text-brand-foreground p-5 mb-5">
-                  <div className="text-[10px] uppercase tracking-[0.22em] opacity-70 mb-1">Top match</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] font-mono opacity-70 mb-1">Top match</div>
                   <div className="flex items-end justify-between gap-3">
                     <h3 className="font-serif text-2xl leading-tight">{result.matches[0]?.specialty.name}</h3>
                     <div className="text-3xl font-serif">{result.matches[0]?.compatibility}<span className="text-base">%</span></div>
@@ -104,7 +104,7 @@ function ComparePage() {
                 {/* Lifecycle sparkline */}
                 {result.matches[0]?.specialty.lifecycle && (
                   <div className="mb-5">
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">Yr 1 → 30 trajectory</div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-muted-foreground mb-1.5">Yr 1 → 30 trajectory</div>
                     <div className="h-14">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={result.matches[0].specialty.lifecycle}>
@@ -123,7 +123,7 @@ function ComparePage() {
                 )}
 
                 <div className="space-y-2 mb-5 pt-4 border-t border-border/60">
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1">Other matches</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-muted-foreground mb-1">Other matches</div>
                   {result.matches.slice(1, 4).map((m: SpecialtyMatch) => (
                     <div key={m.specialty.id} className="flex items-center justify-between text-sm">
                       <span className="truncate text-foreground/80">{m.specialty.name}</span>
@@ -140,7 +140,7 @@ function ComparePage() {
 
                 {result.tensions.length > 0 && (
                   <div className="mt-5 pt-4 border-t border-border/60">
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-warning mb-2">Tensions</div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] font-mono text-warning mb-2">Tensions</div>
                     <ul className="space-y-1.5 text-xs text-foreground/80">
                       {result.tensions.slice(0, 2).map((t: string) => <li key={t}>— {t}</li>)}
                     </ul>

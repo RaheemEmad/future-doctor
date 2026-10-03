@@ -99,7 +99,7 @@ export function SiteNav() {
             <VocareLogo className="size-9 transition-transform group-hover:scale-105" />
             <div className="flex flex-col leading-none">
               <span className="font-serif text-xl tracking-tight">Vocare</span>
-              <span className="hidden sm:block text-[9px] uppercase tracking-[0.22em] text-muted-foreground mt-0.5">
+              <span className="hidden sm:block text-[9px] uppercase tracking-[0.22em] font-mono text-muted-foreground mt-0.5">
                 Your calling in medicine
               </span>
             </div>
@@ -235,7 +235,7 @@ export function SiteFooter() {
         Vocare is a utility test that offers an initial opinion on your medical career direction. It is not
         clinical advice and should not be the sole basis for irreversible career decisions. See our <Link to="/sources" className="underline hover:text-foreground">sources</Link> for the studies and frameworks behind every prediction.
       </p>
-      <div className="mt-4 text-[11px] text-muted-foreground/70 uppercase tracking-[0.2em] px-4">
+      <div className="mt-4 text-[11px] text-muted-foreground/70 uppercase tracking-[0.2em] font-mono px-4">
         © {new Date().getFullYear()} Vocare · Built for medical students in Egypt & worldwide
       </div>
     </footer>

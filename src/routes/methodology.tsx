@@ -37,7 +37,7 @@ function MethodologyPage() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-5xl mx-auto px-6 sm:px-10 pt-10 lg:pt-16 pb-12"
       >
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">How it works</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">How it works</span>
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight text-balance max-w-3xl">
           A <span className="italic">life-fit</span> model, not a popularity quiz.
         </h1>

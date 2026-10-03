@@ -138,7 +138,7 @@ function SourcesPage() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="max-w-5xl mx-auto px-6 sm:px-10 pt-10 lg:pt-16 pb-10"
       >
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Credibility &amp; sources</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Credibility &amp; sources</span>
         <h1 className="text-4xl lg:text-6xl font-serif mt-4 leading-tight text-balance max-w-3xl">
           The <span className="italic">evidence</span> behind every prediction.
         </h1>
@@ -169,7 +169,7 @@ function SourcesPage() {
       {/* Table of contents */}
       <section className="max-w-5xl mx-auto px-6 sm:px-10 mt-10">
         <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">On this page</p>
+          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase font-mono text-muted-foreground mb-3">On this page</p>
           <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
             {SECTIONS.map((s) => (
               <li key={s.id}>

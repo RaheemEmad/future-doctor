@@ -197,7 +197,7 @@ function OnboardingPage() {
       <main className="flex-1 flex flex-col items-center px-6 py-10 lg:py-16">
         <div className="w-full max-w-2xl">
           <div className="flex items-center justify-between mb-12">
-            <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-brand">
+            <span className="text-[11px] font-semibold tracking-[0.18em] uppercase font-mono text-brand">
               About you · {step + 1} / {totalSteps}
             </span>
             <div className="w-40 h-1 bg-muted rounded-full overflow-hidden">

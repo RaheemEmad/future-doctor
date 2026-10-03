@@ -21,7 +21,7 @@ function PrivacyPage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
       <main className="max-w-3xl mx-auto px-6 sm:px-10 pt-10 lg:pt-14 pb-16">
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Privacy</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Privacy</span>
         <h1 className="text-4xl lg:text-5xl font-serif mt-4 leading-tight text-balance">
           What we store, and where it lives.
         </h1>
