@@ -61,7 +61,7 @@ function AuthPage() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
       <main className="max-w-md mx-auto px-6 pt-14 pb-20">
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Account</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Account</span>
         <h1 className="text-3xl lg:text-4xl font-serif mt-3 leading-tight">
           {user ? "You are signed in." : "Sync across devices."}
         </h1>

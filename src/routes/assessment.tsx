@@ -152,7 +152,7 @@ function AssessmentPage() {
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand/20 bg-brand-soft/30 px-4 py-3">
             <UserCircle2 className="size-4 text-brand mt-0.5 shrink-0" />
             <div className="min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-brand font-semibold">Your track</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-brand font-semibold">Your track</div>
               <div className="text-sm font-medium text-foreground/90 mt-0.5">{persona.label}</div>
               <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{persona.accentNote}</div>
             </div>
@@ -165,7 +165,7 @@ function AssessmentPage() {
               className="mb-6 rounded-2xl border border-calm/30 bg-calm-soft/50 px-4 py-3.5"
               role="status"
             >
-              <div className="text-[10px] uppercase tracking-[0.18em] text-calm font-semibold">Halfway there</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] font-mono text-calm font-semibold">Halfway there</div>
               <p className="text-sm text-foreground/85 mt-1 leading-relaxed">
                 You've answered {answeredCount} of {total}. Your top three specialties are already forming — the next block sharpens lifestyle and identity weights. Roughly {minutesLeft} min left.
               </p>
@@ -248,7 +248,7 @@ function AssessmentPage() {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="left" className="max-w-xs text-xs leading-relaxed">
-                      <div className="font-semibold text-[10px] uppercase tracking-[0.15em] text-brand mb-1">Why we ask</div>
+                      <div className="font-semibold text-[10px] uppercase tracking-[0.15em] font-mono text-brand mb-1">Why we ask</div>
                       {q.helper ?? reflectivePrompts[step % reflectivePrompts.length]}
                     </TooltipContent>
                   </Tooltip>

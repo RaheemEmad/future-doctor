@@ -60,7 +60,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="max-w-md w-full">
-        <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-brand mb-7">
+        <div className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase font-mono text-brand mb-7">
           <span className="size-1.5 rounded-full bg-brand" /> Vocare
         </div>
         <h1 className="text-3xl font-serif italic leading-tight text-foreground">Something paused on our side.</h1>
@@ -110,7 +110,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/56c5c40d-746d-4ab7-980e-ddec256cf347/id-preview-e05a43fe--9402acde-78d0-48af-a327-958fb0a97d18.lovable.app-1779938627874.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/56c5c40d-746d-4ab7-980e-ddec256cf347/id-preview-e05a43fe--9402acde-78d0-48af-a327-958fb0a97d18.lovable.app-1779938627874.png" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

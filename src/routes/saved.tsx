@@ -135,7 +135,7 @@ function SavedPage() {
         transition={{ duration: 0.6 }}
         className="max-w-5xl mx-auto px-6 sm:px-10 pt-10 lg:pt-14"
       >
-        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Your library</span>
+        <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Your library</span>
         <h1 className="text-4xl lg:text-5xl font-serif mt-4 leading-tight max-w-3xl text-balance">
           Saved runs &amp; comparisons.
         </h1>

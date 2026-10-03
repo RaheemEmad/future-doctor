@@ -84,7 +84,7 @@ function SampleResultPage() {
       <SiteNav />
       <main className="max-w-4xl mx-auto px-6 sm:px-10 pt-10 lg:pt-14 pb-16">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-brand">Sample result</span>
+          <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Sample result</span>
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-0.5 rounded-full bg-muted">Illustrative</span>
         </div>
         <h1 className="text-4xl lg:text-5xl font-serif leading-tight text-balance">
@@ -99,18 +99,18 @@ function SampleResultPage() {
         <section className="mt-10 rounded-3xl border border-border bg-card p-8">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Top match</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Top match</p>
               <h2 className="font-serif text-3xl mt-1">{topMatch.specialty.name}</h2>
             </div>
             <div className="text-right">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Compatibility</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Compatibility</p>
               <p className="font-serif text-4xl text-brand">{topMatch.compatibility}%</p>
             </div>
           </div>
           <p className="mt-4 text-foreground/85 leading-relaxed">{topMatch.specialty.blurb}</p>
 
           <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">Why this percentage</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-3">Why this percentage</p>
             <ul className="space-y-2">
               {topMatch.breakdown.slice(0, 5).map((b) => (
                 <li key={b.channel} className="flex items-start justify-between gap-4 text-sm">
@@ -130,7 +130,7 @@ function SampleResultPage() {
         </section>
 
         <section className="mt-8 grid gap-3">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Runners-up</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Runners-up</p>
           {result.matches.slice(1, 5).map((m) => (
             <div key={m.specialty.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
@@ -144,7 +144,7 @@ function SampleResultPage() {
 
         <section className="mt-10 rounded-3xl bg-brand text-brand-foreground p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] opacity-80 mb-2">
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-mono opacity-80 mb-2">
               <Sparkles className="size-3.5" /> Your real result will be specific to you
             </div>
             <h3 className="font-serif text-2xl">Twelve minutes. Forty specialties. One ranked list with reasoning.</h3>
