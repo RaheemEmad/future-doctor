@@ -95,7 +95,7 @@ function SpecialtiesPage() {
 
       <section className="max-w-6xl mx-auto px-6 sm:px-10 sticky top-[64px] z-20 bg-background/85 backdrop-blur-sm border-b border-border py-4 -mx-px">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
+          <div className="relative flex-1 md:min-w-[240px] md:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               value={q}
