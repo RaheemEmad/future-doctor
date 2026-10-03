@@ -108,8 +108,20 @@ function LandingPage() {
           >
             <div className="w-full aspect-[6/5] bg-card rounded-3xl shadow-2xl shadow-brand/5 border border-border overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-brand-soft via-card to-calm-soft" />
+              <div className="absolute inset-0 bg-grid-clinical opacity-70" />
+              <div className="absolute inset-4 hud-corners pointer-events-none" />
+              <div className="absolute top-6 left-7 right-7 flex justify-between hud-tag text-monitor">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-vitals animate-vitals" />
+                  Career dossier · live
+                </span>
+                <span className="hidden sm:inline">Takleef · Fellowship · GCC · UK</span>
+              </div>
               <div className="absolute inset-0 grid place-items-center">
                 <RadialPreview />
+              </div>
+              <div className="absolute bottom-6 right-7 hud-tag text-muted-foreground">
+                6 axes · 40 specialties
               </div>
             </div>
             <motion.div

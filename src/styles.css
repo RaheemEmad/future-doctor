@@ -212,3 +212,56 @@
     }
   }
 }
+
+/* ---------- Diagnostic Precision HUD utilities ---------- */
+:root {
+  --vitals: oklch(0.66 0.16 155);
+  --monitor: oklch(0.62 0.13 215);
+}
+.dark {
+  --vitals: oklch(0.78 0.16 155);
+  --monitor: oklch(0.78 0.12 215);
+}
+@theme inline {
+  --color-vitals: var(--vitals);
+  --color-monitor: var(--monitor);
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@utility bg-grid-clinical {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-monitor) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-monitor) 9%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@utility hud-tag {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility hud-corners {
+  position: relative;
+  background-image:
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor)),
+    linear-gradient(var(--color-monitor), var(--color-monitor));
+  background-repeat: no-repeat;
+  background-size: 14px 1.5px, 1.5px 14px, 14px 1.5px, 1.5px 14px, 14px 1.5px, 1.5px 14px, 14px 1.5px, 1.5px 14px;
+  background-position: 0 0, 0 0, 100% 0, 100% 0, 0 100%, 0 100%, 100% 100%, 100% 100%;
+}
+
+@keyframes vitals-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+@utility animate-vitals {
+  animation: vitals-pulse 1.6s ease-in-out infinite;
+}
