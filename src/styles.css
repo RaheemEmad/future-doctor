@@ -267,17 +267,14 @@
 }
 
 /* Site-wide clinical canvas: faint grid fading out below the fold */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
+body {
   background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, transparent 35%, var(--color-background) 90%),
     linear-gradient(color-mix(in oklab, var(--color-monitor) 6%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in oklab, var(--color-monitor) 6%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 85%);
+  background-size: 100% 100vh, 32px 32px, 32px 32px;
+  background-repeat: no-repeat, repeat, repeat;
+  background-attachment: fixed;
 }
 
 /* Precision numerals for scores and percentages */
