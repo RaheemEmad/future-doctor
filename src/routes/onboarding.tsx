@@ -196,6 +196,7 @@ function OnboardingPage() {
       <SiteNav />
       <main className="flex-1 flex flex-col items-center px-6 py-10 lg:py-16">
         <div className="w-full max-w-2xl">
+          {step === 0 && <PriceNotice />}
           <div className="flex items-center justify-between mb-12">
             <span className="text-[11px] font-semibold tracking-[0.18em] uppercase font-mono text-brand">
               About you · {step + 1} / {totalSteps}
