@@ -12,6 +12,7 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip,
 } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
+import { Paywall, usePaymentUnlock } from "@/components/paywall";
 import { loadSession, resetSession, saveSession } from "@/lib/session";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
@@ -70,6 +71,7 @@ function ResultsPage() {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const callSummary = useServerFn(generateSummary);
+  const { claim, setClaim, unlocked } = usePaymentUnlock();
 
   const persona = useMemo(
     () => (session.onboarding ? derivePersona(session.onboarding) : null),
@@ -306,9 +308,11 @@ function ResultsPage() {
           <button onClick={startOver} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <RefreshCw className="size-4" /> Retake
           </button>
-          <button onClick={downloadPdf} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background hover:opacity-90 text-sm font-medium transition-opacity">
-            <Download className="size-4" /> Download PDF
-          </button>
+          {unlocked && (
+            <button onClick={downloadPdf} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background hover:opacity-90 text-sm font-medium transition-opacity">
+              <Download className="size-4" /> Download PDF
+            </button>
+          )}
           <button onClick={share} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border border-border hover:bg-muted text-sm font-medium transition-colors">
             <Share2 className="size-4" /> Share
           </button>
@@ -441,6 +445,7 @@ function ResultsPage() {
         </motion.div>
       </section>
 
+      <Paywall unlocked={unlocked} claim={claim} onClaim={setClaim} topMatch={top.specialty.name}>
       {/* Why this percentage */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
         <ScoreBreakdown match={top} title={`Why ${top.compatibility}% for ${top.specialty.name}`} defaultOpen />
@@ -677,6 +682,7 @@ function ResultsPage() {
         <PredictionCard title="Decision confidence" value={`${result.confidence}%`} body="How consistent your answers were across categories. Higher = clearer fit." />
         <PredictionCard title="Long-term fulfillment" value={top.compatibility > 80 ? "High" : top.compatibility > 65 ? "Moderate" : "Mixed"} body="Projected match between this specialty's daily realities and the life you said you want." />
       </section>
+      </Paywall>
 
       <div className="max-w-6xl mx-auto px-6 sm:px-10 mt-16 flex flex-wrap justify-center gap-3">
         <button onClick={startOver} className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand text-brand-foreground font-medium hover:opacity-90 transition-opacity">
