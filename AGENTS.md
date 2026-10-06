@@ -1,1 +1,2 @@
 - Paid unlock: payment claims are inserted only via server functions (service role, Zod-validated); approval is admin-only via has_role RLS, and unlock state is checked server-side by claim id. Why: anonymous visitors can't write or read the table directly.
+- Free sample reports use isolated deterministic example inputs and the shared scoring model, never personal session or payment state. Why: visitors can inspect full analytics without unlocking or overwriting their own results.
