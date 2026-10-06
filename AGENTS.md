@@ -1,0 +1,1 @@
+- Paid unlock: payment claims are inserted only via server functions (service role, Zod-validated); approval is admin-only via has_role RLS, and unlock state is checked server-side by claim id. Why: anonymous visitors can't write or read the table directly.
