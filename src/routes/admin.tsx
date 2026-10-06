@@ -23,7 +23,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
-  const { user, loading } = useAuth() as ReturnType<typeof useAuth> & { loading?: boolean };
+  const { user, loading } = useAuth();
   const checkAdmin = useServerFn(amIAdmin);
   const list = useServerFn(listPaymentClaims);
   const review = useServerFn(reviewPaymentClaim);

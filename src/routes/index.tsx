@@ -92,6 +92,8 @@ function LandingPage() {
               <span className="size-1 rounded-full bg-muted-foreground/40" />
               <span>Answers stay on your device</span>
               <span className="size-1 rounded-full bg-muted-foreground/40" />
+              <span>Top match free · full analytics 350 EGP</span>
+              <span className="size-1 rounded-full bg-muted-foreground/40" />
               <Link to="/privacy" className="underline hover:text-foreground">Privacy</Link>
             </div>
             <p className="text-[11px] text-muted-foreground/80 pt-2">

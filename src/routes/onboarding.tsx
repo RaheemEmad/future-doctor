@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { SiteNav } from "@/components/site-chrome";
+import { PriceNotice } from "@/components/paywall";
 import { loadSession, saveSession } from "@/lib/session";
 import { pushOnboarding, pullOnboarding } from "@/lib/cloud-sync";
 import { useAuth } from "@/lib/auth";
