@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, Download } from "lucide-react";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
+import { SampleFullReport } from "@/components/sample-full-report";
+import { Button } from "@/components/ui/button";
+import { PAYMENT } from "@/lib/payment";
+import { derivePersona } from "@/lib/persona";
 import { QUESTIONS } from "@/lib/questions";
 import { aggregateTraits, score } from "@/lib/scoring";
 import { trackSampleResultViewed } from "@/lib/analytics";
@@ -10,11 +14,12 @@ import type { Choice, OnboardingData } from "@/lib/types";
 export const Route = createFileRoute("/sample-result")({
   head: () => ({
     meta: [
-      { title: "Sample result — Vocare" },
-      { name: "description", content: "See what a full Vocare result looks like before you spend 12 minutes on the assessment." },
-      { property: "og:title", content: "Sample result — Vocare" },
-      { property: "og:description", content: "A worked example of a Vocare specialty match, with reasoning." },
+      { title: "Full sample report | Vocare" },
+      { name: "description", content: "Explore a complete free example of Vocare's medical specialty report: score reasoning, career paths, regional outlook, risks and a 30-year timeline." },
+      { property: "og:title", content: "Full sample report | Vocare" },
+      { property: "og:description", content: "Explore all post-assessment analytics in a free illustrative report for an intern in Cairo." },
       { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://future-doctor.lovable.app/sample-result" },
     ],
     links: [{ rel: "canonical", href: "https://future-doctor.lovable.app/sample-result" }],
@@ -68,7 +73,8 @@ function buildSampleAnswers(): Record<string, number> {
 
 function SampleResultPage() {
   useEffect(() => { trackSampleResultViewed(); }, []);
-  const { result, topMatch } = useMemo(() => {
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "error">("idle");
+  const { result, choices, responses } = useMemo(() => {
     const answers = buildSampleAnswers();
     const choices = Object.entries(answers).map(([qid, idx]) => {
       const q = QUESTIONS.find((x) => x.id === qid);
@@ -76,82 +82,55 @@ function SampleResultPage() {
     }).filter(Boolean) as Choice[];
     const traits = aggregateTraits(choices);
     const result = score(traits, SAMPLE_ONBOARDING, choices);
-    return { result, topMatch: result.matches[0] };
+    const responses = QUESTIONS.flatMap((question) => {
+      const choice = question.choices[answers[question.id]];
+      return choice ? [{ id: question.id, prompt: question.prompt, answer: choice.label }] : [];
+    });
+    return { result, choices, responses };
   }, []);
+
+  async function downloadSample() {
+    setDownloadState("loading");
+    try {
+      const { generateResultsPdf } = await import("@/lib/pdf");
+      const doc = generateResultsPdf({ onboarding: SAMPLE_ONBOARDING, result, persona: derivePersona(SAMPLE_ONBOARDING), summary: "ILLUSTRATIVE SAMPLE ONLY. Layla is a fictional intern in Cairo, not a real client. This example values family time, predictable outpatient work and patient relationships, with openness to practising in the Gulf. These are example results, not your personal assessment." });
+      doc.setProperties({ title: "Vocare illustrative sample report", subject: "Fictional example, not personal assessment results" });
+      doc.save("vocare-illustrative-sample.pdf");
+      setDownloadState("idle");
+    } catch {
+      setDownloadState("error");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteNav />
-      <main className="max-w-4xl mx-auto px-6 sm:px-10 pt-10 lg:pt-14 pb-16">
+      <main className="max-w-6xl mx-auto px-5 sm:px-10 pt-10 lg:pt-14 pb-16">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-[11px] font-semibold tracking-[0.22em] uppercase font-mono text-brand">Sample result</span>
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-0.5 rounded-full bg-muted">Illustrative</span>
+          <span className="font-mono text-xs text-monitor">FREE SAMPLE · FULL REPORT</span>
         </div>
         <h1 className="text-4xl lg:text-5xl font-serif leading-tight text-balance">
-          What you get at the end.
+          Vocare sample report
         </h1>
         <p className="mt-4 text-muted-foreground max-w-2xl">
-          This is a worked example for a composite PGY-1 in Cairo who values family time, wants a
-          procedural craft, and is open to the Gulf. Your own result will be ranked across all
-          {" "}{result.matches.length}+ specialties with the same reasoning shown for every match.
+          A complete, fictional example of the report after assessment. Explore the reasoning,
+          trade-offs, career paths and long term outlook before deciding whether to unlock your own analytics.
         </p>
+        <p className="text-sm mt-4 text-muted-foreground">This example is free. Your top match is free; your own full analytics cost {PAYMENT.priceEgp} EGP.</p>
+        <div className="flex flex-wrap gap-3 mt-6">
+          <Button asChild className="min-h-11"><Link to="/onboarding">Start your assessment <ArrowRight /></Link></Button>
+          <Button variant="outline" className="min-h-11" onClick={downloadSample} disabled={downloadState === "loading"}><Download />{downloadState === "loading" ? "Preparing sample…" : "Download sample PDF"}</Button>
+        </div>
+        {downloadState === "error" && <p role="alert" className="text-sm text-destructive mt-3">The sample PDF could not be downloaded. Please try again.</p>}
 
-        <section className="mt-10 rounded-3xl border border-border bg-card p-8">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Top match</p>
-              <h2 className="font-serif text-3xl mt-1">{topMatch.specialty.name}</h2>
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Compatibility</p>
-              <p className="font-serif text-4xl text-brand">{topMatch.compatibility}%</p>
-            </div>
-          </div>
-          <p className="mt-4 text-foreground/85 leading-relaxed">{topMatch.specialty.blurb}</p>
+        <SampleFullReport original={result} onboarding={SAMPLE_ONBOARDING} choices={choices} responses={responses} />
 
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground mb-3">Why this percentage</p>
-            <ul className="space-y-2">
-              {topMatch.breakdown.slice(0, 5).map((b) => (
-                <li key={b.channel} className="flex items-start justify-between gap-4 text-sm">
-                  <span className="text-foreground/85">{b.explanation}</span>
-                  <span className="shrink-0 tabular-nums text-brand font-medium">+{b.contribution.toFixed(1)} pts</span>
-                </li>
-              ))}
-              {topMatch.penalties.slice(0, 2).map((p, i) => (
-                <li key={i} className="flex items-start justify-between gap-4 text-sm">
-                  <span className="text-foreground/85">{p.reason}</span>
-                  <span className="shrink-0 tabular-nums text-warning font-medium">−{Math.abs(p.points).toFixed(1)} pts</span>
-                </li>
-              ))}
-            </ul>
-
-          </div>
-        </section>
-
-        <section className="mt-8 grid gap-3">
-          <p className="text-[11px] uppercase tracking-[0.2em] font-mono text-muted-foreground">Runners-up</p>
-          {result.matches.slice(1, 5).map((m) => (
-            <div key={m.specialty.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="font-serif text-lg truncate">{m.specialty.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{m.breakdown[0]?.explanation ?? m.specialty.blurb}</p>
-              </div>
-              <span className="shrink-0 tabular-nums font-medium">{m.compatibility}%</span>
-            </div>
-          ))}
-        </section>
-
-        <section className="mt-10 rounded-3xl bg-brand text-brand-foreground p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <section className="mt-10 border-t border-border pt-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-mono opacity-80 mb-2">
-              <Sparkles className="size-3.5" /> Your real result will be specific to you
-            </div>
-            <h3 className="font-serif text-2xl">Twelve minutes. Forty specialties. One ranked list with reasoning.</h3>
+            <h2 className="font-serif text-2xl">Your report, your priorities.</h2>
+            <p className="text-sm text-muted-foreground mt-2">Top match free. Full personal analytics {PAYMENT.priceEgp} EGP via InstaPay.</p>
           </div>
-          <Link to="/onboarding" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-background text-foreground text-sm font-medium hover:opacity-90 transition shrink-0">
-            Start your assessment <ArrowRight className="size-4" />
-          </Link>
+          <Button asChild className="min-h-11 self-start"><Link to="/onboarding">Start your assessment <ArrowRight /></Link></Button>
         </section>
 
         <p className="mt-6 text-xs text-muted-foreground text-center">
