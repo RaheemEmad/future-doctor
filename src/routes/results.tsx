@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { Paywall, usePaymentUnlock } from "@/components/paywall";
+import { ConflictTeaser, EgyptRealityCard } from "@/components/egypt-reality";
 import { loadSession, resetSession, saveSession } from "@/lib/session";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
@@ -445,7 +446,9 @@ function ResultsPage() {
         </motion.div>
       </section>
 
+      <ConflictTeaser specialty={top.specialty} tension={result.tensions[0]} regret={result.regretRisk.score} unlocked={unlocked} />
       <Paywall unlocked={unlocked} claim={claim} onClaim={setClaim} topMatch={top.specialty.name}>
+      <EgyptRealityCard specialty={top.specialty} />
       {/* Why this percentage */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
         <ScoreBreakdown match={top} title={`Why ${top.compatibility}% for ${top.specialty.name}`} defaultOpen />
