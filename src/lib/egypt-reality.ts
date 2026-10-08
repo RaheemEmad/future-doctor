@@ -7,6 +7,8 @@ import type { Specialty } from "./types";
 export type CapexTier = 1 | 2 | 3;
 
 export type EgyptReality = {
+  mohp?: MohpCutoff;
+  shortage: boolean;
   universityEntry: string; // expected graduation rank for a university residency
   fellowshipAccess: string; // Egyptian Fellowship (Zemala) access
   capexTier: CapexTier;
@@ -52,13 +54,63 @@ const MIGRATION: Record<string, string> = {
   default: "Master or Fellowship + experience opens Gulf licensing; PLAB or UKMLA for UK",
 };
 
+/**
+ * Real MOHP data: minimum cumulative score (المجموع التراكمي) accepted per
+ * hospital, basic residency round May 2025 (حركة نيابات مايو 2025, الحركة الأساسية).
+ * Source: MOHP Taklif portal, mhealth.cu.edu.eg/Niabat/Result_Of_Niabat_May_2025/7ad_Adna_Asasy.htm
+ * median = typical hospital cutoff, min/max = easiest and hardest hospital.
+ */
+export type MohpCutoff = { ar: string; sites: number; min: number; median: number; max: number };
+export const MOHP_SOURCE = {
+  label: "MOHP residency round May 2025, minimum scores (basic round)",
+  url: "http://mhealth.cu.edu.eg/Niabat/Result_Of_Niabat_May_2025/7ad_Adna_Asasy.htm",
+};
+const C = (ar: string, sites: number, min: number, median: number, max: number): MohpCutoff => ({ ar, sites, min, median, max });
+export const MOHP_CUTOFFS: Record<string, MohpCutoff> = {
+  dermatology: C("جلدية", 86, 3739, 4036, 4370),
+  cardiology: C("قلب وأوعية دموية", 24, 2870, 3965, 4221),
+  hemonc: C("أمراض دم", 1, 3773, 3773, 3773),
+  anesthesiology: C("تخدير", 2, 3414, 3725, 4037),
+  rad_onc: C("علاج أورام", 2, 3384, 3722, 4060),
+  diagnostic_radiology: C("أشعة", 12, 3284, 3681, 4215),
+  ir: C("أشعة", 12, 3284, 3681, 4215),
+  nephrology: C("كلى صناعي", 27, 2903, 3657, 4282),
+  pulmonology: C("صدر", 2, 3278, 3651, 4023),
+  orthopedics: C("عظام", 29, 2896, 3645, 4216),
+  psychiatry: C("نفسية وعصبية", 14, 2989, 3616, 3970),
+  ophthalmology: C("رمد", 37, 2903, 3614, 4075),
+  critical_care: C("عناية مركزة", 18, 2969, 3608, 4192),
+  emergency_medicine: C("استقبال وطوارئ", 10, 2789, 3602, 3923),
+  gastroenterology: C("جهاز هضمي وكبد", 29, 2996, 3555, 4476),
+  pathology: C("باثولوجي أنسجة", 4, 3416, 3541, 3584),
+  obgyn: C("نساء وتوليد", 56, 2768, 3517, 4013),
+  pediatrics: C("أطفال", 31, 2975, 3508, 4257),
+  rheumatology: C("روماتيزم وتأهيل", 9, 3086, 3487, 3750),
+  pmr: C("روماتيزم وتأهيل", 9, 3086, 3487, 3750),
+  urology: C("مسالك", 10, 2783, 3449, 4014),
+  ent: C("أنف وأذن", 23, 2986, 3437, 3829),
+  plastics: C("تجميل وحروق", 24, 3076, 3389, 4043),
+  neurosurgery: C("جراحة مخ وأعصاب", 2, 3038, 3349, 3659),
+  internal_medicine: C("باطنة", 7, 3088, 3284, 3660),
+  general_surgery: C("جراحة عامة", 13, 3053, 3284, 3679),
+  vascular_surgery: C("جراحة أوعية دموية", 3, 2915, 3142, 3647),
+};
+
+/** MOHP officially lists these as shortage ("ملحة") specialties with easier entry rules (2025 round). */
+const SHORTAGE = new Set([
+  "emergency_medicine", "anesthesiology", "critical_care", "pathology", "cardiac_surgery",
+  "vascular_surgery", "pulmonology", "infectious_disease", "internal_medicine", "neurosurgery",
+]);
+
 export function egyptReality(s: Specialty): EgyptReality {
   const tier = TIER[s.id] ?? 1;
   const c = s.competitiveness;
+  const mohp = MOHP_CUTOFFS[s.id];
+  const shortage = SHORTAGE.has(s.id);
   const universityEntry =
-    c >= 5 ? "Top of class, excellent with honours" :
-    c >= 4 ? "Very high rank, usually excellent" :
-    c >= 3 ? "Good to very good rank" : "Moderate, widely available";
+    c >= 5 ? "University posts usually go to the top of the class (excellent with honours)" :
+    c >= 4 ? "University posts usually need a very high rank" :
+    c >= 3 ? "University posts reachable with a good to very good rank" : "University posts widely available";
   const fellowshipAccess =
     c >= 4 ? "Limited seats, often waitlisted" : c >= 3 ? "Usually first or second round" : "Open in most rounds";
   const saturation =
@@ -78,6 +130,8 @@ export function egyptReality(s: Specialty): EgyptReality {
       ? MIGRATION.diagnostic
       : s.procedural <= 2 ? MIGRATION.medical : MIGRATION.default;
   return {
+    mohp,
+    shortage,
     universityEntry,
     fellowshipAccess,
     capexTier: tier,

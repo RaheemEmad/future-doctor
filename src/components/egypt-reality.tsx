@@ -1,13 +1,21 @@
 import { AlertTriangle, Lock } from "lucide-react";
 import type { Specialty } from "@/lib/types";
-import { egyptReality } from "@/lib/egypt-reality";
+import { egyptReality, MOHP_SOURCE } from "@/lib/egypt-reality";
 
 export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
   const r = egyptReality(specialty);
+  const m = r.mohp;
   const rows: [string, string][] = [
+    [
+      "MOHP residency cutoff, May 2025 (نيابات الصحة)",
+      m
+        ? `Typical hospital needed ${m.median.toLocaleString()} total score. Easiest ${m.min.toLocaleString()}, hardest ${m.max.toLocaleString()} across ${m.sites} hospital${m.sites > 1 ? "s" : ""} (${m.ar}).`
+        : "Not offered as a separate track in the May 2025 basic round.",
+    ],
+    ["MOHP entry rules", r.shortage ? "Official shortage specialty (تخصص ملح): open after 6 months of takleef and a minimum grade of good." : "Standard track: at least 1 year of takleef and very good overall and in the subject."],
     ["University residency (نيابة الجامعة)", r.universityEntry],
     ["Egyptian Fellowship (الزمالة)", r.fellowshipAccess],
-    ["Private clinic capital (رأس مال العيادة)", `${r.capexRange} · Tier ${r.capexTier}`],
+    ["Private clinic capital, estimate (رأس مال العيادة)", `${r.capexRange} · Tier ${r.capexTier}`],
     ["What you need to buy", r.capexItems],
     ["Market", r.saturation],
     ["How patients reach you", r.patientFlow],
@@ -26,7 +34,11 @@ export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
             </div>
           ))}
         </dl>
-        <p className="text-xs text-muted-foreground mt-4">Indicative estimates to guide questions for seniors, not official figures.</p>
+        <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+          Cutoffs and entry rules come from the official{" "}
+          <a href={MOHP_SOURCE.url} target="_blank" rel="noopener noreferrer" className="underline">{MOHP_SOURCE.label}</a>.
+          Scores are your cumulative total (المجموع التراكمي) and vary by university scale. Clinic capital, market and migration rows are Vocare estimates, not official figures.
+        </p>
       </div>
     </section>
   );
