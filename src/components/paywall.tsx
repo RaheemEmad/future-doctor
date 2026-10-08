@@ -44,6 +44,7 @@ const LOCKED = [
   { t: "30 year lifecycle", d: "How the field feels at year 1, 5, 15 and 30." },
   { t: "Runners up and fields to avoid", d: "With reasoning for each." },
   { t: "Long term predictions + PDF report", d: "Burnout, satisfaction and a downloadable dossier." },
+  { t: "Egypt reality matrix", d: "University vs Fellowship entry, clinic capital in EGP, market and migration route." },
 ];
 
 export function Paywall({
@@ -73,7 +74,7 @@ export function Paywall({
               You've seen your top match. The <span className="italic">why</span> is where decisions get made.
             </h2>
             <p className="text-muted-foreground mt-3 leading-relaxed">
-              Unlock the complete analysis{topMatch ? ` behind ${topMatch}` : ""} for a one time {PAYMENT.priceEgp} EGP.
+              Unlock your Vocare Career Blueprint{topMatch ? ` for ${topMatch}` : ""}: the interactive dossier plus a downloadable PDF you keep, for a one time {PAYMENT.priceEgp} EGP.
             </p>
             <ul className="mt-6 grid sm:grid-cols-2 gap-3">
               {LOCKED.map((l) => (
@@ -118,6 +119,7 @@ function PayPanel({ claim, onClaim, topMatch }: { claim: StoredClaim | null; onC
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [phone, setPhone] = useState("");
+  const [ref, setRef] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -155,7 +157,7 @@ function PayPanel({ claim, onClaim, topMatch }: { claim: StoredClaim | null; onC
     }
     setBusy(true);
     try {
-      const r = await submit({ data: { firstName: first, lastName: last, phone, note, topMatch } });
+      const r = await submit({ data: { firstName: first, lastName: last, phone, note: ref.trim() ? `${note} | Ref: ${ref.trim().slice(0, 80)}` : note, topMatch } });
       const c = { id: r.id, status: r.status } as StoredClaim;
       storeClaim(c);
       onClaim(c);
@@ -195,6 +197,9 @@ function PayPanel({ claim, onClaim, topMatch }: { claim: StoredClaim | null; onC
         <div className="mt-3">
           <Field label="Phone you paid from" value={phone} onChange={setPhone} autoComplete="tel" type="tel" placeholder="01xxxxxxxxx" />
         </div>
+        <div className="mt-3">
+          <Field label="InstaPay reference (optional)" value={ref} onChange={setRef} maxLength={80} placeholder="From your InstaPay receipt" />
+        </div>
       </div>
       {err && <p className="text-sm text-destructive">{err}</p>}
       <button
@@ -204,8 +209,22 @@ function PayPanel({ claim, onClaim, topMatch }: { claim: StoredClaim | null; onC
       >
         {busy ? "Sending…" : "I've paid, notify Vocare"}
       </button>
+      <a
+        href={whatsappLink(first, last, note, ref)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full min-h-12 rounded-full border border-vitals/50 text-vitals font-medium grid place-items-center hover:bg-vitals/10 transition-colors"
+      >
+        Faster: send your receipt screenshot on WhatsApp
+      </a>
     </form>
   );
+}
+
+function whatsappLink(first: string, last: string, note: string, ref: string) {
+  const name = `${first} ${last}`.trim() || "[your name]";
+  const text = `Salam, I sent ${PAYMENT.priceEgp} EGP via InstaPay for Vocare.\nName: ${name}\nDescription: ${note}${ref.trim() ? `\nRef: ${ref.trim()}` : ""}\nScreenshot attached.`;
+  return `https://wa.me/${PAYMENT.instapayNumber.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
 }
 
 function Row({ label, value, onCopy, copied }: { label: string; value: string; onCopy?: () => void; copied?: boolean }) {
