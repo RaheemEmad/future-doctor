@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as SampleResultRouteImport } from './routes/sample-result'
@@ -58,6 +59,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
   '/sample-result': typeof SampleResultRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
   '/sample-result': typeof SampleResultRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/results': typeof ResultsRoute
   '/sample-result': typeof SampleResultRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/pricing'
     | '/privacy'
     | '/results'
     | '/sample-result'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/pricing'
     | '/privacy'
     | '/results'
     | '/sample-result'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/methodology'
     | '/onboarding'
+    | '/pricing'
     | '/privacy'
     | '/results'
     | '/sample-result'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResultsRoute: typeof ResultsRoute
   SampleResultRoute: typeof SampleResultRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ResultsRoute: ResultsRoute,
   SampleResultRoute: SampleResultRoute,
