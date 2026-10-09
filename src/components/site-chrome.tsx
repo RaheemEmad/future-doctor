@@ -51,6 +51,7 @@ const NAV_LINKS = [
   { to: "/methodology", label: "Methodology" },
   { to: "/specialties", label: "Specialties" },
   { to: "/sources", label: "Sources" },
+  { to: "/pricing", label: "Pricing" },
   { to: "/saved", label: "Library" },
 ] as const;
 
