@@ -44,6 +44,7 @@ const LOCKED = [
   { t: "30 year lifecycle", d: "How the field feels at year 1, 5, 15 and 30." },
   { t: "Runners up and fields to avoid", d: "With reasoning for each." },
   { t: "Long term predictions + PDF report", d: "Burnout, satisfaction and a downloadable dossier." },
+  { t: "Licensing tracker", d: "Step by step exams for Egypt, UK, Gulf and US." },
   { t: "Egypt reality matrix", d: "University vs Fellowship entry, clinic capital in EGP, market and migration route." },
 ];
 

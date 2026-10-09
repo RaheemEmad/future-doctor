@@ -34,6 +34,7 @@ const PAID = [
   "UK, Gulf and US exam and licensing route",
   "Burnout risk and fallback subspecialties",
   "30 year lifestyle, fulfilment and income outlook",
+  "Exam roadmap tracker for Egypt, UK, Gulf and US",
   "Full runner up reasoning, adjustable priorities and a PDF to keep",
 ];
 
