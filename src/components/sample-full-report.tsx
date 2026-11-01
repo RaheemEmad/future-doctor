@@ -6,6 +6,7 @@ import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip, RadarChart
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { score } from "@/lib/scoring";
+import { DifferentialGrid } from "@/components/egypt-reality";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
 import { CAREER_ARCHETYPE_LABEL, GEO_INTENT_LABEL, MEANING_LABEL } from "@/lib/types";
 import type { AssessmentResult, Choice, OnboardingData, SpecialtyMatch, Trait, TraitScores } from "@/lib/types";
@@ -169,6 +170,8 @@ export function SampleFullReport({ original, onboarding, choices, responses }: {
     </Section>
 
     <Section id="matches" label="09 · ALTERNATIVE SPECIALTIES" title="Other strong matches">
+      <p className="text-sm text-muted-foreground mb-3">The paid Blueprint compares your top 3 side by side and unlocks the Egypt matrix and exam roadmap for each.</p>
+      <div className="mb-6"><DifferentialGrid specialties={result.matches.slice(0, 3).map((m) => m.specialty)} /></div>
       <p className="text-sm text-muted-foreground mb-6">Top {result.matches.length} of {ENRICHED_SPECIALTIES.length} specialties, including the leading match above.</p>
       <div className="grid md:grid-cols-2 gap-4">{result.matches.slice(1).map((match) => <article key={match.specialty.id} className="rounded-lg border border-border bg-card p-5 sm:p-6 min-w-0">
         <p className="font-mono text-sm text-brand mb-2">{match.compatibility}% compatibility</p><h3 className="font-serif text-xl mb-3">{match.specialty.name}</h3>

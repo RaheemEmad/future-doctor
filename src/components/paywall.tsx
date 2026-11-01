@@ -45,7 +45,7 @@ const LOCKED = [
   { t: "Runners up and fields to avoid", d: "With reasoning for each." },
   { t: "Long term predictions + PDF report", d: "Burnout, satisfaction and a downloadable dossier." },
   { t: "Licensing tracker", d: "Step by step exams for Egypt, UK, Gulf and US." },
-  { t: "Egypt reality matrix", d: "University vs Fellowship entry, clinic capital in EGP, market and migration route." },
+  { t: "Egypt reality matrix for your top 3", d: "Ministry cutoffs, grade check, Master or Fellowship, clinic capital and first private income." },
 ];
 
 export function Paywall({
