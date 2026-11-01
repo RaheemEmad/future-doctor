@@ -2,6 +2,9 @@ import jsPDF from "jspdf";
 import type { AssessmentResult, OnboardingData } from "./types";
 import { GEO_INTENT_LABEL, MEANING_LABEL, CAREER_ARCHETYPE_LABEL } from "./types";
 import type { Persona } from "./persona";
+import { egyptReality, gradeNote, MOHP_SOURCE } from "./egypt-reality";
+import { licensingTracks } from "./licensing";
+import type { Specialty } from "./types";
 
 const BRAND = { r: 73, g: 60, b: 168 }; // matches oklch(0.48 0.16 274) approx
 const INK = { r: 22, g: 26, b: 36 };
@@ -52,6 +55,47 @@ function paragraph(ctx: Ctx, text: string, opts: { size?: number; bold?: boolean
     ensureSpace(ctx, size * 0.4 + lead);
     doc.text(line, margin, ctx.y);
     ctx.y += size * 0.4 + lead;
+  }
+}
+
+function kv(ctx: Ctx, k: string, v: string) {
+  const { doc, pageW, margin } = ctx;
+  doc.setFontSize(9);
+  const lines = doc.splitTextToSize(v, pageW - margin * 2 - 150);
+  ensureSpace(ctx, Math.max(13, lines.length * 11) + 2);
+  doc.setFont("helvetica", "bold"); setColor(doc, MUTED); doc.text(k, margin, ctx.y);
+  doc.setFont("helvetica", "normal"); setColor(doc, INK); doc.text(lines, margin + 150, ctx.y);
+  ctx.y += Math.max(13, lines.length * 11) + 2;
+}
+
+function newPage(ctx: Ctx, label: string) {
+  ctx.doc.addPage(); ctx.y = ctx.margin; drawHeader(ctx); microLabel(ctx, label);
+}
+
+function egyptSection(ctx: Ctx, s: Specialty, grade: OnboardingData["gradeStanding"]) {
+  const r = egyptReality(s);
+  heading(ctx, `${s.name} in the Egyptian system`);
+  const g = gradeNote(s, grade);
+  if (g) paragraph(ctx, `Your grade check: ${g}`, { size: 10, bold: true, color: BRAND, lead: 4 });
+  kv(ctx, "MOHP cutoff, May 2025", r.mohp ? `Typical ${r.mohp.median.toLocaleString()}, easiest ${r.mohp.min.toLocaleString()}, hardest ${r.mohp.max.toLocaleString()} across ${r.mohp.sites} hospitals` : "Not a separate track in the May 2025 basic round");
+  kv(ctx, "Entry rule", r.shortage ? "Shortage specialty: after 6 months of takleef, minimum grade good" : "Standard: 1 year of takleef, very good overall and in the subject");
+  kv(ctx, "University residency", r.universityEntry);
+  kv(ctx, "Egyptian Fellowship", r.fellowshipAccess);
+  kv(ctx, "Master or Fellowship", `${r.postgrad.pick}. ${r.postgrad.why}`);
+  kv(ctx, "Clinic capital (estimate)", `${r.capexRange}, tier ${r.capexTier}. ${r.capexItems}`);
+  kv(ctx, "First private income", `${r.privateRamp.label}, ${r.privateRamp.age}. ${r.privateRamp.why}`);
+  kv(ctx, "Market", r.saturation);
+  kv(ctx, "How patients reach you", r.patientFlow);
+  kv(ctx, "Migration route", r.migration);
+}
+
+function licensingSection(ctx: Ctx, s: Specialty) {
+  heading(ctx, `Licensing roadmap for ${s.name}`);
+  for (const t of licensingTracks(s)) {
+    paragraph(ctx, `${t.region} · ${t.body}`, { size: 10, bold: true, lead: 4 });
+    t.steps.forEach((st, i) => paragraph(ctx, `${i + 1}. ${st.exam}: ${st.note}`, { size: 9, lead: 3 }));
+    paragraph(ctx, t.url, { size: 8, color: MUTED, lead: 3 });
+    ctx.y += 4;
   }
 }
 
@@ -230,6 +274,45 @@ export function generateResultsPdf(opts: {
     }
   }
 
+  const grade = opts.onboarding.gradeStanding;
+  // Egypt reality matrix
+  newPage(ctx, "Egypt reality matrix");
+  egyptSection(ctx, top.specialty, grade);
+  paragraph(ctx, `Cutoffs and entry rules: ${MOHP_SOURCE.label} (${MOHP_SOURCE.url}). Clinic, income timing, postgraduate and migration rows are Vocare estimates.`, { size: 8, color: MUTED, lead: 3 });
+
+  // Licensing
+  newPage(ctx, "International licensing playbook");
+  licensingSection(ctx, top.specialty);
+  paragraph(ctx, "Requirements change. Confirm with each official body before booking.", { size: 8, color: MUTED, lead: 3 });
+
+  // Lifecycle
+  newPage(ctx, "30 year lifecycle");
+  heading(ctx, `How ${top.specialty.name} feels over time`);
+  kv(ctx, "Year", "Lifestyle · Fulfilment · Financial");
+  for (const p of top.specialty.lifecycle) kv(ctx, `Year ${p.year}`, `${p.lifestyle}% · ${p.fulfillment}% · ${p.financial}%`);
+  kv(ctx, "Training", top.specialty.trainingYears);
+  kv(ctx, "Call burden", `${top.specialty.callBurden}/5`);
+  kv(ctx, "Family friendly", `${top.specialty.familyFriendly}/5`);
+  heading(ctx, "A day in the life", 12);
+  paragraph(ctx, top.specialty.dayInLife, { size: 10, lead: 4 });
+  heading(ctx, "Hidden trade offs", 12);
+  for (const d of top.specialty.downsides) paragraph(ctx, `- ${d}`, { size: 9, lead: 3 });
+
+  // Differential: matches 2 and 3
+  newPage(ctx, "Differential · your top 3");
+  heading(ctx, "Side by side");
+  const three = opts.result.matches.slice(0, 3);
+  for (const m of three) {
+    const r = egyptReality(m.specialty);
+    kv(ctx, `${m.specialty.name} ${m.compatibility}%`, `Cutoff ${r.mohp ? r.mohp.median.toLocaleString() : "n/a"} · ${r.shortage ? "shortage" : "standard"} · clinic ${r.capexRange} · income ${r.privateRamp.label} · ${r.postgrad.pick}`);
+  }
+  for (const m of three.slice(1)) {
+    ctx.y += 6;
+    paragraph(ctx, `${m.specialty.name} is ${top.compatibility - m.compatibility} points below ${top.specialty.name}. ${m.reasonsAgainst[0] ?? ""}`, { size: 9, color: MUTED, lead: 3 });
+    egyptSection(ctx, m.specialty, grade);
+    licensingSection(ctx, m.specialty);
+  }
+
   // Your inputs (appendix)
   doc.addPage();
   ctx.y = margin;
@@ -251,6 +334,7 @@ export function generateResultsPdf(opts: {
     ["Financial priority", `${o.financialPriority}/5`],
     ["Ambition", `${o.ambition}/5`],
     ["Relocation openness", `${o.relocationOpenness}/5`],
+    ["Cumulative grade", o.gradeStanding ? o.gradeStanding.replace(/_/g, " ") : "—"],
   ];
   for (const [k, v] of rows) {
     ensureSpace(ctx, 14);

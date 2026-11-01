@@ -106,6 +106,15 @@ export const MEANING_LABEL: Record<MeaningSource, string> = {
   teaching: "Teaching",
 };
 
+export type GradeStanding = "excellent_honours" | "excellent" | "very_good" | "good" | "skip";
+export const GRADE_LABEL: Record<GradeStanding, string> = {
+  excellent_honours: "Excellent with honours (امتياز مع مرتبة الشرف)",
+  excellent: "Excellent (امتياز)",
+  very_good: "Very good (جيد جداً)",
+  good: "Good (جيد)",
+  skip: "Prefer not to say",
+};
+
 export type OnboardingData = {
   ageRange: string;
   gender: string;
@@ -123,6 +132,7 @@ export type OnboardingData = {
   careerArchetypes: CareerArchetype[];
   geographicIntent: GeographicIntent | "";
   meaningTop: MeaningSource[]; // user picks up to 3
+  gradeStanding?: GradeStanding | ""; // Egypt only: cumulative grade (التقدير التراكمي)
 };
 
 export type Choice = {

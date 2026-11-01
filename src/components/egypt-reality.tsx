@@ -1,9 +1,10 @@
 import { AlertTriangle, Lock } from "lucide-react";
-import type { Specialty } from "@/lib/types";
-import { egyptReality, MOHP_SOURCE } from "@/lib/egypt-reality";
+import type { GradeStanding, Specialty } from "@/lib/types";
+import { egyptReality, gradeNote, MOHP_SOURCE } from "@/lib/egypt-reality";
 
-export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
+export function EgyptRealityCard({ specialty, grade }: { specialty: Specialty; grade?: GradeStanding | "" }) {
   const r = egyptReality(specialty);
+  const gn = gradeNote(specialty, grade);
   const m = r.mohp;
   const rows: [string, string][] = [
     [
@@ -19,6 +20,8 @@ export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
     ["What you need to buy", r.capexItems],
     ["Market", r.saturation],
     ["How patients reach you", r.patientFlow],
+    ["Master or Fellowship (الماجستير أم الزمالة)", `${r.postgrad.pick}. ${r.postgrad.why}`],
+    ["First private income (أول دخل من العيادة)", `${r.privateRamp.label}, ${r.privateRamp.age}. ${r.privateRamp.why}`],
     ["Migration route", r.migration],
   ];
   return (
@@ -26,6 +29,7 @@ export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
       <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
         <div className="hud-tag text-monitor">Egypt reality matrix</div>
         <h2 className="font-serif text-2xl sm:text-3xl mt-2">{specialty.name} in the Egyptian system</h2>
+        {gn && <p className="mt-4 rounded-xl border border-monitor/40 bg-monitor/5 p-4 text-sm leading-relaxed"><span className="hud-tag text-monitor block mb-1">Your grade check</span>{gn}</p>}
         <dl className="mt-6 grid sm:grid-cols-2 gap-3">
           {rows.map(([k, v]) => (
             <div key={k} className="rounded-xl border border-border bg-background/70 p-4">
@@ -37,7 +41,7 @@ export function EgyptRealityCard({ specialty }: { specialty: Specialty }) {
         <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
           Cutoffs and entry rules come from the official{" "}
           <a href={MOHP_SOURCE.url} target="_blank" rel="noopener noreferrer" className="underline">{MOHP_SOURCE.label}</a>.
-          Scores are your cumulative total (المجموع التراكمي) and vary by university scale. Clinic capital, market and migration rows are Vocare estimates, not official figures.
+          Scores are your cumulative total (المجموع التراكمي) and vary by university scale. Clinic capital, market, postgraduate track, income timing and migration rows are Vocare estimates, not official figures.
         </p>
       </div>
     </section>
@@ -79,5 +83,36 @@ export function ConflictTeaser({
         </div>
       </div>
     </section>
+  );
+}
+
+/** Side by side Egypt comparison for the top matches. */
+export function DifferentialGrid({ specialties }: { specialties: Specialty[] }) {
+  const rs = specialties.map((s) => ({ s, r: egyptReality(s) }));
+  const rows: [string, (x: (typeof rs)[number]) => string][] = [
+    ["MOHP typical cutoff", ({ r }) => (r.mohp ? r.mohp.median.toLocaleString() : "Not listed")],
+    ["Entry rule", ({ r }) => (r.shortage ? "Shortage: 6 months, good" : "Standard: 1 year, very good")],
+    ["Clinic capital", ({ r }) => r.capexRange],
+    ["First private income", ({ r }) => `${r.privateRamp.label} (${r.privateRamp.age})`],
+    ["Best postgrad track", ({ r }) => r.postgrad.pick],
+    ["Call burden", ({ s }) => `${s.callBurden}/5`],
+    ["Gulf / UK demand", ({ s }) => { const e = s as Specialty & { gccDemand?: number; ukMigrationFriendliness?: number }; return `${e.gccDemand ?? "?"}/10 · ${e.ukMigrationFriendliness ?? "?"}/10`; }],
+  ];
+  return (
+    <div className="overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-sm tabular">
+        <thead className="bg-muted/50 text-left font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <tr><th className="p-3">Metric</th>{rs.map(({ s }) => <th key={s.id} className="p-3">{s.name}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map(([k, f]) => (
+            <tr key={k} className="border-t border-border">
+              <td className="p-3 text-muted-foreground">{k}</td>
+              {rs.map((x) => <td key={x.s.id} className="p-3">{f(x)}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

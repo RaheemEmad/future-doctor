@@ -1,4 +1,4 @@
-import type { Specialty } from "./types";
+import type { GradeStanding, Specialty } from "./types";
 
 /**
  * Egypt-specific practical reality for each specialty.
@@ -17,6 +17,8 @@ export type EgyptReality = {
   saturation: string;
   patientFlow: "Direct walk ins" | "Mixed" | "Referral dependent";
   migration: string;
+  postgrad: { pick: "Egyptian Fellowship" | "University Master and MD" | "Either"; why: string };
+  privateRamp: { label: "Fast" | "Medium" | "Late"; age: string; why: string };
 };
 
 const CAPEX: Record<CapexTier, string> = {
@@ -129,7 +131,23 @@ export function egyptReality(s: Specialty): EgyptReality {
     : s.id.includes("radiology") || s.id === "pathology"
       ? MIGRATION.diagnostic
       : s.procedural <= 2 ? MIGRATION.medical : MIGRATION.default;
+  const surgical = tags.includes("surgical") || s.procedural >= 4;
+  const academic = ["pathology", "diagnostic_radiology", "rad_onc", "hemonc", "rheumatology"].includes(s.id);
+  const postgrad: EgyptReality["postgrad"] = surgical
+    ? { pick: "Egyptian Fellowship", why: "Structured logbook and real operative volume; university Master rotations often give juniors fewer cases." }
+    : academic
+      ? { pick: "University Master and MD", why: "Academic title, subspecialty access and teaching posts; still well recognised in the Gulf." }
+      : { pick: "Either", why: "Fellowship if you want structured clinical training and Ministry promotion; Master and MD if you aim for a university career." };
+  const late = ["cardiac_surgery", "neurosurgery", "vascular_surgery", "surgical_oncology", "ir", "rad_onc", "critical_care", "anesthesiology", "emergency_medicine"].includes(s.id);
+  const fast = tier === 1 && s.patientInteraction >= 4;
+  const privateRamp: EgyptReality["privateRamp"] = late
+    ? { label: "Late", age: "about 38 to 43", why: "Income depends on hospital, ICU or theatre access and senior referral networks." }
+    : fast || s.id === "dermatology"
+      ? { label: "Fast", age: "about 28 to 31", why: "Patients walk in directly and a clinic needs little hospital backing." }
+      : { label: "Medium", age: "about 32 to 36", why: "Needs a key device or time to build referrals before a clinic pays for itself." };
   return {
+    postgrad,
+    privateRamp,
     mohp,
     shortage,
     universityEntry,
@@ -141,4 +159,24 @@ export function egyptReality(s: Specialty): EgyptReality {
     patientFlow,
     migration,
   };
+}
+
+/** Personal reality check from the student's cumulative grade (Vocare reading of MOHP rules). */
+export function gradeNote(s: Specialty, grade?: GradeStanding | ""): string | null {
+  if (!grade || grade === "skip") return null;
+  const shortage = SHORTAGE.has(s.id);
+  const c = s.competitiveness;
+  if (grade === "good") {
+    return shortage
+      ? `With a grade of good, ${s.name} is open to you as a shortage specialty after 6 months of takleef.`
+      : `With a grade of good, the standard Ministry track for ${s.name} is closed (it needs very good). Routes: a shortage specialty, the Fellowship, or raising your grade.`;
+  }
+  if (grade === "very_good") {
+    return c >= 4
+      ? `Very good meets the Ministry rule, but university posts in ${s.name} usually go to excellent grades. Aim for the Ministry track and the Fellowship.`
+      : `Very good meets the Ministry rule for ${s.name}; university posts are reachable with a strong rank.`;
+  }
+  return c >= 5 && grade === "excellent"
+    ? `Excellent keeps ${s.name} realistic; the very top university seats often go to honours graduates.`
+    : `Your grade keeps both university and Ministry routes open for ${s.name}.`;
 }
