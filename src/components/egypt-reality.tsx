@@ -96,7 +96,7 @@ export function DifferentialGrid({ specialties }: { specialties: Specialty[] }) 
     ["First private income", ({ r }) => `${r.privateRamp.label} (${r.privateRamp.age})`],
     ["Best postgrad track", ({ r }) => r.postgrad.pick],
     ["Call burden", ({ s }) => `${s.callBurden}/5`],
-    ["Gulf / UK demand", ({ s }) => `${s.gccDemand}/10 · ${s.ukMigrationFriendliness}/10`],
+    ["Gulf / UK demand", ({ s }) => { const e = s as Specialty & { gccDemand?: number; ukMigrationFriendliness?: number }; return `${e.gccDemand ?? "?"}/10 · ${e.ukMigrationFriendliness ?? "?"}/10`; }],
   ];
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
