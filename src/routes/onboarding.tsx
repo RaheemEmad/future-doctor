@@ -134,8 +134,9 @@ function OnboardingPage() {
   const [session] = useState(() => loadSession());
   const [data, setData] = useState<OnboardingData>(session.onboarding ?? DEFAULTS);
   const [step, setStep] = useState(0);
-  const current = STEPS[step];
-  const totalSteps = STEPS.length;
+  const steps = STEPS.filter((s) => !s.egyptOnly || data.country === "Egypt");
+  const current = steps[Math.min(step, steps.length - 1)];
+  const totalSteps = steps.length;
   const value = data[current.id];
   const { user } = useAuth();
   useEffect(() => { trackOnboardingStart(); }, []);
