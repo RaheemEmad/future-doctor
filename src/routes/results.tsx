@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { SiteFooter, SiteNav } from "@/components/site-chrome";
 import { Paywall, usePaymentUnlock } from "@/components/paywall";
-import { ConflictTeaser, EgyptRealityCard } from "@/components/egypt-reality";
+import { ConflictTeaser, DifferentialGrid, EgyptRealityCard } from "@/components/egypt-reality";
 import { LicensingTracker } from "@/components/licensing-tracker";
 import { loadSession, resetSession, saveSession } from "@/lib/session";
 import { score, aggregateTraits } from "@/lib/scoring";
@@ -449,8 +449,7 @@ function ResultsPage() {
 
       <ConflictTeaser specialty={top.specialty} tension={result.tensions[0]} regret={result.regretRisk.score} unlocked={unlocked} />
       <Paywall unlocked={unlocked} claim={claim} onClaim={setClaim} topMatch={top.specialty.name}>
-      <EgyptRealityCard specialty={top.specialty} />
-      <LicensingTracker specialty={top.specialty} />
+      <MultiMatchExplorer matches={result.matches.slice(0, 3)} grade={session.onboarding!.gradeStanding} />
       {/* Why this percentage */}
       <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
         <ScoreBreakdown match={top} title={`Why ${top.compatibility}% for ${top.specialty.name}`} defaultOpen />
@@ -982,4 +981,37 @@ function describeRunnerDelta(top: SpecialtyMatch, runner: SpecialtyMatch | undef
   if (best.delta < 3 && gap < 3) return `Edged out ${runner.specialty.name} by only ${gap} points — worth comparing them carefully.`;
   if (best.delta < 3) return `Beat ${runner.specialty.name} by ${gap} points across several dimensions evenly.`;
   return `Beat ${runner.specialty.name} (${runner.compatibility}%) mostly on ${best.label}.`;
+}
+
+function MultiMatchExplorer({ matches, grade }: { matches: SpecialtyMatch[]; grade?: GradeStanding | "" }) {
+  const [i, setI] = useState(0);
+  const m = matches[i] ?? matches[0];
+  const lead = matches[0];
+  return (
+    <>
+      <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
+        <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
+          <div className="hud-tag text-monitor">Differential · your top {matches.length}</div>
+          <h2 className="font-serif text-2xl sm:text-3xl mt-2">Compare your closest fields in Egypt</h2>
+          <div className="mt-5"><DifferentialGrid specialties={matches.map((x) => x.specialty)} /></div>
+          <div className="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Choose a match to explore">
+            {matches.map((x, j) => (
+              <button key={x.specialty.id} role="tab" aria-selected={i === j} onClick={() => setI(j)}
+                className={`min-h-11 px-4 rounded-full border text-sm transition-colors ${i === j ? "border-monitor bg-monitor/10 text-monitor" : "border-border hover:bg-muted"}`}>
+                {j + 1}. {x.specialty.name} <span className="font-mono tabular">{x.compatibility}%</span>
+              </button>
+            ))}
+          </div>
+          {i > 0 && (
+            <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+              {m.specialty.name} scored {lead.compatibility - m.compatibility} points below {lead.specialty.name}.{" "}
+              {m.reasonsAgainst[0] ? `Main reason: ${m.reasonsAgainst[0]}` : "The gap comes from smaller differences across several channels."}
+            </p>
+          )}
+        </div>
+      </section>
+      <EgyptRealityCard key={`e-${m.specialty.id}`} specialty={m.specialty} grade={grade} />
+      <LicensingTracker key={`l-${m.specialty.id}`} specialty={m.specialty} />
+    </>
+  );
 }
