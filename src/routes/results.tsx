@@ -19,7 +19,7 @@ import { loadSession, resetSession, saveSession } from "@/lib/session";
 import { score, aggregateTraits } from "@/lib/scoring";
 import { QUESTIONS } from "@/lib/questions";
 import { MEANING_LABEL, GEO_INTENT_LABEL, CAREER_ARCHETYPE_LABEL } from "@/lib/types";
-import type { Choice, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, TraitScores } from "@/lib/types";
+import type { Choice, GradeStanding, SpecialtyMatch, MeaningSource, CareerArchetype, Trait, TraitScores } from "@/lib/types";
 import { decodeShare, encodeShare } from "@/lib/share";
 import { saveRun } from "@/lib/saved";
 import { ENRICHED_SPECIALTIES } from "@/lib/enrichment";
