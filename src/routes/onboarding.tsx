@@ -10,6 +10,8 @@ import { useAuth } from "@/lib/auth";
 import { trackOnboardingStart, trackOnboardingStepComplete, trackOnboardingComplete } from "@/lib/analytics";
 import {
   CAREER_ARCHETYPE_LABEL,
+  GRADE_LABEL,
+  type GradeStanding,
   GEO_INTENT_LABEL,
   MEANING_LABEL,
   type CareerArchetype,
@@ -50,6 +52,7 @@ const DEFAULTS: OnboardingData = {
 
 type Step = {
   id: keyof OnboardingData;
+  egyptOnly?: boolean;
   title: string;
   subtitle?: string;
   kind: "choice" | "scale" | "multi" | "rank";
@@ -79,6 +82,7 @@ const STEPS: Step[] = [
   { id: "gender", title: "How do you identify?", kind: "choice", options: ["Woman", "Man", "Non-binary", "Prefer not to say"].map((v) => ({ value: v, label: v })) },
   { id: "stage", title: "Where are you in your training?", kind: "choice", options: ["Pre-med", "Medical student M1–M2", "Medical student M3–M4", "Intern / PGY-1", "Resident PGY-2+", "Reconsidering specialty"].map((v) => ({ value: v, label: v })) },
   { id: "country", title: "Which country are you training in?", kind: "choice", options: ["Egypt", "Other Middle East", "United States", "Canada", "United Kingdom", "EU", "Asia", "Other"].map((v) => ({ value: v, label: v })) },
+  { id: "gradeStanding", egyptOnly: true, title: "What is your cumulative grade so far?", subtitle: "Your التقدير التراكمي decides which Ministry and university residencies are open to you. Your best estimate is fine.", kind: "choice", options: (Object.keys(GRADE_LABEL) as GradeStanding[]).map((g) => ({ value: g, label: GRADE_LABEL[g] })) },
   { id: "relationship", title: "Your relationship situation today?", kind: "choice", options: ["Single", "Dating", "Long-term partner", "Married", "Prefer not to say"].map((v) => ({ value: v, label: v })) },
   { id: "wantsChildren", title: "Do you want children in your future?", kind: "choice", options: [{ value: "yes", label: "Yes" }, { value: "maybe", label: "Maybe / open" }, { value: "no", label: "No" }] },
   { id: "workLifeBalance", title: "How important is work–life balance to you?", subtitle: "Not what you should feel — what you actually feel.", kind: "scale", minLabel: "Career first", maxLabel: "Life first" },
