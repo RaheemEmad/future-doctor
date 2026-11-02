@@ -1,28 +1,40 @@
 import { AlertTriangle, Lock } from "lucide-react";
 import type { GradeStanding, Specialty } from "@/lib/types";
 import { egyptReality, gradeNote, MOHP_SOURCE } from "@/lib/egypt-reality";
+import { PROVENANCE_LABEL, SOURCES, type ProvenanceMeta } from "@/lib/provenance";
+
+function ProvBadge({ p }: { p: ProvenanceMeta }) {
+  const tone = p.class === "official" ? "border-monitor/50 text-monitor" : "border-border text-muted-foreground";
+  return (
+    <span title={`${p.sourceName} · collected ${p.collectedAt}${p.methodologyNote ? ` · ${p.methodologyNote}` : ""}`}
+      className={`ml-2 inline-block rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${tone}`}>
+      {PROVENANCE_LABEL[p.class]}
+    </span>
+  );
+}
 
 export function EgyptRealityCard({ specialty, grade }: { specialty: Specialty; grade?: GradeStanding | "" }) {
   const r = egyptReality(specialty);
   const gn = gradeNote(specialty, grade);
   const m = r.mohp;
-  const rows: [string, string][] = [
+  const rows: [string, string, ProvenanceMeta][] = [
     [
       "MOHP residency cutoff, May 2025 (نيابات الصحة)",
       m
         ? `Typical hospital needed ${m.median.toLocaleString()} total score. Easiest ${m.min.toLocaleString()}, hardest ${m.max.toLocaleString()} across ${m.sites} hospital${m.sites > 1 ? "s" : ""} (${m.ar}).`
         : "Not offered as a separate track in the May 2025 basic round.",
+      SOURCES.mohpCutoffs,
     ],
-    ["MOHP entry rules", r.shortage ? "Official shortage specialty (تخصص ملح): open after 6 months of takleef and a minimum grade of good." : "Standard track: at least 1 year of takleef and very good overall and in the subject."],
-    ["University residency (نيابة الجامعة)", r.universityEntry],
-    ["Egyptian Fellowship (الزمالة)", r.fellowshipAccess],
-    ["Private clinic capital, estimate (رأس مال العيادة)", `${r.capexRange} · Tier ${r.capexTier}`],
-    ["What you need to buy", r.capexItems],
-    ["Market", r.saturation],
-    ["How patients reach you", r.patientFlow],
-    ["Master or Fellowship (الماجستير أم الزمالة)", `${r.postgrad.pick}. ${r.postgrad.why}`],
-    ["First private income (أول دخل من العيادة)", `${r.privateRamp.label}, ${r.privateRamp.age}. ${r.privateRamp.why}`],
-    ["Migration route", r.migration],
+    ["MOHP entry rules", r.shortage ? "Official shortage specialty (تخصص ملح): open after 6 months of takleef and a minimum grade of good." : "Standard track: at least 1 year of takleef and very good overall and in the subject.", SOURCES.mohpShortage],
+    ["University residency (نيابة الجامعة)", r.universityEntry, SOURCES.universityEntry],
+    ["Egyptian Fellowship (الزمالة)", r.fellowshipAccess, SOURCES.universityEntry],
+    ["Private clinic capital, estimate (رأس مال العيادة)", `${r.capexRange} · Tier ${r.capexTier}`, SOURCES.clinicCapital],
+    ["What you need to buy", r.capexItems, SOURCES.clinicCapital],
+    ["Market", r.saturation, SOURCES.market],
+    ["How patients reach you", r.patientFlow, SOURCES.market],
+    ["Master or Fellowship (الماجستير أم الزمالة)", `${r.postgrad.pick}. ${r.postgrad.why}`, SOURCES.postgradTrack],
+    ["First private income (أول دخل من العيادة)", `${r.privateRamp.label}, ${r.privateRamp.age}. ${r.privateRamp.why}`, SOURCES.privateRamp],
+    ["Migration route", r.migration, SOURCES.migration],
   ];
   return (
     <section className="max-w-6xl mx-auto px-6 sm:px-10 mt-10">
@@ -31,9 +43,9 @@ export function EgyptRealityCard({ specialty, grade }: { specialty: Specialty; g
         <h2 className="font-serif text-2xl sm:text-3xl mt-2">{specialty.name} in the Egyptian system</h2>
         {gn && <p className="mt-4 rounded-xl border border-monitor/40 bg-monitor/5 p-4 text-sm leading-relaxed"><span className="hud-tag text-monitor block mb-1">Your grade check</span>{gn}</p>}
         <dl className="mt-6 grid sm:grid-cols-2 gap-3">
-          {rows.map(([k, v]) => (
+          {rows.map(([k, v, p]) => (
             <div key={k} className="rounded-xl border border-border bg-background/70 p-4">
-              <dt className="text-xs text-muted-foreground">{k}</dt>
+              <dt className="text-xs text-muted-foreground">{k}<ProvBadge p={p} /></dt>
               <dd className="text-sm mt-1 leading-relaxed">{v}</dd>
             </div>
           ))}
